@@ -7,12 +7,12 @@ void Motors::begin() {
 
 void Motors::setDir(bool cw) {
   digitalWrite(DIR_PIN, cw ? CW_LEVEL : !CW_LEVEL);
-  delayMicroseconds(5);                                       // A4988 DIR 셋업 시간
+  delayMicroseconds(DIR_SETUP_US);                                       // A4988 DIR 셋업 시간
 }
 
 void Motors::pulse(uint8_t motor, uint16_t gapUs) {
   digitalWrite(STEP_PINS[motor], HIGH);
-  delayMicroseconds(3);
+  delayMicroseconds(PULSE_US);
   digitalWrite(STEP_PINS[motor], LOW);
   delayMicroseconds(gapUs);
 }
@@ -41,7 +41,7 @@ void Motors::turn(uint8_t m) {
 void Motors::flip() {
   if (!enabled) return;
   for (uint16_t i = 0; i < 2 * STEPS_PER_QUARTER; i++) {
-    setDir(true);  pulse(MOT_R, 20);
+    setDir(true);  pulse(MOT_R, FLIP_PAIR_GAP_US);
     setDir(false); pulse(MOT_L, FLIP_US);
   }
   delay(SETTLE_MS);

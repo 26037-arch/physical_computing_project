@@ -24,11 +24,7 @@ class Motors {
   void setDir(bool cw);
 };
 
-// 핀 배치 (diagram.json, docs/HARDWARE_V4.md 4절과 함께 바꿀 것) — UNO R3/R4 공통 헤더
-static const uint8_t STEP_PINS[6] = {255, 3, 2, 6, 5, 4};   // U(없음) R=D3 F=D2 D=D6 L=D5 B=D4
-static const uint8_t DIR_PIN = 7;
-static const uint16_t STEPS_PER_QUARTER = 50;
-static const uint16_t START_US = 12000, MIN_US = 8000, ACCEL_US = 100;
-static const uint16_t FLIP_US = 9000;      // 뒤집기 중 R/L 한 쌍의 펄스 간격
-static const uint8_t SETTLE_MS = 250;      // 면이 멈춘 뒤 다음 수까지 정착 시간
-static const bool CW_LEVEL = HIGH;         // DIR 이 이 레벨이면 면이 시계 방향(면을 정면에서 볼 때)
+// config/robot_v4.json에서 생성. 핀/펄스/속도를 JS와 공유한다.
+#include "robot_contract.h"
+using namespace RobotContract;
+static const bool CW_LEVEL = HIGH;

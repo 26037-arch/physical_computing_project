@@ -89,13 +89,16 @@ int8_t parseMove(const char* tok) {
 uint8_t parseSeq(const char* str, uint8_t* out, uint8_t maxN) {
   uint8_t n = 0;
   char tok[4];
-  while (*str && n < maxN) {
-    while (*str == ' ') str++;
+  while (*str) {
+    while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') str++;
     if (!*str) break;
+    if (n == maxN) return 0;  // 전체 수열을 거부하며 유효한 앞부분만 실행하지 않는다.
     uint8_t len = 0;
-    while (*str && *str != ' ' && len < 3) tok[len++] = *str++;
+    while (*str && *str != ' ' && *str != '\t' && *str != '\r' && *str != '\n') {
+      if (len == 3) return 0;
+      tok[len++] = *str++;
+    }
     tok[len] = 0;
-    while (*str && *str != ' ') str++;  // 너무 긴 토큰 버림
     int8_t m = parseMove(tok);
     if (m < 0) return 0;
     out[n++] = m;

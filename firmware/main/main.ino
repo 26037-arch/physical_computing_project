@@ -29,11 +29,6 @@
 #include "motors.h"
 #include "mechanism.h"
 
-static const uint8_t BTN_PIN = A2, BUZZER = A3;      // 버튼 1개 (풀업, GND). 핀이 모자라 짧게/길게로 두 기능
-static const unsigned long LONG_PRESS_MS = 1200;
-static const uint8_t SCRAMBLE_LEN = 20;
-static const unsigned long DEBOUNCE_MS = 30;
-
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Cube cube;
 Solver solver;
@@ -42,8 +37,9 @@ Mechanism mech;
 uint8_t solution[SOL_MAX];
 uint8_t solutionLen = 0;
 uint32_t lastSeed = 0;
-char line[96];
-uint8_t lineLen = 0;
+char line[SERIAL_LINE_BYTES];
+uint16_t lineLen = 0;
+bool lineOverflow = false;
 
 // ---- LCD ----
 void lcdShow(const char* row0, const char* row1) {
@@ -97,7 +93,9 @@ void doScramble(uint32_t seed) {
   if (!execute(seq, SCRAMBLE_LEN, F("SCRAMBLING"))) return;
   char row1[17];
   snprintf(row1, sizeof(row1), "seed %lu", (unsigned long)seed);
-  lcdShowF(F("SCRAMBLED 20mv"), row1);
+  char row0[17];
+  snprintf(row0, sizeof(row0), "SCRAMBLED %umv", SCRAMBLE_LEN);
+  lcdShow(row0, row1);
   Serial.print(F("SCRAMBLED exec=")); Serial.print(millis() - t0); Serial.print(F("ms"));
   printMechStats(); Serial.println();
   beep(880, 80);
@@ -167,15 +165,16 @@ void doEject() {
 
 // ---- 시리얼 명령 ----
 void handleLine(char* s) {
-  while (*s == ' ') s++;
+  while (*s == ' ' || *s == '\t') s++;
+  if (!*s) return;
   char cmd = s[0];
   char* arg = s + 1;
-  while (*arg == ' ') arg++;
+  while (*arg == ' ' || *arg == '\t') arg++;
   switch (cmd) {
     case 'S': case 's': doScramble(*arg ? strtoul(arg, nullptr, 10) : (micros() ^ millis())); break;
     case 'V': case 'v': doSolve(); break;
     case 'M': case 'm': {
-      uint8_t seq[64];
+      uint8_t seq[MAX_MANUAL_MOVES];
       uint8_t n = parseSeq(arg, seq, sizeof(seq));
       if (!n) { Serial.println(F("ERR bad moves")); break; }
       mech.resetCounters();
@@ -201,8 +200,11 @@ void pollSerial() {
   while (Serial.available()) {
     char ch = Serial.read();
     if (ch == '\n' || ch == '\r') {
-      if (lineLen) { line[lineLen] = 0; handleLine(line); lineLen = 0; }
+      if (lineOverflow) Serial.println(F("ERR line too long"));
+      else if (lineLen) { line[lineLen] = 0; handleLine(line); }
+      lineLen = 0; lineOverflow = false;
     } else if (lineLen < sizeof(line) - 1) line[lineLen++] = ch;
+    else lineOverflow = true;
   }
 }
 

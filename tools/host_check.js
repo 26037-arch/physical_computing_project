@@ -2,7 +2,7 @@
 //   node tools/host_check.js [시드 시작=1] [개수=300]
 // Wokwi 교차검증(tests/solve_seed*.test.yaml)과 같은 목적이지만 보드 없이 수백 개 시드를 몇 초 안에 돈다.
 'use strict';
-const { execFileSync, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const C = require('../sim/cube.js');
@@ -14,7 +14,13 @@ fs.mkdirSync(path.join(root, 'build'), { recursive: true });
 const srcs = ['tools/host_solver/main.cpp', 'firmware/main/cube.cpp', 'firmware/main/solver.cpp'].map((f) => path.join(root, f));
 const gxx = spawnSync('g++', ['-O2', '-std=c++17', '-I', path.join(root, 'tools/host_solver'), '-I', path.join(root, 'firmware/main'), ...srcs, '-o', exe], { stdio: 'inherit' });
 if (gxx.status !== 0) { console.error('g++ 빌드 실패 (g++ 가 PATH 에 있어야 한다)'); process.exit(2); }
-const fw = execFileSync(exe, [String(seed0), String(count)], { encoding: 'utf8', maxBuffer: 1 << 26 });
+const output = path.join(root, 'build', 'host_solver_output.txt');
+const fd = fs.openSync(output, 'w');
+let run;
+try { run = spawnSync(exe, [String(seed0), String(count)], { stdio: ['ignore', fd, 'inherit'] }); }
+finally { fs.closeSync(fd); }
+if (run.error || run.status !== 0) { console.error('펌웨어 호스트 실행 실패', run.error || run.status); process.exit(2); }
+const fw = fs.readFileSync(output, 'utf8');
 const solver = new Solver();
 const lines = [];
 for (let seed = seed0; seed < seed0 + count; seed++) {

@@ -1,6 +1,7 @@
 # 실제 제작은 V4 문서에서 시작하세요
 
 - 상세 제작 PDF(41쪽): [docs/BUILD_V4_상세제작설명서.pdf](docs/BUILD_V4_상세제작설명서.pdf) — 첫 장은 번호가 있는 3D 부품 지도, 이후 조립·체결·배선·오차 검사
+- 시뮬레이터·펌웨어·CAD 일치 점검: [docs/CONSISTENCY_V4.md](docs/CONSISTENCY_V4.md) — 공통 설정, 수정 사항, 자동 검증과 실물 검증 범위
 - 커밋별 장단점·병합 판단: [docs/BUILD_V4_MERGE_REVIEW.md](docs/BUILD_V4_MERGE_REVIEW.md)
 - 이전 Rev B 조립 단순화 변경: [docs/BUILD_V4_REVB.md](docs/BUILD_V4_REVB.md) — 전산봉/간격관 제거, 공통3점 체결, 레일 위치 결정 턱
 - 본문 원문: [docs/BUILD_V4.md](docs/BUILD_V4.md)

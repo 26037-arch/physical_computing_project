@@ -11,8 +11,12 @@ KIT = ROOT / 'models/robot_v4/assembly_kit'
 def main():
     for path in [ROOT / 'models/robot_v4/mechanical_checks.json'] + [KIT / (n + '_checks.json') for n in ('kit', 'mesh', 'pdf')]:
         assert json.loads(path.read_text())['passed'], f'Failed verification: {path}'
-    paths = [ROOT / 'README_BUILD.md', ROOT / 'firmware/main/mechanism.h', ROOT / 'sim/app.js', ROOT / 'sim/models.js']
-    for pattern in ['docs/BUILD_V4*', 'docs/HARDWARE_V4.md', 'docs/assets/fonts/*', 'docs/images/v4_manual/*.png',
+    paths = [ROOT / 'README_BUILD.md', ROOT / 'config/robot_v4.json', ROOT / 'diagram.json', ROOT / 'wokwi.toml']
+    for pattern in ['firmware/main/*', 'sim/*.js', 'sim/index.html', 'scripts/*.ps1',
+                    'tools/gen_robot_contract.js', 'tools/check_robot_contract.js', 'tools/host_mechanism_check.js',
+                    'tools/host_mechanism/*', 'tools/host_check.js', 'tools/host_solver/*', 'tools/host_solver/avr/*',
+                    'tools/test_sim_v4.js', 'tools/serve.js', 'tests/*.test.yaml', 'docs/SETUP.md', 'tools/gen_mechanism_test.js', 'tools/gen_wokwi_test.js',
+                    'tools/gen_tables.js', 'tools/algs.js', 'docs/CONSISTENCY_V4.md', 'docs/BUILD_V4*', 'docs/HARDWARE_V4.md', 'docs/assets/fonts/*', 'docs/images/v4_manual/*.png',
                     'tools/build_robot_v[234].py', 'tools/build_robot_v4_kit.py', 'tools/check_robot_v2.py',
                     'tools/check_robot_v4*.py', 'tools/embed_models_v4.js', 'tools/make_robot_v4_manual.py',
                     'tools/robot_v4_manual_data.py', 'tools/requirements-robot-v4.txt', 'tools/package_robot_v4.py']:

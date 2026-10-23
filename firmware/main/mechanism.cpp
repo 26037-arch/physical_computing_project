@@ -1,9 +1,5 @@
 #include "mechanism.h"
 
-static const char UNIT_NAME[4][5] = {"FB", "RL", "D", "LOCK"};
-// 논리 면 → 물리 면 (U R F D L B 순). orient 1 = x축 180°: U↔D, F↔B, R·L 그대로
-static const uint8_t PHYS[2][6] = {{0, 1, 2, 3, 4, 5}, {3, 1, 5, 0, 4, 2}};
-
 void Mechanism::begin(Motors* m) {
   motors = m;
   for (uint8_t i = 0; i < 4; i++) {
@@ -15,10 +11,10 @@ void Mechanism::begin(Motors* m) {
 
 bool Mechanism::waitSensor(uint8_t pin, bool wantLow) {
   uint32_t t0 = millis();
-  uint32_t limit = sensorTimeoutMs ? sensorTimeoutMs : 60000UL;   // T 0 = 시운전용 긴 대기 (최대 60 s)
+  uint32_t limit = sensorTimeoutMs ? sensorTimeoutMs : SENSOR_LONG_TIMEOUT_MS;   // T 0 = 시운전용 긴 대기 (최대 60 s)
   while (millis() - t0 < limit) {
     if ((digitalRead(pin) == LOW) == wantLow) return true;
-    delay(2);
+    delay(SENSOR_POLL_MS);
   }
   return false;
 }
@@ -90,7 +86,7 @@ bool Mechanism::load() {
     return true;
   }
   if (!engage(UNIT_LOCK) || !engage(UNIT_FB)) return false;          // 막대로 코어를 잡고 F/B 로 층을 잡는다
-  loaded = true; orient = 1;
+  loaded = true; orient = INITIAL_ORIENT;
   Serial.print(F("LOADED orient=")); Serial.println(orient);
   return true;
 }

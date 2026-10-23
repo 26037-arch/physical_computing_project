@@ -6,12 +6,13 @@
 const fs = require('fs');
 const path = require('path');
 const C = require('../sim/cube.js');
+const R = require('../sim/robot_contract.js');
 const { Solver } = require('../sim/solver.js');
 const { Mechanism } = require('../sim/mechanism.js');
 const seed = parseInt(process.argv[2] || '1', 10);
-const scr = C.scramble(seed, 20);
+const scr = C.scramble(seed, R.scrambleLength);
 const r = new Solver().solve(new C.Cube().apply(scr));
-const mech = new Mechanism();                 // 가상 모드 시작 상태: 모두 후퇴, orient 1
+const mech = new Mechanism({ virtual: true });                 // 가상 모드 시작 상태: 모두 후퇴, orient 1
 mech.planSeq(scr);
 const scrStats = `flips=${mech.flips} regrips=${mech.regrips}`;
 mech.resetCounters();
@@ -23,7 +24,7 @@ const steps = [
   `  - write-serial: ${q("Q 1" + String.fromCharCode(10))}`,
   `  - wait-serial: "MOTORS OFF"`,
   `  - write-serial: ${q("S " + seed + String.fromCharCode(10))}`,
-  `  - wait-serial: ${q(`SCRAMBLE seed=${seed} (20): ${C.seqToString(scr)}`)}`,
+  `  - wait-serial: ${q(`SCRAMBLE seed=${seed} (${R.scrambleLength}): ${C.seqToString(scr)}`)}`,
   `  - wait-serial: ${q(`SCRAMBLED exec=`)}`,
   `  - wait-serial: ${q(`ms ${scrStats}`)}`,
   `  - write-serial: ${q("V" + String.fromCharCode(10))}`,

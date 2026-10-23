@@ -370,51 +370,51 @@
       "collisions": []
     },
     {
-      "angle_deg": 15,
+      "angle_deg": -15,
       "collisions": []
     },
     {
-      "angle_deg": 30,
+      "angle_deg": -30,
       "collisions": []
     },
     {
-      "angle_deg": 45,
+      "angle_deg": -45,
       "collisions": []
     },
     {
-      "angle_deg": 60,
+      "angle_deg": -60,
       "collisions": []
     },
     {
-      "angle_deg": 75,
+      "angle_deg": -75,
       "collisions": []
     },
     {
-      "angle_deg": 90,
+      "angle_deg": -90,
       "collisions": []
     },
     {
-      "angle_deg": 105,
+      "angle_deg": -105,
       "collisions": []
     },
     {
-      "angle_deg": 120,
+      "angle_deg": -120,
       "collisions": []
     },
     {
-      "angle_deg": 135,
+      "angle_deg": -135,
       "collisions": []
     },
     {
-      "angle_deg": 150,
+      "angle_deg": -150,
       "collisions": []
     },
     {
-      "angle_deg": 165,
+      "angle_deg": -165,
       "collisions": []
     },
     {
-      "angle_deg": 180,
+      "angle_deg": -180,
       "collisions": []
     }
   ],

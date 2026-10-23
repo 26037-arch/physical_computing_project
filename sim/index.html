@@ -87,12 +87,8 @@ SCRAMBLE / SOLVE</div>
         <button id="btnViewCube" title="큐브와 구동판·핀·막대만 크게">큐브 보기</button>
       </div>
       <div class="row" style="margin-top:6px">
-        <label style="white-space:nowrap">90° 회전 시간 <span id="speedVal">150</span> ms</label>
-        <input type="range" id="speed" min="40" max="600" step="10" value="150">
-      </div>
-      <div class="row">
-        <label style="white-space:nowrap" title="서보 크랭크 24 mm 이송(결합/해제) 한 번에 걸리는 시간. MG996R 기준 목표값 400 ms, 실측 아님">이송 시간 <span id="feedVal">400</span> ms</label>
-        <input type="range" id="feed" min="0" max="1500" step="50" value="400">
+        <label style="white-space:nowrap" title="1배는 펌웨어의 펄스·서보 대기값 기준. 모든 동작을 같은 비율로 재생합니다">재생 속도 <span id="speedVal">1</span>배</label>
+        <input type="range" id="speed" min="0.25" max="10" step="0.25" value="1">
       </div>
       <div class="row">
         <label class="chk"><input type="checkbox" id="chkFrame" checked> 레일·캐리지·하우징·서보 표시</label>
@@ -117,7 +113,7 @@ SCRAMBLE / SOLVE</div>
         <div><b id="stTime">–</b><span>JS 계산 ms</span></div>
         <div><b id="stRegrip">–</b><span>결합 / 뒤집기</span></div>
       </div>
-      <table id="stages"><thead><tr><th>단계</th><th>수</th><th>수열</th><th>노드</th><th>Uno 예상</th></tr></thead><tbody></tbody></table>
+      <table id="stages"><thead><tr><th>단계</th><th>수</th><th>수열</th><th>노드</th><th>브라우저 계산</th></tr></thead><tbody></tbody></table>
       <div class="note" id="estNote"></div>
     </section>
 
@@ -132,6 +128,7 @@ SCRAMBLE / SOLVE</div>
 <script src="tables.js"></script>
 <script src="solver.js"></script>
 <script src="models.js"></script>
+<script src="robot_contract.js"></script>
 <script src="mechanism.js"></script>
 <script src="app.js"></script>
 </body>

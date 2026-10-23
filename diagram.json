@@ -17,8 +17,10 @@
     { "type": "wokwi-stepper-motor", "id": "motL", "top": -40, "left": 820, "attrs": { "size": "17", "display": "angle", "arrow": "orange" } },
     { "type": "wokwi-stepper-motor", "id": "motD", "top": -40, "left": 960, "attrs": { "size": "17", "display": "angle", "arrow": "yellow" } },
 
-    { "type": "wokwi-servo", "id": "srvFB", "top": 150, "left": 1250, "attrs": { "horn": "single" } },
-    { "type": "wokwi-servo", "id": "srvRL", "top": 250, "left": 1250, "attrs": { "horn": "single" } },
+    { "type": "wokwi-servo", "id": "srvF", "top": 150, "left": 1250, "attrs": { "horn": "single" } },
+    { "type": "wokwi-servo", "id": "srvR", "top": 250, "left": 1250, "attrs": { "horn": "single" } },
+    { "type": "wokwi-servo", "id": "srvB", "top": 150, "left": 1450, "attrs": { "horn": "single" } },
+    { "type": "wokwi-servo", "id": "srvL", "top": 250, "left": 1450, "attrs": { "horn": "single" } },
     { "type": "wokwi-servo", "id": "srvD", "top": 350, "left": 1250, "attrs": { "horn": "single" } },
     { "type": "wokwi-servo", "id": "srvLock", "top": 450, "left": 1250, "attrs": { "horn": "single" } },
 
@@ -51,8 +53,10 @@
     [ "drvL:1A", "motL:B+", "blue", [] ], [ "drvL:1B", "motL:B-", "blue", [] ], [ "drvL:2A", "motL:A+", "purple", [] ], [ "drvL:2B", "motL:A-", "purple", [] ],
     [ "drvD:1A", "motD:B+", "blue", [] ], [ "drvD:1B", "motD:B-", "blue", [] ], [ "drvD:2A", "motD:A+", "purple", [] ], [ "drvD:2B", "motD:A-", "purple", [] ],
 
-    [ "uno:8", "srvFB:PWM", "orange", [] ], [ "srvFB:V+", "uno:5V", "red", [] ], [ "srvFB:GND", "uno:GND.3", "black", [] ],
-    [ "uno:9", "srvRL:PWM", "orange", [] ], [ "srvRL:V+", "uno:5V", "red", [] ], [ "srvRL:GND", "uno:GND.3", "black", [] ],
+    [ "uno:8", "srvF:PWM", "orange", [] ], [ "srvF:V+", "uno:5V", "red", [] ], [ "srvF:GND", "uno:GND.3", "black", [] ],
+    [ "uno:9", "srvR:PWM", "orange", [] ], [ "srvR:V+", "uno:5V", "red", [] ], [ "srvR:GND", "uno:GND.3", "black", [] ],
+    [ "uno:8", "srvB:PWM", "orange", [] ], [ "srvB:V+", "uno:5V", "red", [] ], [ "srvB:GND", "uno:GND.3", "black", [] ],
+    [ "uno:9", "srvL:PWM", "orange", [] ], [ "srvL:V+", "uno:5V", "red", [] ], [ "srvL:GND", "uno:GND.3", "black", [] ],
     [ "uno:10", "srvD:PWM", "orange", [] ], [ "srvD:V+", "uno:5V", "red", [] ], [ "srvD:GND", "uno:GND.3", "black", [] ],
     [ "uno:11", "srvLock:PWM", "orange", [] ], [ "srvLock:V+", "uno:5V", "red", [] ], [ "srvLock:GND", "uno:GND.3", "black", [] ],
 

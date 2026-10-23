@@ -3,28 +3,21 @@
 // 기구 절차는 sim/mechanism.js(= firmware/main/mechanism.cpp)가 정한다. 치수·좌표는 docs/HARDWARE_V4.md 2절
 // (= tools/build_robot_v4.py, models/robot_v4/parameters.json) 을 그대로 쓴다.
 //  - 회전: 물리 면 p 의 헤드 스핀들(판·핀 2·허브·축)이 엣지 2개를 핀으로 밀어 그 층을 돌린다 (측면: 적도 엣지, D: DF/DB).
-//  - 지지: 회전할 면의 쌍(F/B 또는 R/L)만 결합(핀 삽입 3 mm). 다른 쌍과 D 헤드는 24 mm 후퇴. D 회전은 D 헤드 결합.
+//  - 지지: 회전할 면의 쌍(F/B 또는 R/L)만 결합(핀 삽입 4.8 mm). 다른 쌍과 D 헤드는 24 mm 후퇴. D 회전은 D 헤드 결합.
 //  - 잠금 막대: 아래에서 중공 D 축을 지나 큐브 중심 센터 판 소켓까지 올라와 코어를 잡는다(V3 중앙축 대신). 뒤집기 때만 30 mm 내려간다.
 //  - 뒤집기: 위(U)에는 헤드가 없다. 논리 면이 위에 오면 R/L 만 결합한 채 두 헤드가 같은 방향으로 180° 돌아 큐브를 뒤집는다.
 //  - 장착: 위가 열려 있다. D 헤드가 결합 위치로 올라오면 큐브를 손으로 핀 위에 올려놓고(흰색 아래) LOAD → 막대·F/B 가 잡는다.
 (function () {
   'use strict';
-  const C = CubeLib, S = CubeSolver, MECH = CubeMechanism;
+  const C = CubeLib, S = CubeSolver, MECH = CubeMechanism, R = RobotContract;
   const MODELS = (typeof CubeModels !== 'undefined') ? CubeModels : { params: {}, parts: {} };
   // CAD 매개변수 (models/robot_v4/parameters.json). 값이 없으면 docs/HARDWARE_V4.md 의 기본값.
-  const P = Object.assign({ cube_mm: 57, piece_mm: 18.8, pitch_mm: 19.1, retract_mm: 24, pin_mm: 3, socket_mm: 3.4,
-    socket_depth_mm: 6, pin_engagement_mm: 4.8, socket_countersink_mm: 7, pin_tip_mm: 1, pin_tip_h_mm: 1, pin_length_mm: 16, plate_thickness_mm: 6,
-    recess_depth_mm: 2, lock_bar_mm: 6, lock_socket_mm: 6.4, lock_socket_depth_mm: 5,
-    lock_stroke_mm: 30, lock_crank_r_mm: 15, lock_tip_y_mm: -22.5, lock_length_mm: 230, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195],
-    lock_servo_axis: [22, 24, 255], hollow_id_mm: 12.5, hollow_od_mm: 17, hollow_length_mm: 82, motor_offset_mm: 60,
-    strip_width_mm: 16, strip_pad_y_mm: 14.5, strip_pad_mm: [8, 4] }, MODELS.params || {});
+  const P = Object.assign({}, R.geometry, MODELS.params || {});
   const UNIT = P.pitch_mm;                 // 1 단위 = 조각 중심 간격 = 19.1 mm
   const mm = (x) => x / UNIT;
   const HALF = mm(P.cube_mm / 2);          // 큐브 중심 → 면 거리 (28.5 mm): 헤드 배치용
   const SURF = mm(P.piece_mm / 2);         // 큐비 중심 → 그 면 거리 (9.4 mm)
-  const SCRAMBLE_LEN = 20;
-  // 보드 속도 추정 근거: Wokwi(Uno, 16 MHz AVR) 시드 1 측정 — CALC nodes=108161 ms=4733
-  const AVR_NODES_PER_SEC = 108161 / 4.733;
+  const SCRAMBLE_LEN = R.scrambleLength;
   const FACE_NAMES = ['U', 'R', 'F', 'D', 'L', 'B'];
   const SIDE = [2, 1, 5, 4];               // 물리 측면 헤드 F R B L (표시 순서)
   const DF = 3;                            // 아래 D 헤드 = 물리 D
@@ -49,7 +42,7 @@
   const COLORS = [0xf2f2f2, 0xd62828, 0x1b9e3f, 0xf7d308, 0xf77f00, 0x0057b8];
   const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
 
-  // ----- 도넛 큐브: 조각 18.8 mm, 피치 19.1 mm. 엣지 노출면 2곳에 Ø3.4 소켓, U/D 센터는 2 mm 파인 판(사각 소켓 8.4, 막대 끝 y −23.5) -----
+  // ----- 도넛 큐브: 조각 18.8 mm, 피치 19.1 mm. 엣지 노출면 2곳에 Ø3.4 소켓, U/D 센터는 2 mm 파인 판(사각 소켓 6.4, 막대 끝 y −22.5) -----
   const cubeGroup = new THREE.Group(); scene.add(cubeGroup);
   const cubies = {};  // "x,y,z" → Group (논리 위치)
   const cubieGeo = new THREE.BoxGeometry(mm(P.piece_mm), mm(P.piece_mm), mm(P.piece_mm));
@@ -297,7 +290,7 @@
     scene.add(g);
     const frame = new THREE.Group(); g.add(frame);
     const LSA = P.lock_servo_axis;
-    if (GEO.lock_guide) frame.add(new THREE.Mesh(GEO.lock_guide, MAT.lock_guide)); else frame.add(boxAt(30, 30, 30, 0, 0, 175, MAT.rail_support));   // 출력 가이드 블록 (사각 구멍 8.3)
+    if (GEO.lock_guide) frame.add(new THREE.Mesh(GEO.lock_guide, MAT.lock_guide)); else frame.add(boxAt(44, 28, 22, -8, 0, 185, MAT.rail_support));   // 출력 가이드 블록 (사각 구멍 6.3)
     if (GEO.lock_servo_mount) frame.add(new THREE.Mesh(GEO.lock_servo_mount, MAT.lock_servo_mount)); else frame.add(boxAt(8, 30, 60, 0, LSA[1], 240, MAT.rail_support));
     if (GEO.lock_servo_clamp) frame.add(new THREE.Mesh(GEO.lock_servo_clamp, MAT.lock_servo_clamp));
     frame.add(envelope('lock_engage_switch', [12.8, 6.5, 5.8], [22, 14.75, 211.9], servoMat));   // 막대 결합 스위치 (SENS LOCK)
@@ -343,25 +336,31 @@
   const queue = [];       // 대기 중인 논리 수 {m}
   let actions = [];       // 지금 수의 남은 기구 동작
   let current = null;     // 진행 중 애니메이션
+  let displayedOrient = R.initialOrient; // planner may already hold the next action's final state
   let paused = false;
   let allMoves = [], moveIdx = 0, queueLabel = '', onQueueDone = null, execStart = 0;
-  const speedEl = document.getElementById('speed'), feedEl = document.getElementById('feed');
-  // 시작 상태 = 펌웨어의 장착 완료 상태: 큐브 장착(흰색 아래, orient 1), D·막대·F/B 결합, R/L 후퇴
-  mech.load(); mech.load(); mech.resetCounters();
+  const speedEl = document.getElementById('speed');
+  const actionDuration = a => R.actionMs(a) / +speedEl.value;
+  const flipAngle = R.flipWorldDeg * Math.PI / 180;
+  // 펌웨어 setup과 동일: 미장착, 네 이송 유닛 모두 후퇴. LOAD 두 단계.
   for (let u = 0; u < 4; u++) for (const c of UNIT_CRANKS[u]) c.set(mech.engaged[u] ? 0 : Math.PI);
-  cubeGroup.rotation.x = Math.PI;        // orient 1: 논리 U(흰색)가 아래
+  cubeGroup.rotation.x = R.initialOrient * Math.PI;        // orient 1: 논리 U(흰색)가 아래
 
   const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
   function startAction(a) {
-    if (a.line) log(a.line);
+    if (a.line && a.type !== 'flip') log(a.line);
+    if (a.type === 'loaded') { displayedOrient = R.initialOrient; cubeGroup.rotation.x = displayedOrient * Math.PI; }
     if (a.type === 'engage' || a.type === 'retract') {
       const cranks = UNIT_CRANKS[a.unit];
-      current = { type: 'crank', unit: a.unit, cranks, from: cranks[0].theta, to: a.type === 'engage' ? 0 : Math.PI, start: performance.now(), dur: +feedEl.value };
+      current = { type: 'crank', unit: a.unit, cranks, from: cranks[0].theta, to: a.type === 'engage' ? 0 : Math.PI, start: performance.now(), dur: actionDuration(a) };
     } else if (a.type === 'flip') {
-      current = { type: 'flip', from: cubeGroup.rotation.x, start: performance.now(), dur: 2 * +speedEl.value + 200, r0: heads[1].angle, l0: heads[4].angle };
+      current = { type: 'flip', orient: a.orient, line: a.line, from: cubeGroup.rotation.x, start: performance.now(), dur: actionDuration(a), r0: heads[1].angle, l0: heads[4].angle };
     } else if (a.type === 'turn') {
       startMove(a);
-    } else current = { type: 'noop', start: performance.now(), dur: 0 };
+    } else if (a.type === 'error') {
+      queue.length = 0; actions = []; onQueueDone = null;
+      log(`ABORTED completed=${moveIdx}`); lcd('ABORTED', 'state retained'); setBusy(false);
+    } else current = { type: 'noop', start: performance.now(), dur: actionDuration(a) };
     renderHeads();
   }
   function startMove(a) {
@@ -376,7 +375,7 @@
     pivot.rotation.set(0, 0, 0); pivot.updateMatrixWorld();
     for (const o of members) pivot.attach(o);
     const axis = nLogical.clone().applyQuaternion(cubeGroup.quaternion);   // 뒤집힌 큐브면 물리 면 법선이 된다
-    current = { type: 'move', m: a.m, f, p, start: performance.now(), dur: Math.abs(turns) * +speedEl.value, members, axis, angle: -turns * Math.PI / 2 };
+    current = { type: 'move', m: a.m, f, p, start: performance.now(), dur: actionDuration(a), members, axis, angle: -turns * Math.PI / 2 };
     renderQueue();
   }
   function startNext() {
@@ -393,7 +392,7 @@
       moveIdx++;
       if (moveIdx % 4 === 0 || moveIdx === allMoves.length) lcd(queueLabel, `${moveIdx}/${allMoves.length}`);
     } else if (c.type === 'crank') { for (const k of c.cranks) k.set(c.to); }
-    else if (c.type === 'flip') { cubeGroup.rotation.x = c.from + Math.PI; heads[1].angle = c.r0 + Math.PI; heads[4].angle = c.l0 - Math.PI; heads[1].spin.rotation.z = heads[1].angle; heads[4].spin.rotation.z = heads[4].angle; }
+    else if (c.type === 'flip') { cubeGroup.rotation.x = c.from + flipAngle; heads[1].angle = c.r0 + flipAngle; heads[4].angle = c.l0 - flipAngle; heads[1].spin.rotation.z = heads[1].angle; heads[4].spin.rotation.z = heads[4].angle; displayedOrient = c.orient; if (c.line) log(c.line); }
     current = null;
     renderQueue(); renderHeads();
     if (!queue.length && !actions.length && onQueueDone) { const cb = onQueueDone; onQueueDone = null; cb(); }
@@ -414,15 +413,18 @@
     if (!current && (queue.length || actions.length) && !paused) startNext();
     if (current && !paused) {
       const t = current.dur > 0 ? Math.min(1, (now - current.start) / current.dur) : 1;
-      const e = ease(t), c = current;
+      const c = current;
+      let e = ease(t); // servo travel is an ideal interpolation; no feedback position is available
+      if (c.type === 'move') e = R.turnProgress(c.p * 3 + c.m % 3, t * R.turnMicros(c.p * 3 + c.m % 3) / 1000);
+      else if (c.type === 'flip') e = R.flipProgress(t * R.flipMicros() / 1000);
       if (c.type === 'move') {
         pivot.setRotationFromAxisAngle(c.axis, c.angle * e);
         heads[c.p].spin.rotation.z = heads[c.p].angle + c.angle * e;
       } else if (c.type === 'crank') {
         for (const k of c.cranks) k.set(c.from + (c.to - c.from) * e);
       } else if (c.type === 'flip') {
-        cubeGroup.rotation.x = c.from + Math.PI * e;
-        heads[1].spin.rotation.z = c.r0 + Math.PI * e; heads[4].spin.rotation.z = c.l0 - Math.PI * e;
+        cubeGroup.rotation.x = c.from + flipAngle * e;
+        heads[1].spin.rotation.z = c.r0 + flipAngle * e; heads[4].spin.rotation.z = c.l0 - flipAngle * e;
       }
       if (t >= 1) finishCurrent();
     }
@@ -457,10 +459,10 @@
     }
     const lin = lock.crank.theta < 0.01;
     items.push(`<span class="chip ${feedUnit === 3 ? 'feed' : lin ? 'in' : 'out'}" title="잠금 막대 ${P.lock_bar_mm} mm: 코어 고정, 뒤집기 때만 내림">LOCK<small>${feedUnit === 3 ? '이송' : lin ? '고정' : `−${P.lock_stroke_mm}`}</small></span>`);
-    items.push(`<span class="chip ${mech.orient ? 'in' : 'out'}" title="orient: 논리 U(흰색)가 아래면 1">${mech.orient ? '흰색↓' : '흰색↑'}<small>orient ${mech.orient}</small></span>`);
+    items.push(`<span class="chip ${displayedOrient ? 'in' : 'out'}" title="orient: 논리 U(흰색)가 아래면 1">${displayedOrient ? '흰색↓' : '흰색↑'}<small>orient ${displayedOrient}</small></span>`);
     chips.innerHTML = items.join('');
     let text;
-    if (current && current.type === 'crank') text = `${UNIT_LABEL[current.unit]} ${current.to === 0 ? (current.unit === 3 ? '올리는 중 (막대 → 센터 판 소켓)' : '결합 중 (서보 크랭크, 핀 삽입 3 mm)') : (current.unit === 3 ? '내리는 중 (30 mm, 뒤집기 공간)' : '해제 중 (24 mm 후퇴)')}`;
+    if (current && current.type === 'crank') text = `${UNIT_LABEL[current.unit]} ${current.to === 0 ? (current.unit === 3 ? '올리는 중 (막대 → 센터 판 소켓)' : '결합 중 (서보 크랭크, 핀 삽입 4.8 mm)') : (current.unit === 3 ? '내리는 중 (30 mm, 뒤집기 공간)' : '해제 중 (24 mm 후퇴)')}`;
     else if (current && current.type === 'flip') text = 'R/L 만 결합한 채 두 헤드가 같은 방향으로 180° → 큐브 뒤집기';
     else if (current && current.type === 'move') text = `${FACE_NAMES[current.f]} 수 → 물리 ${FACE_NAMES[current.p]} 헤드 회전 (막대가 코어 고정)`;
     else text = mech.loaded ? '장착됨 · 대기' : mech.engaged[MECH.D] ? 'D 헤드 결합 — 큐브를 핀 위에 올려놓고 LOAD' : '대기';
@@ -472,7 +474,7 @@
   // 수열의 기구 비용 미리 계산 (상태를 바꾸지 않도록 복제본으로)
   function planStats(moves) {
     const m2 = new MECH.Mechanism(); Object.assign(m2, { engaged: mech.engaged.slice(), orient: mech.orient, loaded: mech.loaded });
-    m2.planSeq(moves); return { flips: m2.flips, regrips: m2.regrips };
+    const list = m2.planSeq(moves); return { flips: m2.flips, regrips: m2.regrips, ms: list.reduce((sum,a) => sum + R.actionMs(a), 0) };
   }
 
   function doScramble(seed) {
@@ -481,7 +483,7 @@
     log(`SCRAMBLE seed=${seed} (${SCRAMBLE_LEN}): ${C.seqToString(seq)}`);
     enqueue(seq, 'SCRAMBLING', () => {
       finishLog(`SCRAMBLED exec=${Math.round(performance.now() - execStart)}ms`);
-      lcd('SCRAMBLED 20mv', `seed ${seed}`); setBusy(false);
+      lcd(`SCRAMBLED ${SCRAMBLE_LEN}mv`, `seed ${seed}`); setBusy(false);
     });
   }
   function doSolve() {
@@ -496,21 +498,16 @@
     const tb = document.querySelector('#stages tbody'); tb.innerHTML = '';
     for (const st of r.stages) {
       log(`${st.name} (${st.moves.length}): ${C.seqToString(st.moves)} | nodes=${st.nodes} ms=${st.ms.toFixed(1)}`);
-      const est = st.nodes / AVR_NODES_PER_SEC;
-      tb.insertAdjacentHTML('beforeend', `<tr><td>${st.name}</td><td class="num">${st.moves.length}</td><td class="mv">${C.seqToString(st.moves)}</td><td class="num">${st.nodes}</td><td class="num">${est < 0.05 ? '<0.1' : est.toFixed(1)} s</td></tr>`);
+      tb.insertAdjacentHTML('beforeend', `<tr><td>${st.name}</td><td class="num">${st.moves.length}</td><td class="mv">${C.seqToString(st.moves)}</td><td class="num">${st.nodes}</td><td class="num">${st.ms.toFixed(1)} ms</td></tr>`);
     }
     log(`TOTAL ${r.moves.length}: ${C.seqToString(r.moves)}`);
     log(`CALC nodes=${r.nodes} ms=${calcMs.toFixed(1)}`);
     const st = planStats(r.moves);
-    const quarterTurns = r.moves.reduce((s, m) => s + (m % 3 === 1 ? 2 : 1), 0);
     document.getElementById('stMoves').textContent = r.moves.length;
     document.getElementById('stNodes').textContent = r.nodes.toLocaleString();
     document.getElementById('stTime').textContent = calcMs.toFixed(1);
     document.getElementById('stRegrip').textContent = `${st.regrips} / ${st.flips}`;
-    const flipMs = 2 * +speedEl.value + 200;
-    const mechMs = quarterTurns * +speedEl.value + st.regrips * 2 * +feedEl.value + st.flips * flipMs;   // 결합 1회 ≈ 결합 + 나중 해제 = 이송 2번
-    document.getElementById('estNote').textContent = `Uno 예상 = 노드 ÷ ${Math.round(AVR_NODES_PER_SEC).toLocaleString()} 노드/초 (Wokwi 시드 1 실측). 전체 ${(r.nodes / AVR_NODES_PER_SEC).toFixed(1)} s. UNO R4(48 MHz, 32bit)는 이보다 수 배 빠를 것으로 예상(실측 전). `
-      + `기구 실행 예상 = 90° ${quarterTurns}회 × ${speedEl.value} ms + 결합/해제 ${st.regrips}회 × 2 × ${feedEl.value} ms + 뒤집기 ${st.flips}회 × ${flipMs} ms ≈ ${(mechMs / 1000).toFixed(1)} s (이송은 서보 크랭크의 목표값, 실측 아님).`;
+    document.getElementById('estNote').textContent = `펌웨어 펄스·가감속·서보 대기값 기준 실행 ${(st.ms / 1000).toFixed(1)} s, 현재 재생 ${(st.ms / +speedEl.value / 1000).toFixed(1)} s. 센서는 즉시 확인된다고 가정하며 실물 속도·하중 검증은 별도입니다. 단계 계산 시간은 현재 브라우저 측정값입니다.`;
     enqueue(r.moves, 'EXECUTING', () => {
       const ok = cube.isSolved();
       finishLog(`SOLVED ok=${ok ? 1 : 0} moves=${r.moves.length}`);
@@ -522,7 +519,7 @@
     if (!mech.loaded) { log('ERR not loaded'); return; }
     let seq;
     try { seq = C.parseMoves(str); } catch (e) { log('ERR bad moves'); return; }
-    if (!seq.length) return;
+    if (!seq.length || seq.length > R.maxManualMoves) { log('ERR bad moves'); return; }
     enqueue(seq, 'MOVING', () => { finishLog(`MOVED ${seq.length}`); lcd('CUBE ROBOT V4', cube.isSolved() ? 'solved' : 'scrambled'); setBusy(false); });
   }
   // LOAD 버튼: 장착됨 → 배출(막대·F/B·R/L 해제, D 핀이 받침, 손으로 꺼냄) / D 결합 상태 → 막대·F/B 결합 / 그 외 → D 결합
@@ -559,7 +556,6 @@
   document.getElementById('btnView').onclick = () => setView(VIEW_ALL);
   document.getElementById('btnViewCube').onclick = () => setView(VIEW_CUBE);
   speedEl.oninput = () => { document.getElementById('speedVal').textContent = speedEl.value; };
-  feedEl.oninput = () => { document.getElementById('feedVal').textContent = feedEl.value; };
   const chkFrame = document.getElementById('chkFrame'), chkMotor = document.getElementById('chkMotor');
   function applyVisibility() {
     for (const h of Object.values(heads)) {
@@ -575,7 +571,7 @@
   // 시작
   paint(cube); resize(); updateCamera(); applyVisibility(); renderHeads();
   log('READY cube-robot v4 (S [seed] | V | M <moves> | L | E | F | P | R | Q 0|1)');
-  log('LOADED orient=1');
+  lcd('CUBE ROBOT V4', 'hold=LOAD tap=GO');
   requestAnimationFrame(animate);
   window.CubeSim = { cube, mech, doScramble, doSolve, doMoves, doLoad, doFlip, heads: () => ({ orient: mech.orient, flips: mech.flips, regrips: mech.regrips, shift: [...SIDE, DF].map((p) => [FACE_NAMES[p], +heads[p].crank.shift.toFixed(2)]), lock: +lock.crank.shift.toFixed(2) }), params: P };  // 콘솔/테스트용
 })();

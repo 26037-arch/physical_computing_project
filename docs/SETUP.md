@@ -36,3 +36,21 @@ UNO R4 WiFi 용 컴파일: `arduino-cli compile --fqbn arduino:renesas_uno:unor4
 - Fusion 은 시작 메뉴 `Autodesk Fusion` 으로 띄우면 애드인이 자동 실행된다 (`fusion_ping` 으로 확인).
 - 긴 작업(STL High 품질 내보내기 등)은 메인 스레드 대기 120 s 를 넘길 수 있다. 부품 단위로 나눠 실행하고 STL 은 Medium 품질을 쓴다.
 - 새 문서: `app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)` 후 `DirectDesignType` 으로 두면 타임라인 없이 빠르다. 클라우드 저장(`saveAs`) 대신 `createFusionArchiveExportOptions` 로 `.f3d` 를 저장소에 남긴다.
+
+## V4 공통 제어 검증 (2026-10-24)
+
+설정은 `config/robot_v4.json`에서 수정하고 `node tools/gen_robot_contract.js`로 생성한다.
+기구 치수 변경 후에도 CAD 매개변수 생성 → 계약 생성 → STL 임베딩 순서로 갱신한다.
+
+```sh
+node tools/gen_robot_contract.js --check
+node tools/check_robot_contract.js
+node tools/host_check.js 1 300
+node tools/host_mechanism_check.js
+node tools/test_sim_v4.js
+```
+
+`upload.ps1`은 실제 UNO R4 WiFi가 기본이며 `build/physical`로 빌드한다.
+`build.ps1`과 Wokwi는 UNO R3가 기본이다. 두 보드는 핀 신호·풀이·기구 절차를 공유한다.
+현재 클라우드 세션에는 Wokwi CLI/토큰과 실물 보드가 없어 Wokwi 시나리오 실행과 업로드는 하지 않았다.
+로컬 PC의 기존 설치 상태와 구분하며 상세 결과는 `CONSISTENCY_V4.md`에 기록한다.

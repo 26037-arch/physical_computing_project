@@ -140,7 +140,8 @@ def main():
         obstacles.extend((face+'/'+n, s.moved(d.face_location_v4(face)))
                          for n, s in d.module_pose(modules[face == 'D'], 24).items())
     obstacles.extend(('LOCK/'+n, s.moved(loc)) for n, s in d.lock_pose(lock, 30).items())
-    for angle in range(0, 181, 15):
+    control = json.loads((d.OUT.parents[1]/'config/robot_v4.json').read_text(encoding='utf-8'))
+    for angle in range(0, control['flipWorldDeg'] - 1, -15):
         rotated = [(n, s.rotate((0, 0, 0), (1, 0, 0), angle)) for n, s in cube]
         collisions = record(f'flip {angle}', hits(rotated, obstacles))
         report['flip_samples'].append(dict(angle_deg=angle, collisions=collisions))

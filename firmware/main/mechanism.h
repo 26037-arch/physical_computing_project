@@ -24,25 +24,19 @@ class Mechanism {
   bool waitingForCube() const { return !loaded && engaged[UNIT_D]; }
   void resetCounters() { flips = 0; regrips = 0; }
   void printStatus(Print& p);
-  uint8_t orient = 1;          // 장착은 흰색(U) 면을 아래로 → 논리 U 가 아래 D 헤드
+  uint8_t orient = RobotContract::INITIAL_ORIENT;          // 장착은 흰색(U) 면을 아래로 → 논리 U 가 아래 D 헤드
   uint16_t flips = 0, regrips = 0;
-  uint16_t sensorTimeoutMs = 1500;   // 결합/해제 확인 대기 ms (시리얼 T 명령으로 조정; 0 = 최대 60 s 대기, 시운전·Wokwi 시나리오 지연용)
+  uint16_t sensorTimeoutMs = RobotContract::SENSOR_TIMEOUT_MS;   // 결합/해제 확인 대기 ms (시리얼 T 명령으로 조정; 0 = 최대 60 s 대기, 시운전·Wokwi 시나리오 지연용)
 
  private:
   Motors* motors = nullptr;
   Servo servo[4];
-  bool engaged[4] = {false, false, false, false};
-  bool loaded = false;
+  bool engaged[4] = {INITIAL_ENGAGED[0], INITIAL_ENGAGED[1], INITIAL_ENGAGED[2], INITIAL_ENGAGED[3]};
+  bool loaded = RobotContract::INITIAL_LOADED;
   bool virt() const { return !motors->isEnabled(); }
   bool engage(uint8_t unit);
   bool retract(uint8_t unit);
   bool waitSensor(uint8_t pin, bool wantLow);
 };
 
-// 핀 배치 (diagram.json, docs/HARDWARE_V4.md 4절) — UNO R3/R4 공통 헤더
-static const uint8_t SERVO_PINS[4] = {8, 9, 10, 11};     // F·B 서보 2개 같은 신호, R·L 2개 같은 신호, D 서보, 막대 서보
-static const uint8_t SENS_PINS[4] = {12, 13, A0, A1};    // F·B / R·L 결합 스위치 직렬 (둘 다 눌림 = LOW), D 스위치, 막대 스위치. 풀업
-static const uint8_t SERVO_ENGAGED_DEG = 0, SERVO_RETRACTED_DEG = 180;   // 크랭크 r12 → 24 mm (막대는 r15 → 30 mm)
-// 제작 보강 Rev A: 프레임/체결/가이드 보강, 막대 끝 -23.8 mm·중공 ID12.5.
-// 캐리지 행정24/30과 위 서보 각도는 동일(막대의 캐리지 내 고정 위치로 끝을 조절).
-static const uint16_t SERVO_TRAVEL_MS = 400;      // 이송 명목 시간
+// Rev C: 6 mm 막대 끝−22.5, 핀 삽입4.8. 행정24/30과 서보각은 공통 계약을 쓴다.
