@@ -1,0 +1,29 @@
+# 버튼 시나리오: SCRAMBLE 버튼 → 로봇이 섞기 실행 → SOLVE 버튼 → 보드가 풀이 계산·실행 → SOLVED ok=1
+# 시드는 micros() 기반이라 수열은 매번 다르다. 어떤 섞기든 풀어야 한다는 것을 검증한다.
+name: 버튼으로 섞고 풀기 (SCRAMBLE → SOLVE → SOLVED ok=1)
+version: 1
+author: physical_computing_project
+steps:
+  - wait-serial: "READY"
+  - set-control:
+      part-id: btnScramble
+      control: pressed
+      value: 1
+  - delay: 120ms
+  - set-control:
+      part-id: btnScramble
+      control: pressed
+      value: 0
+  - wait-serial: "SCRAMBLED exec="
+  - set-control:
+      part-id: btnSolve
+      control: pressed
+      value: 1
+  - delay: 120ms
+  - set-control:
+      part-id: btnSolve
+      control: pressed
+      value: 0
+  # 버튼을 뗀 직후 나오는 짧은 줄(SOLVING, CROSS)은 기다리지 않는다 — 계산 몇 초 뒤의 줄만 확인
+  - wait-serial: "CALC nodes="
+  - wait-serial: "SOLVED ok=1"

@@ -21,8 +21,17 @@
 
 ## 확인 명령 (2026-10-23 모두 통과)
 ```
+node tools/gen_tables.js
+node tools/test_solver.js 300 1
 powershell -ExecutionPolicy Bypass -File scripts/build.ps1
-powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -ExpectText READY
-powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/button.test.yaml
+powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000
+powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/buttons.test.yaml -TimeoutMs 180000
 ```
 일반 PowerShell은 기본 실행 정책이 .ps1 실행을 막으므로 `-ExecutionPolicy Bypass` 를 붙인다.
+UNO R4 WiFi 용 컴파일: `arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi --output-dir build/r4 firmware/main`
+시뮬레이터 미리보기: `node tools/serve.js` → http://localhost:8765/sim/ (Node 외 의존성 없음, Three.js 는 CDN)
+
+## Fusion 브리지 사용 메모
+- Fusion 은 시작 메뉴 `Autodesk Fusion` 으로 띄우면 애드인이 자동 실행된다 (`fusion_ping` 으로 확인).
+- 긴 작업(STL High 품질 내보내기 등)은 메인 스레드 대기 120 s 를 넘길 수 있다. 부품 단위로 나눠 실행하고 STL 은 Medium 품질을 쓴다.
+- 새 문서: `app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)` 후 `DirectDesignType` 으로 두면 타임라인 없이 빠르다. 클라우드 저장(`saveAs`) 대신 `createFusionArchiveExportOptions` 로 `.f3d` 를 저장소에 남긴다.
