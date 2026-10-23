@@ -130,14 +130,26 @@
   }
   // 조립 좌표에서의 [XY 중심, 바닥 z] (mm). parameters.json 의 print_offsets 가 있으면 그것을, 없으면 V2 head_parts() 값을 쓴다.
   const HEAD = {
-    drive_plate_2pin:  { offset: [0, 0, 0.8],      color: 0x34659a },
-    shaft_hub:         { offset: [0, 0, 11],       color: 0x7998b8 },
-    bearing_front_cap: { offset: [0, 0, 33],       color: 0xaab3bd },
-    bearing_housing:   { offset: [0, -7.5, 35],    color: 0xaab3bd },
-    bearing_rear_cap:  { offset: [0, 0, 52],       color: 0xaab3bd },
-    carriage:          { offset: [0, -12.5, 32],   color: 0x7d8898 },
-    rail_support:      { offset: [0, -44.5, 0],    color: 0x4a525f },
-    servo_mount:       { offset: [22, -44, 175],   color: 0x4a525f },
+    drive_plate_2pin:         { offset: [0, 0, 0.8],      color: 0x34659a },
+    shaft_hub:                { offset: [0, 0, 11],       color: 0x7998b8 },
+    bearing_front_cap_direct: { offset: [0, 0, 33],       color: 0xaab3bd },
+    bearing_housing_direct:   { offset: [0, -7.5, 35],    color: 0xaab3bd },
+    bearing_rear_cap_direct:  { offset: [0, 0, 52],       color: 0xaab3bd },
+    carriage_direct:          { offset: [0, -12.5, 32],   color: 0x7d8898 },
+    shaft_hub_hollow:         { offset: [0, 0, 11],       color: 0x7998b8 },
+    bearing_front_cap_hollow: { offset: [0, 0, 32],       color: 0xaab3bd },
+    bearing_housing_hollow:   { offset: [0, -7.5, 35],    color: 0xaab3bd },
+    bearing_rear_cap_hollow:  { offset: [0, 0, 55],       color: 0xaab3bd },
+    carriage_hollow:          { offset: [28, -12.5, 32],  color: 0x7d8898 },
+    rail_support:             { offset: [0, -44.5, 0],    color: 0x4a525f },
+    servo_mount:              { offset: [22, -44, 175],   color: 0x4a525f },
+    crank:                    { offset: [22, -44, 183],   color: 0x8d949c },
+    link:                     { offset: [22, -44, 147],   color: 0xc9ced6 },
+    lock_guide:               { offset: [0, 0, 160],      color: 0x4a525f },
+    lock_carriage:            { offset: [0, 0, 204],      color: 0x7d8898 },
+    lock_servo_mount:         { offset: [22, 24, 235],    color: 0x4a525f },
+    lock_crank:               { offset: [22, 24, 243],    color: 0x8d949c },
+    lock_link:                { offset: [22, 24, 204],    color: 0xc9ced6 },
   };
   const OFF = P.print_offsets || {};
   const GEO = {};
@@ -212,9 +224,10 @@
     frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [-10, -48, 150], servoMat));
     // 이송부(캐리지): 하우징·캡·캐리지·MGN12H 블록·추력 베어링·모터. 크랭크가 국소 +z 로 밀어낸다
     const carriage = new THREE.Group(); face.add(carriage);
-    for (const k of ['bearing_housing', 'bearing_front_cap', 'bearing_rear_cap', 'carriage']) if (!hollow && GEO[k]) carriage.add(new THREE.Mesh(GEO[k], MAT[k]));
-    if (hollow || !GEO.carriage) { carriage.add(boxAt(60, 6, 120, 0, -35, 92, MAT.carriage)); carriage.add(boxAt(hollow ? 116 : 60, 58, 6, hollow ? 28 : 0, -3, 101, MAT.carriage)); carriage.add(boxAt(12, 19, 10, 22, -41.5, 147, MAT.carriage)); }
-    if (hollow || !GEO.bearing_housing) { carriage.add(boxAt(34, 34, hollow ? 19 : 17, 0, 0, hollow ? 44.5 : 43.5, MAT.bearing_housing)); carriage.add(boxAt(60, 6, 17, 0, -29, 43.5, MAT.bearing_housing)); }
+    const V = hollow ? '_hollow' : '_direct';
+    for (const k of ['bearing_housing', 'bearing_front_cap', 'bearing_rear_cap', 'carriage']) if (GEO[k + V]) carriage.add(new THREE.Mesh(GEO[k + V], MAT[k + V]));
+    if (!GEO['carriage' + V]) { carriage.add(boxAt(60, 6, 120, 0, -35, 92, MAT.carriage_direct)); carriage.add(boxAt(hollow ? 116 : 60, 58, 6, hollow ? 28 : 0, -3, 101, MAT.carriage_direct)); carriage.add(boxAt(12, 19, 10, 22, -41.5, 147, MAT.carriage_direct)); }
+    if (!GEO['bearing_housing' + V]) { carriage.add(boxAt(34, 34, hollow ? 19 : 17, 0, 0, hollow ? 44.5 : 43.5, MAT.bearing_housing_direct)); carriage.add(boxAt(60, 6, 17, 0, -29, 43.5, MAT.bearing_housing_direct)); }
     carriage.add(boxAt(27, 4.9, 45.4, 0, -40.45, 84, alumMat));                 // MGN12H 블록 윗판
     for (const bx of [-9.85, 9.85]) carriage.add(boxAt(7.3, 6.1, 45.4, bx, -45.95, 84, alumMat));
     const motor = new THREE.Group(); carriage.add(motor);
@@ -233,7 +246,8 @@
     else { spin.add(boxAt(50, 50, 6, 0, 0, 8, MAT.drive_plate_2pin)); }
     for (const [px, py] of PIN_XY) spin.add(cylZ(P.pin_mm, -P.pin_engagement_mm, 13, steelMat, px, py, 12));   // Ø3×16 핀 2개
     for (const sx of [-pitch, pitch]) for (const sy of [-pitch, pitch]) spin.add(boxAt(8, 8, 0.8, sx, sy, 0.4, padMat));
-    if (GEO.shaft_hub) spin.add(new THREE.Mesh(GEO.shaft_hub, MAT.shaft_hub));
+    const hubKey = hollow && GEO.shaft_hub_hollow ? 'shaft_hub_hollow' : 'shaft_hub';
+    if (GEO[hubKey]) spin.add(new THREE.Mesh(GEO[hubKey], MAT[hubKey]));
     else { spin.add(boxAt(32, 32, 5, 0, 0, 13.5, MAT.shaft_hub)); spin.add(cylZ(24, 16, 28, MAT.shaft_hub)); }
     if (hollow) {
       spin.add(cylZ(P.hollow_od_mm, 16, 98, steelMat));                         // 중공 회전축 (안 Ø12 로 막대 통과)
@@ -258,13 +272,15 @@
     g.position.copy(n.clone().multiplyScalar(HALF));
     scene.add(g);
     const frame = new THREE.Group(); g.add(frame);
-    frame.add(boxAt(30, 30, 30, 0, 0, 175, MAT.rail_support));                   // 출력 가이드 블록 (사각 구멍 8.3)
-    frame.add(boxAt(8, 30, 60, 0, -22, 240, MAT.rail_support));                  // 서보 받침
+    const LSA = P.lock_servo_axis || [22, 24, 255];
+    if (GEO.lock_guide) frame.add(new THREE.Mesh(GEO.lock_guide, MAT.lock_guide)); else frame.add(boxAt(30, 30, 30, 0, 0, 175, MAT.rail_support));   // 출력 가이드 블록 (사각 구멍 8.3)
+    if (GEO.lock_servo_mount) frame.add(new THREE.Mesh(GEO.lock_servo_mount, MAT.lock_servo_mount)); else frame.add(boxAt(8, 30, 60, 0, LSA[1], 240, MAT.rail_support));
     const carriage = new THREE.Group(); g.add(carriage);
-    carriage.add(boxAt(P.lock_bar_mm, P.lock_bar_mm, 230, 0, 0, 104, lockMat));  // 막대: 국소 z −11(소켓 바닥) ~ 219
-    carriage.add(boxAt(24, 24, 20, 0, 0, 214, MAT.carriage));                    // 막대 캐리지
-    carriage.add(boxAt(12, 19, 10, 22, 0, 204, MAT.carriage));                   // 링크 러그
-    const crank = makeCrank(frame, [22, 0, 255], P.lock_crank_r_mm, 204, carriage);
+    const tipZ = -(P.cube_mm / 2 + (P.lock_tip_y_mm !== undefined ? P.lock_tip_y_mm : -23.5));   // 결합 시 막대 끝 (면 평면 기준 국소 z, 안쪽이 −)
+    const barLen = P.lock_length_mm || 230;
+    carriage.add(boxAt(P.lock_bar_mm, P.lock_bar_mm, barLen, 0, 0, tipZ + barLen / 2, lockMat));   // 막대
+    if (GEO.lock_carriage) carriage.add(new THREE.Mesh(GEO.lock_carriage, MAT.lock_carriage)); else { carriage.add(boxAt(24, 24, 20, 0, 0, 214, MAT.carriage_direct)); carriage.add(boxAt(12, 19, 10, 22, LSA[1], 204, MAT.carriage_direct)); }
+    const crank = makeCrank(frame, LSA, P.lock_crank_r_mm, 204, carriage);
     return { group: g, frame, carriage, crank };
   })();
   // 유닛 번호(mechanism.js) → 크랭크 목록
@@ -526,6 +542,7 @@
       h.motor.visible = chkMotor.checked;
     }
     lock.frame.visible = chkFrame.checked;
+    for (const o of lock.carriage.children) if (o.material !== lockMat) o.visible = chkFrame.checked;
   }
   chkFrame.onchange = chkMotor.onchange = applyVisibility;
 

@@ -171,7 +171,7 @@ A4988 ENABLE 은 묶어서 LOW(항상 활성 → 유지 토크). 서보 6개는 
 ## 6. 파일
 
 - `tools/build_robot_v4.py`, `check_robot_v4.py`, `render_robot_v4.py` → `models/robot_v4/` (출력 STL/STEP, `robot_assembly.step`, `parameters.json`, `mechanical_checks.json`)
-- `node tools/embed_models.js` 는 `models/robot_v4/parameters.json` 과 `models/robot_v4/print/*.stl` 을 `sim/models.js` 에 넣는다
+- `node tools/embed_models_v4.js` 는 `models/robot_v4/parameters.json` 과 `models/robot_v4/print/*.stl` 을 `sim/models.js` 에 넣는다
 - `firmware/main/mechanism.h/.cpp` (절차·센서·서보), `motors.h/.cpp` (STEP 5 + DIR 공용, 뒤집기), `main.ino` (버튼 짧게/길게, `L`/`E`/`F`/`T` 명령)
 - `sim/mechanism.js` (펌웨어와 같은 절차 → 동작 목록), `sim/app.js` (V4 3D), `tools/gen_mechanism_test.js` (Wokwi 실제 모드 시나리오), `tools/gen_wokwi_test.js` (풀이 교차검증 + 뒤집기·결합 횟수)
 

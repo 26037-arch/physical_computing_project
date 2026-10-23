@@ -24,7 +24,7 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
 
 tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|step, parameters.json
   (V1: fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► models/*.stl)   │
-                                                     node tools/embed_models.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
+                                                     node tools/embed_models_v4.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
                                                                                    │
                                             sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 큐브 + 핀 구동 헤드 6개 + 결합/후퇴 전환)
 ```
@@ -44,7 +44,7 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 | 6. 3D 부품 (V4) | `.venv-cad\Scripts\python.exe tools/build_robot_v4.py` → `check_robot_v4.py` → `render_robot_v4.py` (CadQuery 2.7, Python 3.12 venv) | `models/robot_v4/**` STL·STEP·GLB, `parameters.json`, `mechanical_checks.json` |
 | 6'. 3D 부품 (V2, 이력) | `python tools/build_robot_v2.py` → `check_robot_v2.py` → `render_robot_v2.py` | `models/robot_v2/**` |
 | 6'. 3D 부품 (V1) | Claude Code 에서 `fusion_exec` 로 `fusion/scripts/cube_robot_parts.py` 실행 | `models/center_coupler.stl`, `center_cap.stl`, `motor_mount.stl` |
-| 7. STL 임베드 | `node tools/embed_models.js` | `sim/models.js` (V4 출력 부품 STL + `parameters.json` 의 `print_offsets`/`purchased`) |
+| 7. STL 임베드 | `node tools/embed_models_v4.js` | `sim/models.js` (V4 출력 부품 STL + `parameters.json` 의 `print_offsets`/`purchased`) |
 | 8. 시뮬레이터 | `node tools/serve.js` → http://localhost:8765/sim/ (또는 `sim/index.html` 더블클릭) | 3D 시연 |
 | 9. 업로드 | `powershell -ExecutionPolicy Bypass -File scripts/upload.ps1 -Port COMx -Fqbn arduino:renesas_uno:unor4wifi` | 실물 보드 |
 
