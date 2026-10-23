@@ -5,16 +5,22 @@
   "plate_thickness_mm": 6.0,
   "pin_mm": 3.0,
   "socket_mm": 3.4,
-  "socket_depth_mm": 4.2,
-  "pin_engagement_mm": 3.0,
+  "socket_depth_mm": 6.0,
+  "pin_engagement_mm": 4.8,
   "retract_mm": 24.0,
-  "lock_bar_mm": 8.0,
-  "lock_socket_mm": 8.4,
+  "lock_bar_mm": 6.0,
+  "lock_socket_mm": 6.4,
+  "lock_socket_depth_mm": 5.0,
   "lock_stroke_mm": 30.0,
   "lock_crank_r_mm": 15.0,
   "lock_length_mm": 230.0,
   "recess_depth_mm": 2.0,
-  "lock_tip_y_mm": -23.5,
+  "lock_tip_y_mm": -22.5,
+  "lock_screw_pocket_mm": 6.0,
+  "socket_countersink_mm": 7.0,
+  "pin_tip_mm": 1.0,
+  "pin_tip_h_mm": 1.0,
+  "pin_length_mm": 16.0,
   "hollow_id_mm": 12.0,
   "hollow_od_mm": 17.0,
   "hollow_length_mm": 82.0,
@@ -41,6 +47,19 @@
       -19.1
     ]
   ],
+  "strip_width_mm": 16.0,
+  "strip_hole_mm": 13.0,
+  "strip_bolt_xy": [
+    3.5,
+    9.0
+  ],
+  "strip_pad_y_mm": 14.5,
+  "strip_pad_mm": [
+    8.0,
+    4.0
+  ],
+  "d_sweep_r_mm": 38.65,
+  "d_layer_top_mm": -9.7,
   "piece_mm": 18.8,
   "pitch_mm": 19.1,
   "track_outer_r_mm": 23.5,
@@ -169,7 +188,7 @@
       0.0,
       52.0
     ],
-    "drive_plate_2pin": [
+    "drive_plate_strip": [
       0.0,
       0.0,
       0.7999999999999998
@@ -214,6 +233,11 @@
       0.0,
       58.0
     ],
+    "drive_plate_2pin": [
+      0.0,
+      0.0,
+      0.7999999999999998
+    ],
     "lock_guide": [
       -8.0,
       -5.0,
@@ -254,62 +278,6 @@
       ],
       "qty": 4,
       "module": "FRBL"
-    },
-    "axial_pad_0": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        -19.1,
-        -19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
-    },
-    "axial_pad_1": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        -19.1,
-        19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
-    },
-    "axial_pad_2": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        19.1,
-        -19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
-    },
-    "axial_pad_3": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        19.1,
-        19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
     },
     "bearing_608_0_direct": {
       "size": [
@@ -432,7 +400,7 @@
       "center": [
         0.0,
         19.1,
-        5.0
+        3.1999999999999997
       ],
       "qty": 5,
       "module": "all"
@@ -446,10 +414,38 @@
       "center": [
         0.0,
         -19.1,
-        5.0
+        3.1999999999999997
       ],
       "qty": 5,
       "module": "all"
+    },
+    "strip_pad_0_direct": {
+      "size": [
+        8.0,
+        4.0,
+        0.8
+      ],
+      "center": [
+        0.0,
+        -14.5,
+        0.4
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "strip_pad_1_direct": {
+      "size": [
+        8.0,
+        4.0,
+        0.8
+      ],
+      "center": [
+        0.0,
+        14.5,
+        0.4
+      ],
+      "qty": 4,
+      "module": "FRBL"
     },
     "servo_MG996R": {
       "size": [
@@ -492,6 +488,62 @@
       ],
       "qty": 5,
       "module": "all"
+    },
+    "axial_pad_0_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        -19.1,
+        -19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "axial_pad_1_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        -19.1,
+        19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "axial_pad_2_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        19.1,
+        -19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "axial_pad_3_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        19.1,
+        19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
     },
     "motor_NEMA17_offset_hollow": {
       "size": [
@@ -635,14 +687,14 @@
     },
     "lock_bar": {
       "size": [
-        8.0,
-        8.0,
+        6.0,
+        6.0,
         230.0
       ],
       "center": [
         0.0,
         0.0,
-        110.0
+        109.0
       ],
       "qty": 1,
       "module": "LOCK"

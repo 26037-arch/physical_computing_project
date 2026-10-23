@@ -17,13 +17,29 @@ import build_robot_v3 as v3
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'models' / 'robot_v4'
 box, cyl, ball, rounded, fuse = v2.box, v2.cyl, v2.ball, v2.rounded, v2.fuse
-P = dict(v2.P, lock_bar_mm=8., lock_socket_mm=8.4, lock_stroke_mm=30.,
+# Lock bar 6x6 (was 8x8): the 3-mm plate is all the V2 track sphere allows
+# for an 8-mm socket, so there was no room for a floor. A 6.4 socket fits
+# inside the 8.8 neck and runs 5 mm deep; the tip stops at -22.5, 1 mm short
+# of the floor at -21.5, and the M3 head (6 mm pocket) sits below the floor.
+P = dict(v2.P, lock_bar_mm=6., lock_socket_mm=6.4, lock_socket_depth_mm=5.,
+         lock_stroke_mm=30.,
          lock_crank_r_mm=15., lock_length_mm=230., recess_depth_mm=2.,
-         lock_tip_y_mm=-23.5,
+         lock_tip_y_mm=-22.5, lock_screw_pocket_mm=6.,
+         # Self-aligning pins (2026-10-24): 90-deg countersink to 7 mm and a
+         # 90-deg cone tip (3 -> 1 mm) capture 3.0 mm of in-plane offset, more
+         # than the 1.9 mm a 3.8-deg bar-square slop moves a side socket. The
+         # bore is deepened so the 3 mm shank still engages 2 mm past the cone.
+         socket_depth_mm=6., pin_engagement_mm=4.8, socket_countersink_mm=7.,
+         pin_tip_mm=1., pin_tip_h_mm=1., pin_length_mm=16.,
          hollow_id_mm=12., hollow_od_mm=17., hollow_length_mm=82.,
          crank_r_mm=12., link_mm=36., servo_axis=[22., -44., 195.],
          rail_front_chamfer_mm=1.6,
-         lock_servo_axis=[22., 24., 255.], pin_positions=[[0., 19.1], [0., -19.1]])
+         lock_servo_axis=[22., 24., 255.], pin_positions=[[0., 19.1], [0., -19.1]],
+         # Side heads: equatorial strip plate + narrow hub. A turning D layer
+         # (top at y=-9.7, sweep radius 38.65 about y) must clear them while
+         # the side pair stays engaged for the D move (HARDWARE_V4 2.3/3.2).
+         strip_width_mm=16., strip_hole_mm=13., strip_bolt_xy=[3.5, 9.],
+         strip_pad_y_mm=14.5, strip_pad_mm=[8., 4.], d_sweep_r_mm=38.65, d_layer_top_mm=-9.7)
 FACES_V4 = dict(F=((0, 0, 1), (0, 1, 0)), R=((1, 0, 0), (0, 1, 0)),
                 B=((0, 0, -1), (0, 1, 0)), L=((-1, 0, 0), (0, 1, 0)),
                 D=((0, -1, 0), (1, 0, 0)))
@@ -36,6 +52,19 @@ def face_location_v4(face):
 
 def cube_parts():
     parts, derived = v2.cube_parts()
+    # Re-cut the V2 edge sockets (same two exposed faces, same axes) with the
+    # V4 countersink and depth; the coupon gets the same geometry for fit tests.
+    pitch, w, cs, depth, dia = derived['pitch_mm'], P['cube_mm'], P['socket_countersink_mm'], P['socket_depth_mm'], P['socket_mm']
+    edge = parts['cube_edge']
+    for axis, origin in (((0, 0, 1), (0, pitch, -w/2)), ((0, -1, 0), (0, w/2, -pitch))):
+        edge = edge.cut(cyl(dia, -0.2, depth, axis, origin))
+        edge = edge.cut(cq.Solid.makeCone(cs/2, dia/2, (cs-dia)/2, origin, axis))
+    parts['cube_edge'] = edge.clean()
+    coupon = box(42, 16, 8, (0, 0, 4))
+    for x, dc in zip((-14, 0, 14), (3.2, 3.4, 3.6)):
+        coupon = coupon.cut(cyl(dc, 8-depth, 9, origin=(x, 0, 0)))
+        coupon = coupon.cut(cq.Solid.makeCone(cs/2, dc/2, (cs-dc)/2, (x, 0, 8), (0, 0, -1)))
+    parts['socket_coupon'] = coupon.clean()
     # Holes are WORLD U/D. Only the recessed centre template faces -Z.
     for sign in (-1, 1):
         parts['cube_core'] = parts['cube_core'].cut(box(8.3, 9, 8.3, (0, sign*15.5, 0)))
@@ -48,11 +77,14 @@ def cube_parts():
     neck = cyl(8.8, front, 0).cut(ball(derived['track_inner_r_mm']))
     stem = box(8, 8, 6, (0, 0, -15)).intersect(ball(17.2))
     center = fuse(plate, neck, stem, cyl(8, -18, -12))
-    center = center.cut(box(8.4, 8.4, 3.01, (0, 0, front+1.495)))
+    # Square socket through the plate and 2 mm into the neck (6.4 corners
+    # reach r 4.53 vs neck r 4.4: a 0.13 mm nick, bearing is on the flats).
+    depth = P['lock_socket_depth_mm']
+    center = center.cut(box(P['lock_socket_mm'], P['lock_socket_mm'], depth+.01, (0, 0, front+depth/2-.005)))
     center = center.cut(cyl(3.4, front-1, -11))
-    # Keep the M3 head BELOW the lock-socket floor, otherwise it obstructs
-    # the square bar. V2's 7-mm head clearance is retained, 3 mm deep here.
-    center = center.cut(cyl(7, front+2.99, front+6))
+    # M3 socket head (5.5 x 3) pocket starts AT the socket floor, so the bar
+    # tip (lock_tip_y) stops lock_floor_clearance above head and floor alike.
+    center = center.cut(cyl(P['lock_screw_pocket_mm'], front+depth, front+depth+3))
     parts['center_recessed'] = center.clean()
     parts['cube_core'] = parts['cube_core'].clean()
     return parts, derived
@@ -79,6 +111,49 @@ def drive_plate(pitch):
     for x, y in P['pin_positions']:
         plate = plate.cut(cyl(2.9, 4, 12, origin=(x, y, 0)))
     return plate.clean()
+
+
+def dowel_pin(x, y):
+    # 3 x 16 dowel with a 90-deg cone tip; the tip sits pin_engagement below
+    # the cube face (local z=0), the shank is held by the plate (z 5..11).
+    e, h, L = P['pin_engagement_mm'], P['pin_tip_h_mm'], P['pin_length_mm']
+    shank = cyl(P['pin_mm'], -e+h, -e+L, origin=(x, y, 0))
+    cone = cq.Solid.makeCone(P['pin_mm']/2, P['pin_tip_mm']/2, h, (x, y, -e+h), (0, 0, -1))
+    return fuse(shank, cone)
+
+
+def drive_plate_strip():
+    # Local x = world up on F/R/B/L, so the strip (|x| <= 8) stays inside the
+    # equator slab |y| < 9.7 that a D-layer turn never sweeps. Pins (0, +-19.1)
+    # drive the equator edges; two pads rest on those edges, bolts sit at
+    # (+-3.5, +-9) between the centre hole and the pads.
+    w, hole = P['strip_width_mm'], P['strip_hole_mm']
+    plate = box(w, 50, 6, (0, 0, 8)).cut(cyl(hole, 4, 12))
+    px, py = P['strip_pad_mm']
+    for y in (-P['strip_pad_y_mm'], P['strip_pad_y_mm']):
+        plate = plate.fuse(box(px, py, 4.2, (0, y, 2.9)))
+    bx, by = P['strip_bolt_xy']
+    for x, y in itertools.product((-bx, bx), (-by, by)):
+        plate = plate.cut(cyl(3.4, 4, 12, origin=(x, y, 0)))
+        plate = plate.cut(cyl(5.8, 4.9, 7, origin=(x, y, 0)))
+    for x, y in P['pin_positions']:
+        plate = plate.cut(cyl(2.9, 4, 12, origin=(x, y, 0)))
+    return plate.clean()
+
+
+def shaft_hub_strip():
+    # V2 hub with the plate flange narrowed to the strip width and the four
+    # M3 heat-set pockets moved to the strip bolt pattern.
+    hub = fuse(box(P['strip_width_mm'], 32, 5, (0, 0, 13.5)), cyl(24, 16, 28))
+    hub = hub.cut(cyl(8.15, 10, 29))
+    bx, by = P['strip_bolt_xy']
+    for x, y in itertools.product((-bx, bx), (-by, by)):
+        hub = hub.cut(cyl(4.6, 10.9, 15.1, origin=(x, y, 0)))
+        hub = hub.cut(cyl(3.2, 15.1, 17, origin=(x, y, 0)))
+    for axis in ((1, 0, 0), (0, 1, 0)):
+        hub = hub.cut(cyl(4.3, 0, 13, axis, (0, 0, 22)))
+        hub = hub.cut(cyl(5.6, 7, 13, axis, (0, 0, 22)))
+    return hub.clean()
 
 
 def servo_mount():
@@ -136,10 +211,17 @@ def module_design(hollow=False):
     hardware = {k: s for k, s in hardware.items()
                 if not k.startswith(('feed_', 'index_', 'handwheel_', 'profile_bolt_'))}
     hardware = {k: s for k, s in hardware.items() if not k.startswith('pin_')}
-    hardware.update({f'pin_{i}': cyl(3, -3, 13, origin=(x, y, 0))
-                     for i, (x, y) in enumerate(P['pin_positions'])})
+    hardware.update({f'pin_{i}': dowel_pin(x, y) for i, (x, y) in enumerate(P['pin_positions'])})
     heads.pop('drive_plate')
-    heads['drive_plate_2pin'] = drive_plate(19.1)
+    if hollow:
+        heads['drive_plate_2pin'] = drive_plate(19.1)      # D: 50x50, 22 mm bore for the lock bar
+    else:
+        heads['drive_plate_strip'] = drive_plate_strip()   # F/R/B/L: 16x50 equatorial strip
+        heads['shaft_hub'] = shaft_hub_strip()
+        hardware = {k: s for k, s in hardware.items() if not k.startswith('axial_pad_')}
+        px, py = P['strip_pad_mm']
+        hardware.update({f'strip_pad_{i}': box(px, py, 0.8, (0, y, 0.4))
+                         for i, y in enumerate((-P['strip_pad_y_mm'], P['strip_pad_y_mm']))})
     heads['carriage'] = carriage_boss(heads['carriage'])
     support = box(60, 6, 190, (0, -54, 95))
     # D and R front corners overlap by 1.5 x 1.5 x 6 without this relief.
@@ -187,7 +269,8 @@ def module_design(hollow=False):
 def lock_design():
     # Local D z=-5 is world y=-23.5. Chamfer ONLY the leading end.
     tip = -P['lock_tip_y_mm']-P['cube_mm']/2
-    bar = cq.Workplane('XY').box(8, 8, P['lock_length_mm']).faces('<Z').edges().chamfer(1).val().translate((0, 0, tip+P['lock_length_mm']/2))
+    b = P['lock_bar_mm']
+    bar = cq.Workplane('XY').box(b, b, P['lock_length_mm']).faces('<Z').edges().chamfer(1).val().translate((0, 0, tip+P['lock_length_mm']/2))
     guide = fuse(box(24, 24, 12, (0, 0, 180)), box(24, 24, 12, (0, 0, 190)),
                  box(6, 24, 65, (-15, 0, 206.5)),
                  box(22, 63, 6, (-23, -19.5, 236)),
@@ -196,14 +279,14 @@ def lock_design():
                  box(36, 3, 57, (0, 39.5, 261.5)),
                  box(6, 41, 6, (-15, 20.5, 236)))
     for z in (180, 190):
-        guide = guide.cut(box(8.3, 8.3, 14, (0, 0, z)))
+        guide = guide.cut(box(b+.3, b+.3, 14, (0, 0, z)))
     # Clamp grips the bar below the lower guide, translated with the slider.
     carriage = fuse(box(18, 18, 10, (0, 0, 204)), box(8, 31, 8, (0, 11.5, 204)),
                     box(26, 10, 8, (9, 24, 204)),
                     cyl(10, 16, 29, (1, 0, 0), (0, 24, 204)))
-    carriage = carriage.cut(box(8.1, 8.1, 12, (0, 0, 204)))
+    carriage = carriage.cut(box(b+.1, b+.1, 12, (0, 0, 204)))
     carriage = carriage.cut(cyl(3, 15, 34, (1, 0, 0), (0, 24, 204)))
-    carriage = carriage.cut(cyl(2.5, 3, 11, (1, 0, 0), (0, 0, 204)))
+    carriage = carriage.cut(cyl(2.5, b/2-1, 11, (1, 0, 0), (0, 0, 204)))   # clamp set screw reaches the bar
     crank, link = crank_link(lock=True)
     heads = dict(lock_guide=guide.clean(), lock_carriage=carriage.clean(),
                  lock_servo_mount=servo_mount().translate((0, 68, 60)),
@@ -239,10 +322,9 @@ def make_design():
 def printable_parts(cubes, modules, lock):
     qty = dict(cube_core=1, cube_center=4, center_recessed=2, cube_edge=12, cube_corner=8, socket_coupon=1)
     parts = {n: (s, qty[n]) for n, s in cubes.items()}
-    shared = {'drive_plate_2pin', 'rail_support', 'servo_mount', 'crank', 'link'}
     for hollow, (heads, _) in modules.items():
         for n, s in heads.items():
-            if n in shared:
+            if n in SHARED:
                 if not hollow:
                     parts[n] = (s, 5)
             else:
@@ -252,8 +334,13 @@ def printable_parts(cubes, modules, lock):
     return parts
 
 
+SHARED = {'rail_support', 'servo_mount', 'crank', 'link'}   # one STL, printed 5x
+
+
 def export_name(name, hollow):
-    return name if name == 'shaft_hub' and not hollow else name+('_hollow' if hollow else '_direct')
+    if name.startswith('drive_plate') or (name == 'shaft_hub' and not hollow):
+        return name
+    return name+('_hollow' if hollow else '_direct')
 
 
 def assembly_items(instances, modules, lock, pose='FB'):
@@ -268,6 +355,8 @@ def assembly_items(instances, modules, lock, pose='FB'):
 
 
 def color(name):
+    if name == 'drive_plate_strip':
+        name = 'drive_plate_2pin'
     if name in ('lock_bar', 'center_recessed'):
         return '#e07935' if name == 'lock_bar' else '#9c73b5'
     if 'servo' in name:
