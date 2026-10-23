@@ -13,9 +13,11 @@
   const MODELS = (typeof CubeModels !== 'undefined') ? CubeModels : { params: {}, parts: {} };
   // CAD 매개변수 (models/robot_v4/parameters.json). 값이 없으면 docs/HARDWARE_V4.md 의 기본값.
   const P = Object.assign({ cube_mm: 57, piece_mm: 18.8, pitch_mm: 19.1, retract_mm: 24, pin_mm: 3, socket_mm: 3.4,
-    socket_depth_mm: 4.2, pin_engagement_mm: 3, plate_thickness_mm: 6, recess_depth_mm: 2, lock_bar_mm: 8, lock_socket_mm: 8.4,
-    lock_stroke_mm: 30, lock_crank_r_mm: 15, lock_tip_y_mm: -23.8, lock_length_mm: 230, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195],
-    lock_servo_axis: [22, 24, 255], hollow_id_mm: 12.5, hollow_od_mm: 17, hollow_length_mm: 82, motor_offset_mm: 60 }, MODELS.params || {});
+    socket_depth_mm: 6, pin_engagement_mm: 4.8, socket_countersink_mm: 7, pin_tip_mm: 1, pin_tip_h_mm: 1, pin_length_mm: 16, plate_thickness_mm: 6,
+    recess_depth_mm: 2, lock_bar_mm: 6, lock_socket_mm: 6.4, lock_socket_depth_mm: 5,
+    lock_stroke_mm: 30, lock_crank_r_mm: 15, lock_tip_y_mm: -22.5, lock_length_mm: 230, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195],
+    lock_servo_axis: [22, 24, 255], hollow_id_mm: 12.5, hollow_od_mm: 17, hollow_length_mm: 82, motor_offset_mm: 60,
+    strip_width_mm: 16, strip_pad_y_mm: 14.5, strip_pad_mm: [8, 4] }, MODELS.params || {});
   const UNIT = P.pitch_mm;                 // 1 단위 = 조각 중심 간격 = 19.1 mm
   const mm = (x) => x / UNIT;
   const HALF = mm(P.cube_mm / 2);          // 큐브 중심 → 면 거리 (28.5 mm): 헤드 배치용
@@ -67,8 +69,10 @@
   const socketMat = new THREE.MeshStandardMaterial({ color: 0x0b0d10, roughness: 0.9 });
   const pocketMat = new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: 0.8 });
   const screwMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, roughness: 0.4, metalness: 0.6 });
-  const socketGeo = new THREE.CircleGeometry(mm(P.socket_mm / 2), 20);
-  const socketWallGeo = new THREE.CylinderGeometry(mm(P.socket_mm / 2), mm(P.socket_mm / 2), mm(P.socket_depth_mm), 20, 1, true);
+  const CS_DEPTH = (P.socket_countersink_mm - P.socket_mm) / 2;   // 90° 카운터싱크 깊이 (Ø7 → Ø3.4: 1.8)
+  const socketGeo = new THREE.CircleGeometry(mm(P.socket_countersink_mm / 2), 20);
+  const socketConeGeo = new THREE.CylinderGeometry(mm(P.socket_countersink_mm / 2), mm(P.socket_mm / 2), mm(CS_DEPTH), 20, 1, true);   // 카운터싱크 (안쪽 면)
+  const socketWallGeo = new THREE.CylinderGeometry(mm(P.socket_mm / 2), mm(P.socket_mm / 2), mm(P.socket_depth_mm - CS_DEPTH), 20, 1, true);
   const pocketGeo = new THREE.CircleGeometry(mm(3.5), 24);
   const screwGeo = new THREE.CircleGeometry(mm(2.7), 20);
   const lockSocketGeo = new THREE.PlaneGeometry(mm(P.lock_socket_mm), mm(P.lock_socket_mm));
@@ -85,12 +89,16 @@
     m.position.copy(n.clone().multiplyScalar(SURF - depth + mm(0.05)));
     m.lookAt(n.clone().multiplyScalar(4));
     owner.add(m); stickers.push(m);
-    if (zeros === 1) {  // 엣지: 노출면 중앙에 구동 소켓 (Ø3.4, 깊이 4.2)
+    if (zeros === 1) {  // 엣지: 노출면 중앙에 구동 소켓 (Ø3.4, 깊이 6) + 90° 카운터싱크 Ø7 (핀 원뿔 끝과 함께 자동 정렬)
       const hole = new THREE.Mesh(socketGeo, socketMat);
       hole.position.copy(n.clone().multiplyScalar(SURF + mm(0.1))); hole.lookAt(n.clone().multiplyScalar(4)); owner.add(hole);
-      const wall = new THREE.Mesh(socketWallGeo, new THREE.MeshStandardMaterial({ color: 0x1a1d22, side: THREE.BackSide }));
+      const innerMat = new THREE.MeshStandardMaterial({ color: 0x1a1d22, side: THREE.BackSide });
+      const cone = new THREE.Mesh(socketConeGeo, innerMat);
+      cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n);
+      cone.position.copy(n.clone().multiplyScalar(SURF - mm(CS_DEPTH / 2))); owner.add(cone);
+      const wall = new THREE.Mesh(socketWallGeo, innerMat);
       wall.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n);
-      wall.position.copy(n.clone().multiplyScalar(SURF - mm(P.socket_depth_mm / 2))); owner.add(wall);
+      wall.position.copy(n.clone().multiplyScalar(SURF - mm(CS_DEPTH + (P.socket_depth_mm - CS_DEPTH) / 2))); owner.add(wall);
     } else if (recessed) {  // U/D 센터 판: 잠금 막대용 사각 소켓 8.4
       const sq = new THREE.Mesh(lockSocketGeo, socketMat);
       sq.position.copy(n.clone().multiplyScalar(SURF - depth + mm(0.1))); sq.lookAt(n.clone().multiplyScalar(4)); owner.add(sq);
@@ -130,7 +138,8 @@
   }
   // 조립 좌표에서의 [XY 중심, 바닥 z] (mm). parameters.json 의 print_offsets 가 있으면 그것을, 없으면 docs/HARDWARE_V4.md 7절 표의 값을 쓴다.
   const HEAD = {
-    drive_plate_2pin:         { offset: [0, 0, 0.8],      color: 0x34659a },
+    drive_plate_2pin:         { offset: [0, 0, 0.8],      color: 0x34659a },   // D 전용 50×50 (Ø22 막대 통과)
+    drive_plate_strip:        { offset: [0, 0, 0.8],      color: 0x34659a },   // 측면 4개: 적도 띠 16×50 (D 층 회전과 간섭 없음)
     shaft_hub:                { offset: [0, 0, 11],       color: 0x7998b8 },
     bearing_front_cap_direct: { offset: [0, 0, 33],       color: 0xaab3bd },
     bearing_housing_direct:   { offset: [0, -7.5, 35],    color: 0xaab3bd },
@@ -169,6 +178,11 @@
   // 국소 z 축 방향 원기둥 (지름 d, z0~z1 mm, 중심 x,y mm)
   function cylZ(d, z0, z1, mat, x = 0, y = 0, seg = 24) {
     const g = new THREE.CylinderGeometry(mm(d / 2), mm(d / 2), mm(z1 - z0), seg); g.rotateX(Math.PI / 2);
+    const m = new THREE.Mesh(g, mat); m.position.set(mm(x), mm(y), mm((z0 + z1) / 2)); return m;
+  }
+  // 국소 z 축 방향 원뿔대 (z0 에서 지름 d0, z1 에서 지름 d1)
+  function coneZ(d0, d1, z0, z1, mat, x = 0, y = 0, seg = 16) {
+    const g = new THREE.CylinderGeometry(mm(d1 / 2), mm(d0 / 2), mm(z1 - z0), seg); g.rotateX(Math.PI / 2);
     const m = new THREE.Mesh(g, mat); m.position.set(mm(x), mm(y), mm((z0 + z1) / 2)); return m;
   }
   // 국소 x 축 방향 원기둥 (풀리·서보 축)
@@ -244,15 +258,21 @@
       motor.add(cylZ(28, 76, 84, alumMat, mx, 0)); motor.add(cylZ(20, 84, 94, alumMat, mx, 0));   // 40T 구동 풀리
       motor.add(boxAt(mx, 2, 6, mx / 2, 13.5, 80, beltMat)); motor.add(boxAt(mx, 2, 6, mx / 2, -13.5, 80, beltMat));   // 벨트 2가닥
     }
-    // 회전부(스핀들): 구동판 + 핀 2 + 패드 4 + 허브 + 축(측면: Ø8 + 커플링, D: 중공 OD17/ID12.5 + 40T 종동 풀리)
+    // 회전부(스핀들): 구동판 + 핀 2 + 패드 + 허브 + 축(측면: Ø8 + 커플링, D: 중공 OD17/ID12.5 + 40T 종동 풀리)
+    //   측면 판은 적도 띠(국소 x = 월드 위, 폭 16)라 D 층(y ≤ −9.7, 쓸림 반경 38.65)이 측면 쌍을 결합한 채 돌 수 있다. D 판은 50×50 (Ø22 로 막대 통과)
     const spin = new THREE.Group(); carriage.add(spin);
-    if (GEO.drive_plate_2pin) spin.add(new THREE.Mesh(GEO.drive_plate_2pin, MAT.drive_plate_2pin));
-    else { spin.add(boxAt(50, 50, 6, 0, 0, 8, MAT.drive_plate_2pin)); }
-    for (const [px, py] of PIN_XY) spin.add(cylZ(P.pin_mm, -P.pin_engagement_mm, 13, steelMat, px, py, 12));   // Ø3×16 핀 2개
-    for (const sx of [-pitch, pitch]) for (const sy of [-pitch, pitch]) spin.add(boxAt(8, 8, 0.8, sx, sy, 0.4, padMat));
+    const plateKey = hollow ? 'drive_plate_2pin' : 'drive_plate_strip';
+    if (GEO[plateKey]) spin.add(new THREE.Mesh(GEO[plateKey], MAT[plateKey]));
+    else { spin.add(boxAt(hollow ? 50 : P.strip_width_mm, 50, 6, 0, 0, 8, MAT[plateKey])); }
+    for (const [px, py] of PIN_XY) {   // Ø3×16 핀 2개: 끝 원뿔 90° (Ø3→Ø1), 삽입 4.8
+      spin.add(cylZ(P.pin_mm, -P.pin_engagement_mm + P.pin_tip_h_mm, -P.pin_engagement_mm + P.pin_length_mm, steelMat, px, py, 12));
+      spin.add(coneZ(P.pin_tip_mm, P.pin_mm, -P.pin_engagement_mm, -P.pin_engagement_mm + P.pin_tip_h_mm, steelMat, px, py, 12));
+    }
+    if (hollow) { for (const sx of [-pitch, pitch]) for (const sy of [-pitch, pitch]) spin.add(boxAt(8, 8, 0.8, sx, sy, 0.4, padMat)); }   // D: 모서리 패드 4
+    else { for (const sy of [-P.strip_pad_y_mm, P.strip_pad_y_mm]) spin.add(boxAt(P.strip_pad_mm[0], P.strip_pad_mm[1], 0.8, 0, sy, 0.4, padMat)); }   // 측면: 적도 엣지 위 패드 2
     const hubKey = hollow && GEO.shaft_hub_hollow ? 'shaft_hub_hollow' : 'shaft_hub';
     if (GEO[hubKey]) spin.add(new THREE.Mesh(GEO[hubKey], MAT[hubKey]));
-    else { spin.add(boxAt(32, 32, 5, 0, 0, 13.5, MAT.shaft_hub)); spin.add(cylZ(24, 16, 28, MAT.shaft_hub)); }
+    else { spin.add(boxAt(hollow ? 32 : P.strip_width_mm, 32, 5, 0, 0, 13.5, MAT.shaft_hub)); spin.add(cylZ(24, 16, 28, MAT.shaft_hub)); }
     if (hollow) {
       spin.add(cylZ(P.hollow_od_mm, 16, 16 + P.hollow_length_mm, steelMat));    // 중공 회전축 OD17, 길이82 (안 Ø12.5로 막대 통과)
       spin.add(cylZ(28, 76, 84, alumMat)); spin.add(cylZ(20, 84, 94, alumMat)); // 40T 종동 풀리
@@ -268,7 +288,7 @@
   }
   for (const p of SIDE) buildHead(p);
   buildHead(DF);
-  // ----- 잠금 막대 유닛: D 모듈 아래, y 축. 결합 끝 y −23.8, 후퇴 −53.8. 소켓 바닥 여유0.3, 행정30 -----
+  // ----- 잠금 막대 유닛: D 모듈 아래, y 축. 막대 6×6 이 중공축을 지나 센터 판 소켓(결합 끝 y −22.5, 후퇴 −52.5)까지. 소켓 바닥 여유 1.0, 행정 30 -----
   const lock = (() => {
     const n = v3(N[DF]), x = v3([1, 0, 0]), y = n.clone().cross(x);
     const g = new THREE.Group();
@@ -282,7 +302,7 @@
     if (GEO.lock_servo_clamp) frame.add(new THREE.Mesh(GEO.lock_servo_clamp, MAT.lock_servo_clamp));
     frame.add(envelope('lock_engage_switch', [12.8, 6.5, 5.8], [22, 14.75, 211.9], servoMat));   // 막대 결합 스위치 (SENS LOCK)
     const carriage = new THREE.Group(); g.add(carriage);
-    const tipZ = -(P.cube_mm / 2 + P.lock_tip_y_mm);   // 결합 끝 y −23.8 → 국소 z −4.7
+    const tipZ = -(P.cube_mm / 2 + P.lock_tip_y_mm);   // 결합 시 막대 끝 (면 평면 기준 국소 z, 안쪽이 −): y −22.5 → z −6 (소켓 바닥 −21.5 까지 1 mm 축방향 여유)
     const barLen = P.lock_length_mm;
     carriage.add(boxAt(P.lock_bar_mm, P.lock_bar_mm, barLen, 0, 0, tipZ + barLen / 2, lockMat));   // 막대
     if (GEO.lock_carriage) carriage.add(new THREE.Mesh(GEO.lock_carriage, MAT.lock_carriage)); else { carriage.add(boxAt(24, 24, 20, 0, 0, 214, MAT.carriage_direct)); carriage.add(boxAt(12, 19, 10, 22, LSA[1], 204, MAT.carriage_direct)); }
@@ -436,7 +456,7 @@
       items.push(`<span class="chip ${cls}" title="${FACE_NAMES[p]}: 핀 2개 (${p === DF ? 'DF/DB' : '적도 엣지'})">${FACE_NAMES[p]}<small>${txt}</small></span>`);
     }
     const lin = lock.crank.theta < 0.01;
-    items.push(`<span class="chip ${feedUnit === 3 ? 'feed' : lin ? 'in' : 'out'}" title="잠금 막대 8 mm: 코어 고정, 뒤집기 때만 내림">LOCK<small>${feedUnit === 3 ? '이송' : lin ? '고정' : `−${P.lock_stroke_mm}`}</small></span>`);
+    items.push(`<span class="chip ${feedUnit === 3 ? 'feed' : lin ? 'in' : 'out'}" title="잠금 막대 ${P.lock_bar_mm} mm: 코어 고정, 뒤집기 때만 내림">LOCK<small>${feedUnit === 3 ? '이송' : lin ? '고정' : `−${P.lock_stroke_mm}`}</small></span>`);
     items.push(`<span class="chip ${mech.orient ? 'in' : 'out'}" title="orient: 논리 U(흰색)가 아래면 1">${mech.orient ? '흰색↓' : '흰색↑'}<small>orient ${mech.orient}</small></span>`);
     chips.innerHTML = items.join('');
     let text;

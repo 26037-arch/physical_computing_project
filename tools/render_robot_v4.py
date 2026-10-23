@@ -70,8 +70,10 @@ def main():
     close_clip = d.box(100, 87, 100, (0, -9.5, 0))
     add(ax, lock[1]['lock_bar'].moved(loc).intersect(close_clip), '#e07935')
     setup(ax, (-32, 18), (-53, 34), (-34, 34), elev=12, azim=18)
-    fig.text(.265, .89, 'Cube section x <= 0; bar in recessed D centre\n8 x 8 bar; 8.4 socket; tip Y = -23.5 mm', ha='center', va='top', fontsize=12)
-    ax.text2D(.02, .02, 'Orange: locking bar\nPurple: keyed U/D centre\nPlate Y = -26.5 .. -23.5 mm\nNominal wall clearance: 5.7 mm', transform=ax.transAxes, fontsize=10,
+    b, sk, dp, tip = d.P['lock_bar_mm'], d.P['lock_socket_mm'], d.P['lock_socket_depth_mm'], d.P['lock_tip_y_mm']
+    front = -d.P['cube_mm']/2+d.P['recess_depth_mm']
+    fig.text(.265, .89, f'Cube section x <= 0; bar in recessed D centre\n{b:g} x {b:g} bar; {sk:g} socket {dp:g} deep; tip Y = {tip:g} mm', ha='center', va='top', fontsize=12)
+    ax.text2D(.02, .02, f'Orange: locking bar\nPurple: keyed U/D centre\nPlate Y = {front:g} .. {front+3:g} mm\nNominal wall clearance: {(19.4-b)/2:g} mm\nAxial clearance to socket floor: {front+dp-tip:g} mm', transform=ax.transAxes, fontsize=10,
               bbox=dict(facecolor='white', alpha=.9, edgecolor='#d4d9e0'))
     ax = fig.add_subplot(122, projection='3d')
     for n, kind, s, _ in instances:
@@ -79,7 +81,7 @@ def main():
             add(ax, s.intersect(half), d.color(kind))
     for n, s in d.module_pose(modules[True], 0).items():
         if n in ('shaft_hub', 'bearing_housing', 'bearing_front_cap', 'bearing_rear_cap',
-                  'spindle_hollow_17x12', 'bearing_6003_0', 'bearing_6003_1', 'drive_plate_2pin'):
+                  'spindle_hollow_17x12', 'bearing_6003_0', 'bearing_6003_1', 'drive_plate_2pin', 'drive_plate_strip'):
             add(ax, s.moved(loc).intersect(half), d.color(n), .85)
     for n, s in d.lock_pose(lock, 0).items():
         add(ax, s.moved(loc), d.color(n))

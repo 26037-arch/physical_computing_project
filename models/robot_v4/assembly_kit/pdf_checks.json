@@ -1,7 +1,7 @@
 {
   "passed": true,
-  "revision": "Rev B",
-  "pages": 40,
+  "revision": "Rev C",
+  "pages": 41,
   "first_page_part_ids": [
     "B01",
     "B02",
@@ -62,11 +62,12 @@
     "P26",
     "P27",
     "P28",
-    "P29"
+    "P29",
+    "P30"
   ],
-  "bookmarks": 40,
+  "bookmarks": 41,
   "clipped_text_spans": [],
   "fonts_embedded": true,
-  "pdf_sha256": "cfacc2d79362291110e5e9f424d9569999e22cc1136a415d0fde8f471403e6a5",
-  "integration_base_commit": "d8c21f49c8be001da35f6dc10457c168cfa5b99a"
+  "pdf_sha256": "bd23e08146a4f415f746cdef6623f0bfb7ee9f7d7d25de97178f4180e4ee7805",
+  "integration_base_commit": "83ade39d35a54d3a644a2fec932033650a53e135"
 }

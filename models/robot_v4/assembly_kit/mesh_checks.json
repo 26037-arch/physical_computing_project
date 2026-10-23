@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "unique_parts": 32,
+  "unique_parts": 33,
   "printed_quantity": 93,
   "limitations": "Rounded vertex weld 1e-5 mm, edges and signed volume only; not self-intersection, strength or printability certification.",
   "parts": {
@@ -103,6 +103,17 @@
       ],
       "passed": true
     },
+    "print/drive_plate_strip.stl": {
+      "triangles": 1920,
+      "closed_two_faces_per_edge": true,
+      "positive_volume_mm3": 3841.1019117908872,
+      "size_mm": [
+        16.0,
+        50.0,
+        10.2
+      ],
+      "passed": true
+    },
     "print/bearing_rear_cap_hollow.stl": {
       "triangles": 872,
       "closed_two_faces_per_edge": true,
@@ -128,7 +139,7 @@
     "print/lock_carriage.stl": {
       "triangles": 754,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 5731.025690696533,
+      "positive_volume_mm3": 6010.13526140264,
       "size_mm": [
         38.0,
         38.0,
@@ -148,9 +159,9 @@
       "passed": true
     },
     "print/cube_edge.stl": {
-      "triangles": 2500,
+      "triangles": 2584,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 5649.422804259452,
+      "positive_volume_mm3": 5574.140366883825,
       "size_mm": [
         18.8,
         23.8,
@@ -181,9 +192,9 @@
       "passed": true
     },
     "print/center_recessed.stl": {
-      "triangles": 958,
+      "triangles": 990,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 1131.1740776203349,
+      "positive_volume_mm3": 1186.7579935708288,
       "size_mm": [
         18.8,
         18.8,
@@ -214,9 +225,9 @@
       "passed": true
     },
     "print/socket_coupon.stl": {
-      "triangles": 516,
+      "triangles": 1020,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 5261.765344404871,
+      "positive_volume_mm3": 5143.556000663521,
       "size_mm": [
         42.0,
         16.0,
@@ -225,11 +236,11 @@
       "passed": true
     },
     "print/shaft_hub.stl": {
-      "triangles": 2520,
+      "triangles": 2508,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 9014.463099816297,
+      "positive_volume_mm3": 6425.826101343911,
       "size_mm": [
-        32.0,
+        24.0,
         32.0,
         17.0
       ],
@@ -282,7 +293,7 @@
     "print/lock_guide.stl": {
       "triangles": 1376,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 24906.448881975914,
+      "positive_volume_mm3": 25548.848877779747,
       "size_mm": [
         44.0,
         28.0,
@@ -324,13 +335,13 @@
       "passed": true
     },
     "assembly_kit/jigs/pin_depth_gauge.stl": {
-      "triangles": 1284,
+      "triangles": 1404,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 16823.9867289078,
+      "positive_volume_mm3": 16934.776520369935,
       "size_mm": [
         50.0,
         50.0,
-        8.0
+        9.8
       ],
       "passed": true
     },
@@ -348,7 +359,7 @@
     "assembly_kit/jigs/square_fit_coupon.stl": {
       "triangles": 72,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 17007.719886474613,
+      "positive_volume_mm3": 18058.919804077148,
       "size_mm": [
         58.0,
         28.0,

@@ -37,15 +37,15 @@
       "qty": 12,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 5639.2931,
+      "volume_mm3": 5563.3042,
       "size_mm": [
         18.800000200000007,
         23.800000100000005,
         23.800000100000005
       ],
       "mesh_cleanup": {
-        "triangles_before": 2506,
-        "triangles_after": 2500,
+        "triangles_before": 2590,
+        "triangles_after": 2584,
         "weld_mm": 1e-05
       }
     },
@@ -69,15 +69,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 5261.3382,
+      "volume_mm3": 5141.9702,
       "size_mm": [
         42.0,
         16.0,
         8.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 516,
-        "triangles_after": 516,
+        "triangles_before": 1020,
+        "triangles_after": 1020,
         "weld_mm": 1e-05
       }
     },
@@ -85,15 +85,15 @@
       "qty": 2,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 1133.8514,
+      "volume_mm3": 1189.6475,
       "size_mm": [
         18.8000002,
         18.8000002,
         14.500000100000001
       ],
       "mesh_cleanup": {
-        "triangles_before": 958,
-        "triangles_after": 958,
+        "triangles_before": 990,
+        "triangles_after": 990,
         "weld_mm": 1e-05
       }
     },
@@ -101,15 +101,15 @@
       "qty": 4,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 9028.7525,
+      "volume_mm3": 6436.5828,
       "size_mm": [
-        32.0,
+        24.0000002,
         32.0,
         17.000000200000002
       ],
       "mesh_cleanup": {
-        "triangles_before": 2520,
-        "triangles_after": 2520,
+        "triangles_before": 2508,
+        "triangles_after": 2508,
         "weld_mm": 1e-05
       }
     },
@@ -193,19 +193,19 @@
         "weld_mm": 1e-05
       }
     },
-    "drive_plate_2pin": {
-      "qty": 5,
+    "drive_plate_strip": {
+      "qty": 4,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 13328.3485,
+      "volume_mm3": 3836.5103,
       "size_mm": [
-        50.0,
+        16.0,
         50.0,
         10.2
       ],
       "mesh_cleanup": {
-        "triangles_before": 1952,
-        "triangles_after": 1952,
+        "triangles_before": 1920,
+        "triangles_after": 1920,
         "weld_mm": 1e-05
       }
     },
@@ -353,11 +353,27 @@
         "weld_mm": 1e-05
       }
     },
+    "drive_plate_2pin": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 13328.3485,
+      "size_mm": [
+        50.0,
+        50.0,
+        10.2
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 1952,
+        "triangles_after": 1952,
+        "weld_mm": 1e-05
+      }
+    },
     "lock_guide": {
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 24903.8984,
+      "volume_mm3": 25546.2984,
       "size_mm": [
         44.0,
         28.0,
@@ -373,7 +389,7 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 5732.6295,
+      "volume_mm3": 6011.7207,
       "size_mm": [
         38.0,
         38.0,
@@ -467,62 +483,6 @@
       ],
       "qty": 4,
       "module": "FRBL"
-    },
-    "axial_pad_0": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        -19.1,
-        -19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
-    },
-    "axial_pad_1": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        -19.1,
-        19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
-    },
-    "axial_pad_2": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        19.1,
-        -19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
-    },
-    "axial_pad_3": {
-      "size": [
-        8.0,
-        8.0,
-        0.8
-      ],
-      "center": [
-        19.1,
-        19.1,
-        0.4
-      ],
-      "qty": 5,
-      "module": "all"
     },
     "bearing_608_0_direct": {
       "size": [
@@ -645,7 +605,7 @@
       "center": [
         0.0,
         19.1,
-        5.0
+        3.1999999999999997
       ],
       "qty": 5,
       "module": "all"
@@ -659,10 +619,38 @@
       "center": [
         0.0,
         -19.1,
-        5.0
+        3.1999999999999997
       ],
       "qty": 5,
       "module": "all"
+    },
+    "strip_pad_0_direct": {
+      "size": [
+        8.0,
+        4.0,
+        0.8
+      ],
+      "center": [
+        0.0,
+        -14.5,
+        0.4
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "strip_pad_1_direct": {
+      "size": [
+        8.0,
+        4.0,
+        0.8
+      ],
+      "center": [
+        0.0,
+        14.5,
+        0.4
+      ],
+      "qty": 4,
+      "module": "FRBL"
     },
     "servo_MG996R": {
       "size": [
@@ -733,6 +721,62 @@
       ],
       "qty": 4,
       "module": "FRBL"
+    },
+    "axial_pad_0_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        -19.1,
+        -19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "axial_pad_1_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        -19.1,
+        19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "axial_pad_2_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        19.1,
+        -19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "axial_pad_3_hollow": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        19.1,
+        19.1,
+        0.4
+      ],
+      "qty": 1,
+      "module": "D"
     },
     "motor_NEMA17_offset_hollow": {
       "size": [
@@ -890,14 +934,14 @@
     },
     "lock_bar": {
       "size": [
-        8.0,
-        8.0,
-        230.00000000000003
+        6.0,
+        6.0,
+        230.0
       ],
       "center": [
         0.0,
         0.0,
-        110.3
+        109.0
       ],
       "qty": 1,
       "module": "LOCK"

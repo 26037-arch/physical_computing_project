@@ -47,10 +47,9 @@ def load_design():
     exported = {p.stem: cq.importers.importStep(str(p)).val() for p in (d.OUT/'print').glob('*.step')}
     for n in cubes:
         cubes[n] = exported[n]
-    shared = {'drive_plate_2pin', 'rail_support', 'servo_mount', 'servo_clamp', 'crank', 'link'}
     for hollow, (heads, _) in modules.items():
         for n in heads:
-            heads[n] = exported[n if n in shared else d.export_name(n, hollow)]
+            heads[n] = exported[n if n in d.SHARED else d.export_name(n, hollow)]
     for n in lock[0]:
         lock[0][n] = exported[n]
     return params, cubes, d.cube_instances(cubes), modules, lock, exported
@@ -109,6 +108,26 @@ def main():
     report['lock_to_D_edge_clearance_mm'] = min(bar.distance(s) for s in edges)
     report['nominal_lock_to_edge_wall_mm'] = (19.4-params['lock_bar_mm'])/2
     report['lock_to_hollow_diagonal_clearance_mm'] = (params['hollow_id_mm']-params['lock_bar_mm']*math.sqrt(2))/2
+    # Axial: the engaged tip must stop short of the socket floor (and the M3
+    # head under it). Nominal from the contract, then proven on the BRep by
+    # pushing the bar further up: clear just below the nominal gap, touching
+    # just beyond it. A dead-centre crank cannot absorb interference here.
+    front = -params['cube_mm']/2+params['recess_depth_mm']
+    axial = (front+params['lock_socket_depth_mm'])-params['lock_tip_y_mm']
+    report['lock_axial_clearance_mm'] = axial
+    centre_d = next(s for _, k, s, pos in parts if k == 'center_recessed' and pos[1] == -1)
+    # The M3 socket head (purchased, DIN 912: 5.5 x 3) sits in the pocket with
+    # its top flush with the socket floor; it is the real stop for the 4x4 flat
+    # tip, which is smaller than the 6 mm pocket. Include its envelope.
+    m3_head = d.cyl(5.5, front+params['lock_socket_depth_mm'], front+params['lock_socket_depth_mm']+3, (0, 1, 0))
+    report['lock_axial_samples'] = []
+    for extra, want_hit in ((axial-.05, False), (axial+.05, True)):
+        raised = bar.translate((0, extra, 0))
+        vol = overlap(raised, centre_d)+overlap(raised, m3_head)
+        report['lock_axial_samples'].append(dict(bar_raised_mm=extra, overlap_mm3=round(vol, 6), expect_contact=want_hit))
+        if (vol > TOL) != want_hit:
+            failures.append(['lock_axial_clearance', extra, vol])
+    print('lock axial clearance', axial, 'mm; samples', report['lock_axial_samples'], flush=True)
     report['lock_hollow_samples'] = []
     for shift in (0, 24):
         shaft = modules[True][1]['spindle_hollow_17x12'].translate((0, 0, shift)).moved(loc)
@@ -125,6 +144,48 @@ def main():
         rotated = [(n, s.rotate((0, 0, 0), (1, 0, 0), angle)) for n, s in cube]
         collisions = record(f'flip {angle}', hits(rotated, obstacles))
         report['flip_samples'].append(dict(angle_deg=angle, collisions=collisions))
+    # Pin self-alignment (2026-10-24). In-plane capture = countersink radius
+    # minus tip radius; the lever to a side socket is cube/2 (28.5), to a D
+    # socket the pitch (19.1). BRep sample: cube shifted in x, pin tips 0.1 mm
+    # below the face -> clear inside the capture, touching just outside it.
+    cs, tipd, eng = params['socket_countersink_mm'], params['pin_tip_mm'], params['pin_engagement_mm']
+    capture = (cs-tipd)/2
+    report['pin_capture_mm'] = capture
+    report['pin_capture_deg'] = dict(side=math.degrees(capture/(params['cube_mm']/2)), D=math.degrees(capture/params['pitch_mm']),
+                                     bar_square_slop=math.degrees((params['lock_socket_mm']-params['lock_bar_mm'])/params['lock_bar_mm']))
+    report['pin_capture_samples'] = []
+    for face in ('F', 'D'):
+        pins = [(face+'/'+n, s.translate((0, 0, eng-.1)).moved(d.face_location_v4(face)))
+                for n, s in modules[face == 'D'][1].items() if n.startswith('pin_')]
+        for dx, want_hit in ((capture-.4, False), (capture+.3, True)):
+            shifted = [(n, s.translate((dx, 0, 0))) for n, s in cube]
+            collisions = hits(pins, shifted)
+            report['pin_capture_samples'].append(dict(face=face, cube_shift_x_mm=dx, expect_contact=want_hit, collisions=collisions))
+            if bool(collisions) != want_hit:
+                failures.append(['pin_capture', face, dx, collisions])
+            print(f'pin capture {face} shift {dx:.2f}: {len(collisions)} collisions (expect {"hit" if want_hit else "clear"})', flush=True)
+    # Layer turns against the modules in the pose the firmware actually uses
+    # (mechanism.cpp prepare): F with F/B engaged, R with R/L engaged, and D
+    # with the lock bar plus whichever side pair was left engaged. The turning
+    # face's own module spins with the layer and is excluded. Found 2026-10-24:
+    # D-layer corners (sweep r 38.65) hit 50x50 side plates at 33.5 mm.
+    report['layer_turn_samples'] = []
+    for face, axis_i, side, engaged in (('F', 2, 1, ('F', 'B')), ('R', 0, 1, ('R', 'L')),
+                                        ('D', 1, -1, ('F', 'B', 'D')), ('D', 1, -1, ('R', 'L', 'D'))):
+        axis = tuple(1 if i == axis_i else 0 for i in range(3))
+        obstacles = []
+        for other in d.FACES_V4:
+            if other == face:
+                continue
+            obstacles.extend((other+'/'+n, s.moved(d.face_location_v4(other)))
+                             for n, s in d.module_pose(modules[other == 'D'], 0 if other in engaged else 24).items())
+        obstacles.extend(('LOCK/'+n, s.moved(loc)) for n, s in d.lock_pose(lock, 0).items())
+        moving = [(n, s) for n, k, s, p in parts if p[axis_i] == side and k != 'center_recessed']
+        label = face+' turn, '+'/'.join(engaged)+' engaged'
+        for angle in range(15, 90, 15):
+            rotated = [(n, s.rotate((0, 0, 0), axis, angle)) for n, s in moving]
+            collisions = record(f'{label} {angle}', hits(rotated, obstacles))
+            report['layer_turn_samples'].append(dict(face=face, engaged=list(engaged), angle_deg=angle, collisions=collisions))
     for pose in ('FB', 'RL', 'retracted'):
         groups = {}
         for n, _, s in d.assembly_items(parts, modules, lock, pose):
@@ -159,7 +220,8 @@ def main():
             sz = d.slider_z(theta, radius, axis_z)
             if abs(math.hypot(ey, ez-sz)-params['link_mm']) > .01:
                 failures.append(['link_length', is_lock, theta])
-    report['sample_counts'] = dict(cube_pairs=27*26//2, layer_poses=len(report['cube_layer_samples']), flip_poses=len(report['flip_samples']), module_poses=len(report['module_poses']))
+    report['sample_counts'] = dict(cube_pairs=27*26//2, layer_poses=len(report['cube_layer_samples']), flip_poses=len(report['flip_samples']),
+                                   layer_turn_poses=len(report['layer_turn_samples']), module_poses=len(report['module_poses']))
     report['failure_count'] = len(failures)
     report['failures'] = failures
     report['passed'] = not failures

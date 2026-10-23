@@ -1,27 +1,28 @@
-# robot_v4 조립 단순화 Rev B
+# robot_v4 통합 제작 Rev C
 
-최신 통합 기준: `d8c21f49c8be001da35f6dc10457c168cfa5b99a`.
-기구 원형: `b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9` (`robot_v4 Draft`).
-제작 설명서는 `docs/BUILD_V4_상세제작설명서.pdf`(40페이지)를 먼저 읽습니다.
-첫 장은 A2 가로 부품 지도, 나머지는 A4입니다. PDF는 가공용 축척 도면이 아닙니다.
+원격83ade39 + 조립 단순화a7f8bcd를 결합한 파일입니다.
+현재 기준은 docs/BUILD_V4_MERGE_REVIEW.md와 상세 PDF(41쪽)입니다.
+첫 장은61개 번호가 있는 A2 부품 지도이며 이후는 A4입니다.
 
-- `../print/`: P01~P28 STL/STEP, 89개 출력. 기존 Draft 파일과 혼용하지 않습니다.
-- `print/`: P29 막대 스위치 받침 STL/STEP, 1개.
-- `jigs/`: J01~J03 정렬 블록·사각 공차 시험편·핀 깊이 지그, 3개.
-- `cut/`: 합판 패널, 2060/앵글 외형, 금속 잠금 지지판 STEP와 판재 DXF(mm, 1:1).
-- `robot_build_assembly.step`: 프레임과 전체 로봇을 포함한 조립 모델.
-- `parts_BOM.csv`: PDF 첫 장의 60개 번호와 수량·조달 구분.
-- `fastener_BOM.csv`: F01~F25 체결/배선 부속. 여분 수량 미포함.
-- `kit_manifest.json`, `kit_checks.json`, `mesh_checks.json`: 제작 형상과 기하/메시 검사.
+- ../print/: P01~P28 및 P30, 본체89개 출력. 측면 P30 네 개, D P07 한 개.
+- print/: P29 스위치 받침1개. jigs/: J01~J03 세 개. 전체33종93개.
+- cut/: 패널/잠금 금속판 DXF(mm,1:1)와 금속 구매품 참고 STEP.
+- robot_build_assembly.step: 최신 전체 프레임 조립 모델.
+- parts_BOM.csv / fastener_BOM.csv: 조달/체결표. F17/F18은0, M3 인서트69/M4 인서트14.
+- kit_checks.json / mesh_checks.json / pdf_checks.json: 검사 결과.
 
-재생성: `python tools/build_robot_v4.py --stl-tolerance 0.1 --stl-angular 0.3` →
-`python tools/build_robot_v4_kit.py` → `python tools/check_robot_v4.py` →
-`python tools/check_robot_v4_kit.py` → `python tools/check_robot_v4_meshes.py` →
-`node tools/embed_models_v4.js` → `python tools/make_robot_v4_manual.py` →
-`python tools/check_robot_v4_manual.py` → `python tools/package_robot_v4.py`.
+6 mm 막대,6.4 소켓, 원뿔 끝 핀, 측면16×50 띠 판을 사용합니다.
+이전8 mm 막대·J02/J03·측면50×50 판과 혼용하지 마세요.
+서보 받침은 프로파일에3점 체결하며 전산봉·간격관은 쓰지 않습니다.
+실물 강도/마찰/반복 정밀도는 시험 전입니다. 구매품 실제 외형을 대조하세요.
 
-구매품 CAD는 외형 참고용입니다. 실제 서보·혼·스위치 레버·레일·2060 단면·전원선·나사 머리와 가공 오차를 구매 도면 및 실측으로 확인해야 합니다. 프로파일 STL은 없으며 금속 구매품을 출력물로 대체하지 않습니다.
-
-실물 출력·하중 시험은 미실시입니다. 특히 사각 잠금의 유격과 가운데 층의 마찰에 의존하는 뒤집기는 PDF의 실물 합격 조건을 확인하기 전 자동 운전 성능이 검증된 것이 아닙니다.
-
-Rev B: 전산봉20본·길이 맞춤 간격관20본·패널 홀20개를 없앴습니다. P14는 공통3점 프로파일 직결, P13은 레일 위치 결정 턱/장공/서보 포켓, P23/P29는 금속판 뒤에서 짧은 나사로 인서트 체결합니다. 교체 대상은 P13/P14/P15/P23/P25/P26/P29이며 기존 부품 번호를 유지합니다. 상세 변경은 docs/BUILD_V4_REVB.md를 확인하세요.
+재생성(저장소 루트):
+python tools/build_robot_v4.py --stl-tolerance 0.1 --stl-angular 0.3
+python tools/build_robot_v4_kit.py
+python tools/check_robot_v4.py
+python tools/check_robot_v4_kit.py
+python tools/check_robot_v4_meshes.py
+node tools/embed_models_v4.js
+python tools/make_robot_v4_manual.py
+python tools/check_robot_v4_manual.py
+python tools/package_robot_v4.py

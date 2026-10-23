@@ -1,7 +1,7 @@
 {
-  "revision": "V4 assembly Rev B",
+  "revision": "V4 assembly Rev C",
   "source_commit": "b37de3e9",
-  "integration_base_commit": "d8c21f49c8be001da35f6dc10457c168cfa5b99a",
+  "integration_base_commit": "83ade39d35a54d3a644a2fec932033650a53e135",
   "units": "mm",
   "physical_validation": false,
   "parts": {
@@ -312,7 +312,7 @@
       "size_mm": [
         50.0,
         50.0,
-        8.0
+        9.8
       ]
     }
   }

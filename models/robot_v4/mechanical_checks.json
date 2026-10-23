@@ -581,6 +581,10 @@
       "valid": true,
       "solids": 1
     },
+    "drive_plate_strip": {
+      "valid": true,
+      "solids": 1
+    },
     "shaft_hub_hollow": {
       "valid": true,
       "solids": 1
@@ -592,18 +596,277 @@
   },
   "cube_assembled_collisions": [],
   "lock_cube_collisions": [],
-  "lock_to_D_edge_clearance_mm": 3.0710678118654693,
-  "nominal_lock_to_edge_wall_mm": 5.699999999999999,
-  "lock_to_hollow_diagonal_clearance_mm": 0.5931457505076194,
+  "lock_to_D_edge_clearance_mm": 2.9634761434214716,
+  "nominal_lock_to_edge_wall_mm": 6.699999999999999,
+  "lock_to_hollow_diagonal_clearance_mm": 2.0073593128807143,
+  "lock_axial_clearance_mm": 1.0,
+  "lock_axial_samples": [
+    {
+      "bar_raised_mm": 0.95,
+      "overlap_mm3": 0.0,
+      "expect_contact": false
+    },
+    {
+      "bar_raised_mm": 1.05,
+      "overlap_mm3": 0.817453,
+      "expect_contact": true
+    }
+  ],
   "lock_hollow_samples": [
     {
       "shift_mm": 0,
-      "clearance_mm": 0.5931457505076194,
+      "clearance_mm": 2.0073593128807143,
       "collisions": []
     },
     {
       "shift_mm": 24,
-      "clearance_mm": 0.5931457505076194,
+      "clearance_mm": 2.0073593128807143,
+      "collisions": []
+    }
+  ],
+  "pin_capture_mm": 3.0,
+  "pin_capture_deg": {
+    "side": 6.031134685587612,
+    "D": 8.999337096295653,
+    "bar_square_slop": 3.819718634205491
+  },
+  "pin_capture_samples": [
+    {
+      "face": "F",
+      "cube_shift_x_mm": 2.6,
+      "expect_contact": false,
+      "collisions": []
+    },
+    {
+      "face": "F",
+      "cube_shift_x_mm": 3.3,
+      "expect_contact": true,
+      "collisions": [
+        [
+          "F/pin_0",
+          "edge_09",
+          0.03269
+        ],
+        [
+          "F/pin_1",
+          "edge_11",
+          0.03269
+        ]
+      ]
+    },
+    {
+      "face": "D",
+      "cube_shift_x_mm": 2.6,
+      "expect_contact": false,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "cube_shift_x_mm": 3.3,
+      "expect_contact": true,
+      "collisions": [
+        [
+          "D/pin_0",
+          "edge_10",
+          0.03269
+        ],
+        [
+          "D/pin_1",
+          "edge_02",
+          0.03269
+        ]
+      ]
+    }
+  ],
+  "layer_turn_samples": [
+    {
+      "face": "F",
+      "engaged": [
+        "F",
+        "B"
+      ],
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "face": "F",
+      "engaged": [
+        "F",
+        "B"
+      ],
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "face": "F",
+      "engaged": [
+        "F",
+        "B"
+      ],
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "face": "F",
+      "engaged": [
+        "F",
+        "B"
+      ],
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "face": "F",
+      "engaged": [
+        "F",
+        "B"
+      ],
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "face": "R",
+      "engaged": [
+        "R",
+        "L"
+      ],
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "face": "R",
+      "engaged": [
+        "R",
+        "L"
+      ],
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "face": "R",
+      "engaged": [
+        "R",
+        "L"
+      ],
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "face": "R",
+      "engaged": [
+        "R",
+        "L"
+      ],
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "face": "R",
+      "engaged": [
+        "R",
+        "L"
+      ],
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "F",
+        "B",
+        "D"
+      ],
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "F",
+        "B",
+        "D"
+      ],
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "F",
+        "B",
+        "D"
+      ],
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "F",
+        "B",
+        "D"
+      ],
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "F",
+        "B",
+        "D"
+      ],
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "R",
+        "L",
+        "D"
+      ],
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "R",
+        "L",
+        "D"
+      ],
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "R",
+        "L",
+        "D"
+      ],
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "R",
+        "L",
+        "D"
+      ],
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "face": "D",
+      "engaged": [
+        "R",
+        "L",
+        "D"
+      ],
+      "angle_deg": 75,
       "collisions": []
     }
   ],
@@ -611,24 +874,10 @@
     "cube_pairs": 351,
     "layer_poses": 36,
     "flip_poses": 13,
+    "layer_turn_poses": 20,
     "module_poses": 3
   },
   "failure_count": 0,
   "failures": [],
-  "passed": true,
-  "final_insert_tip_clearance_update": {
-    "method": "After full motion checks, only plastic was removed inside the guide and switch-bracket screw relief bores. BRep differences prove zero added material; therefore the earlier zero-collision results remain valid. Final guide/bar/bolt-tip and mesh checks are recorded separately in assembly_kit.",
-    "parts": {
-      "lock_guide": {
-        "added_volume_mm3": 0.0,
-        "removed_volume_mm3": 119.38052083640996,
-        "valid_single_solid": true
-      },
-      "lock_switch_bracket": {
-        "added_volume_mm3": 0.0,
-        "removed_volume_mm3": 58.38649946696545,
-        "valid_single_solid": true
-      }
-    }
-  }
+  "passed": true
 }

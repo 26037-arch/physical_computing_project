@@ -13,7 +13,7 @@ function bundle(headOnly = false) {
   const parts = {};
   for (const file of files) {
     const name = file.replace(/\.stl$/i, '');
-    if (headOnly && !/^(drive_plate_2pin|shaft_hub.*|bearing_.*|carriage.*|rail_support|servo_mount|center_recessed)$/.test(name)) continue;
+    if (headOnly && !/^(drive_plate_2pin|drive_plate_strip|shaft_hub.*|bearing_.*|carriage.*|rail_support|servo_mount|center_recessed)$/.test(name)) continue;
     const buf = fs.readFileSync(path.join(dir, 'print', file));
     if (buf.length < 84) throw new Error(`${file}: truncated STL`);
     const triangles = buf.readUInt32LE(80);

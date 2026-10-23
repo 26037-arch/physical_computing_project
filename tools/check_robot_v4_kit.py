@@ -1,4 +1,4 @@
-"""Check Rev B mounting interfaces, bolt heads and sampled V4 movement."""
+"""Check Rev C mounting interfaces, bolt heads and sampled V4 movement."""
 import json,itertools,math
 from pathlib import Path
 import build_robot_v4 as d
@@ -8,12 +8,25 @@ from check_robot_v4 import hits
 def main():
     panels,metal,prints,jigs=k.design()
     cubes,derived,instances,modules,lock=d.make_design()
-    report={'revision':'Rev B','physical_load_test':False,'checks':{},'limitations':'Discrete rigid geometry only; includes P14 M5 head/washer envelopes. Other fasteners, vendor slots, horn details and switch levers are omitted.'}
+    report={'revision':'Rev C','physical_load_test':False,'checks':{},'limitations':'Discrete rigid geometry only; includes P14 M5 head/washer envelopes. Other fasteners, vendor slots, horn details and switch levers are omitted.'}
     failures=[]
     def record(n,left,right,same=False):
         h=hits(left,right,same);report['checks'][n]=h
         print(n,len(h),h,flush=True);failures.extend([[n,*x] for x in h])
     frame=list({**panels,**metal}.items())
+    # The deeper 6.4 socket moves the M3 head two millimetres inward.
+    # Use standard M3x10 (2.5 mm metal-insert engagement), not old M3x14.
+    report['UD_center_screw_lengths']={}
+    for sign in (-1,1):
+        axis=(0,sign,0)
+        center=next(s for _,kind,s,pos in instances if kind=='center_recessed' and pos[1]==sign)
+        fixed=[('core',cubes['cube_core']),('center',center)]
+        screw=d.cyl(3,8.5,18.5,axis).fuse(d.cyl(5.5,18.5,21.5,axis))
+        record(f'UD_center_M3x10_{sign}',fixed,[('M3x10',screw)])
+        old=d.cyl(3,4.5,18.5,axis)
+        clashes=hits(fixed,[('old_M3x14',old)])
+        report['UD_center_screw_lengths'][str(sign)]={'selected_mm':10,'insert_engagement_mm':2.5,'rejected_M3x14_collisions':clashes}
+        if not clashes:failures.append(['missing_expected_old_screw_contact',sign])
     record('frame_internal',frame,frame,True)
     for pose in ('FB','RL','retracted'):
         old=[(n,s) for n,_,s in d.assembly_items(instances,modules,lock,pose)]

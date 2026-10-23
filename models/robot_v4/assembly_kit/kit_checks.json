@@ -1,7 +1,9 @@
 {
-  "revision": "Rev B",
+  "revision": "Rev C",
   "physical_load_test": false,
   "checks": {
+    "UD_center_M3x10_-1": [],
+    "UD_center_M3x10_1": [],
     "frame_internal": [],
     "frame_vs_robot_FB": [],
     "frame_vs_robot_RL": [],
@@ -49,6 +51,30 @@
     "lock_servo_capture": []
   },
   "limitations": "Discrete rigid geometry only; includes P14 M5 head/washer envelopes. Other fasteners, vendor slots, horn details and switch levers are omitted.",
+  "UD_center_screw_lengths": {
+    "-1": {
+      "selected_mm": 10,
+      "insert_engagement_mm": 2.5,
+      "rejected_M3x14_collisions": [
+        [
+          "core",
+          "old_M3x14",
+          10.308351
+        ]
+      ]
+    },
+    "1": {
+      "selected_mm": 10,
+      "insert_engagement_mm": 2.5,
+      "rejected_M3x14_collisions": [
+        [
+          "core",
+          "old_M3x14",
+          10.308351
+        ]
+      ]
+    }
+  },
   "failure_count": 0,
   "failures": [],
   "passed": true

@@ -1,4 +1,4 @@
-"""Rev B assembly kit. World Y is up. Purchased panels/metal are NOT prints.
+"""Rev C assembly kit. World Y is up. Purchased panels/metal are NOT prints.
 
 Run AFTER build_robot_v4.py. Exports fabrication STEP/DXF, printable fixtures,
 the complete framed STEP and a machine-readable bill of parts. Millimetres.
@@ -72,12 +72,19 @@ def design():
     # A rigid 57-mm dummy is used only with motors off, then removed.
     fixtures['alignment_cube']=(B(57,57,57,(0,0,28.5)),1)
     coupon=B(58,28,12,(0,0,6))
-    for x,dd in ((-20,8.2),(0,8.3),(20,8.4)):
+    bar=d.P['lock_bar_mm']
+    for x,dd in ((-20,bar+.2),(0,bar+.3),(20,bar+.4)):
         coupon=coupon.cut(B(dd,dd,14,(x,0,6)))
     fixtures['square_fit_coupon']=(coupon.clean(),1)
-    # Fixed insertion depth is measured from the printed plate front (z=5).
-    jig=B(50,50,8,(0,0,4)).cut(C(22,-1,9))
-    for y in (-19.1,19.1):jig=jig.cut(C(3.3,-1,9,origin=(0,y,0)))
+    # Fixed insertion depth is measured from the printed plate front (z=5):
+    # gauge thickness = plate front (5) + pin engagement below the cube face.
+    # Pockets clear the pad bosses (strip: (0,+-14.5) 8x4; D: corners 8x8).
+    t=5+d.P['pin_engagement_mm']
+    jig=B(50,50,t,(0,0,t/2)).cut(C(22,-1,t+1))
+    for y in (-19.1,19.1):jig=jig.cut(C(3.3,-1,t+1,origin=(0,y,0)))
+    for y in (-d.P['strip_pad_y_mm'],d.P['strip_pad_y_mm']):jig=jig.cut(B(d.P['strip_pad_mm'][0]+.6,d.P['strip_pad_mm'][1]+.6,t+2,(0,y,t/2)))
+    for x in (-19.1,19.1):
+        for y in (-19.1,19.1):jig=jig.cut(B(8.6,8.6,t+2,(x,y,t/2)))
     fixtures['pin_depth_gauge']=(jig.clean(),1)
     return panels,metal,prints,fixtures
 
@@ -109,7 +116,7 @@ def flat_dxf(name,shape,axis):
 def build():
     panels,metal,prints,fixtures=design()
     for sub in ('cut','print','jigs'):(OUT/sub).mkdir(parents=True,exist_ok=True)
-    info={'revision':'V4 assembly Rev B','source_commit':'b37de3e9','integration_base_commit':'d8c21f49c8be001da35f6dc10457c168cfa5b99a','units':'mm','physical_validation':False,'parts':{}}
+    info={'revision':'V4 assembly Rev C','source_commit':'b37de3e9','integration_base_commit':'83ade39d35a54d3a644a2fec932033650a53e135','units':'mm','physical_validation':False,'parts':{}}
     for group,parts in [('cut',{**panels,**metal}),('print',prints),('jigs',fixtures)]:
         for name,value in parts.items():
             shape,qty=value if isinstance(value,tuple) else (value,1)
