@@ -477,91 +477,7 @@
     }
   ],
   "print_parts": {
-    "bearing_front_cap_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_front_cap_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_housing_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_housing_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_rear_cap_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_rear_cap_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "carriage_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "carriage_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "center_recessed": {
-      "valid": true,
-      "solids": 1
-    },
-    "crank": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_center": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_core": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_corner": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_edge": {
-      "valid": true,
-      "solids": 1
-    },
-    "drive_plate_2pin": {
-      "valid": true,
-      "solids": 1
-    },
     "link": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_carriage": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_crank": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_guide": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_link": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_servo_mount": {
-      "valid": true,
-      "solids": 1
-    },
-    "rail_support": {
       "valid": true,
       "solids": 1
     },
@@ -573,29 +489,121 @@
       "valid": true,
       "solids": 1
     },
-    "shaft_hub_hollow": {
+    "cube_edge": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_link": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_servo_clamp": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_center": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_housing_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_rear_cap_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "rail_support": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_housing_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_front_cap_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_rear_cap_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_guide": {
+      "valid": true,
+      "solids": 1
+    },
+    "carriage_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "center_recessed": {
       "valid": true,
       "solids": 1
     },
     "socket_coupon": {
       "valid": true,
       "solids": 1
+    },
+    "servo_clamp": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_corner": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_crank": {
+      "valid": true,
+      "solids": 1
+    },
+    "carriage_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_servo_mount": {
+      "valid": true,
+      "solids": 1
+    },
+    "crank": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_core": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_front_cap_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_carriage": {
+      "valid": true,
+      "solids": 1
+    },
+    "shaft_hub_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "drive_plate_2pin": {
+      "valid": true,
+      "solids": 1
     }
   },
   "cube_assembled_collisions": [],
   "lock_cube_collisions": [],
-  "lock_to_D_edge_clearance_mm": 2.8589357775095063,
+  "lock_to_D_edge_clearance_mm": 3.0710678118654693,
   "nominal_lock_to_edge_wall_mm": 5.699999999999999,
-  "lock_to_hollow_diagonal_clearance_mm": 0.3431457505076194,
+  "lock_to_hollow_diagonal_clearance_mm": 0.5931457505076194,
   "lock_hollow_samples": [
     {
       "shift_mm": 0,
-      "clearance_mm": 0.34314575050761925,
+      "clearance_mm": 0.5931457505076194,
       "collisions": []
     },
     {
       "shift_mm": 24,
-      "clearance_mm": 0.34314575050761925,
+      "clearance_mm": 0.5931457505076194,
       "collisions": []
     }
   ],

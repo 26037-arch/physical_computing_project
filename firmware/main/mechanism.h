@@ -43,4 +43,6 @@ class Mechanism {
 static const uint8_t SERVO_PINS[4] = {8, 9, 10, 11};     // F·B 서보 2개 같은 신호, R·L 2개 같은 신호, D 서보, 막대 서보
 static const uint8_t SENS_PINS[4] = {12, 13, A0, A1};    // F·B / R·L 결합 스위치 직렬 (둘 다 눌림 = LOW), D 스위치, 막대 스위치. 풀업
 static const uint8_t SERVO_ENGAGED_DEG = 0, SERVO_RETRACTED_DEG = 180;   // 크랭크 r12 → 24 mm (막대는 r15 → 30 mm)
+// 제작 보강 Rev A: 프레임/체결/가이드 보강, 막대 끝 -23.8 mm·중공 ID12.5.
+// 캐리지 행정24/30과 위 서보 각도는 동일(막대의 캐리지 내 고정 위치로 끝을 조절).
 static const uint16_t SERVO_TRAVEL_MS = 400;      // 이송 명목 시간

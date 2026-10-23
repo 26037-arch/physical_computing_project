@@ -13,9 +13,9 @@
   const MODELS = (typeof CubeModels !== 'undefined') ? CubeModels : { params: {}, parts: {} };
   // CAD 매개변수 (models/robot_v4/parameters.json). 값이 없으면 docs/HARDWARE_V4.md 의 기본값.
   const P = Object.assign({ cube_mm: 57, piece_mm: 18.8, pitch_mm: 19.1, retract_mm: 24, pin_mm: 3, socket_mm: 3.4,
-    socket_depth_mm: 4.2, pin_engagement_mm: 3, plate_thickness_mm: 6, recess_depth_mm: 8, lock_bar_mm: 8, lock_socket_mm: 8.4,
-    lock_stroke_mm: 30, lock_crank_r_mm: 15, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195], hollow_id_mm: 12, hollow_od_mm: 17,
-    motor_offset_mm: 60 }, MODELS.params || {});
+    socket_depth_mm: 4.2, pin_engagement_mm: 3, plate_thickness_mm: 6, recess_depth_mm: 2, lock_bar_mm: 8, lock_socket_mm: 8.4,
+    lock_stroke_mm: 30, lock_crank_r_mm: 15, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195], hollow_id_mm: 12.5, hollow_od_mm: 17,
+    motor_offset_mm: 60, lock_tip_y_mm: -23.8, lock_servo_axis: [22, 24, 255] }, MODELS.params || {});
   const UNIT = P.pitch_mm;                 // 1 단위 = 조각 중심 간격 = 19.1 mm
   const mm = (x) => x / UNIT;
   const HALF = mm(P.cube_mm / 2);          // 큐브 중심 → 면 거리 (28.5 mm): 헤드 배치용
@@ -140,6 +140,13 @@
     servo_mount:       { offset: [22, -44, 175],   color: 0x4a525f },
   };
   const OFF = P.print_offsets || {};
+  // Rev A: exact named meshes include the direct/hollow suffixes.
+  const CADG = {};
+  function cadMesh(name, color = 0x7d8898) {
+    if (!MODELS.parts[name]) return null;
+    if (!CADG[name]) CADG[name] = stlGeometry(MODELS.parts[name].b64, OFF[name]);
+    return new THREE.Mesh(CADG[name], new THREE.MeshStandardMaterial({ color, roughness: 0.6 }));
+  }
   const GEO = {};
   for (const k of Object.keys(HEAD)) if (MODELS.parts && MODELS.parts[k]) GEO[k] = stlGeometry(MODELS.parts[k].b64, OFF[k] || HEAD[k].offset);
   const MAT = {};
@@ -209,12 +216,16 @@
     else frame.add(boxAt(60, 6, 190, 0, -54, 95, MAT.rail_support));
     frame.add(boxAt(12, 8, 180, 0, -47, 95, railMat));
     if (GEO.servo_mount) frame.add(new THREE.Mesh(GEO.servo_mount, MAT.servo_mount));
+    const servoCap = cadMesh('servo_clamp'); if (servoCap) frame.add(servoCap);
     frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [-10, -48, 150], servoMat));
     // 이송부(캐리지): 하우징·캡·캐리지·MGN12H 블록·추력 베어링·모터. 크랭크가 국소 +z 로 밀어낸다
     const carriage = new THREE.Group(); face.add(carriage);
-    for (const k of ['bearing_housing', 'bearing_front_cap', 'bearing_rear_cap', 'carriage']) if (!hollow && GEO[k]) carriage.add(new THREE.Mesh(GEO[k], MAT[k]));
-    if (hollow || !GEO.carriage) { carriage.add(boxAt(60, 6, 120, 0, -35, 92, MAT.carriage)); carriage.add(boxAt(hollow ? 116 : 60, 58, 6, hollow ? 28 : 0, -3, 101, MAT.carriage)); carriage.add(boxAt(12, 19, 10, 22, -41.5, 147, MAT.carriage)); }
-    if (hollow || !GEO.bearing_housing) { carriage.add(boxAt(34, 34, hollow ? 19 : 17, 0, 0, hollow ? 44.5 : 43.5, MAT.bearing_housing)); carriage.add(boxAt(60, 6, 17, 0, -29, 43.5, MAT.bearing_housing)); }
+    const suffix = hollow ? '_hollow' : '_direct';
+    for (const k of ['bearing_housing', 'bearing_front_cap', 'bearing_rear_cap', 'carriage']) {
+      const mesh = cadMesh(k + suffix); if (mesh) carriage.add(mesh);
+    }
+    if (!MODELS.parts['carriage' + suffix]) { carriage.add(boxAt(60, 6, 120, 0, -35, 92, MAT.carriage)); carriage.add(boxAt(hollow ? 116 : 60, 58, 6, hollow ? 28 : 0, -3, 101, MAT.carriage)); }
+    if (!MODELS.parts['bearing_housing' + suffix]) carriage.add(boxAt(44, 44, hollow ? 23 : 17, 0, 0, hollow ? 46.5 : 43.5, MAT.bearing_housing));
     carriage.add(boxAt(27, 4.9, 45.4, 0, -40.45, 84, alumMat));                 // MGN12H 블록 윗판
     for (const bx of [-9.85, 9.85]) carriage.add(boxAt(7.3, 6.1, 45.4, bx, -45.95, 84, alumMat));
     const motor = new THREE.Group(); carriage.add(motor);
@@ -233,7 +244,8 @@
     else { spin.add(boxAt(50, 50, 6, 0, 0, 8, MAT.drive_plate_2pin)); }
     for (const [px, py] of PIN_XY) spin.add(cylZ(P.pin_mm, -P.pin_engagement_mm, 13, steelMat, px, py, 12));   // Ø3×16 핀 2개
     for (const sx of [-pitch, pitch]) for (const sy of [-pitch, pitch]) spin.add(boxAt(8, 8, 0.8, sx, sy, 0.4, padMat));
-    if (GEO.shaft_hub) spin.add(new THREE.Mesh(GEO.shaft_hub, MAT.shaft_hub));
+    const hubMesh = cadMesh(hollow ? 'shaft_hub_hollow' : 'shaft_hub');
+    if (hubMesh) spin.add(hubMesh);
     else { spin.add(boxAt(32, 32, 5, 0, 0, 13.5, MAT.shaft_hub)); spin.add(cylZ(24, 16, 28, MAT.shaft_hub)); }
     if (hollow) {
       spin.add(cylZ(P.hollow_od_mm, 16, 98, steelMat));                         // 중공 회전축 (안 Ø12 로 막대 통과)
@@ -258,13 +270,14 @@
     g.position.copy(n.clone().multiplyScalar(HALF));
     scene.add(g);
     const frame = new THREE.Group(); g.add(frame);
-    frame.add(boxAt(30, 30, 30, 0, 0, 175, MAT.rail_support));                   // 출력 가이드 블록 (사각 구멍 8.3)
-    frame.add(boxAt(8, 30, 60, 0, -22, 240, MAT.rail_support));                  // 서보 받침
+    for (const name of ['lock_guide', 'lock_servo_mount', 'lock_servo_clamp']) {
+      const mesh = cadMesh(name); if (mesh) frame.add(mesh);
+    }
     const carriage = new THREE.Group(); g.add(carriage);
-    carriage.add(boxAt(P.lock_bar_mm, P.lock_bar_mm, 230, 0, 0, 104, lockMat));  // 막대: 국소 z −11(소켓 바닥) ~ 219
-    carriage.add(boxAt(24, 24, 20, 0, 0, 214, MAT.carriage));                    // 막대 캐리지
-    carriage.add(boxAt(12, 19, 10, 22, 0, 204, MAT.carriage));                   // 링크 러그
-    const crank = makeCrank(frame, [22, 0, 255], P.lock_crank_r_mm, 204, carriage);
+    const lockTip = -P.lock_tip_y_mm - P.cube_mm / 2;
+    carriage.add(boxAt(P.lock_bar_mm, P.lock_bar_mm, 230, 0, 0, lockTip + 115, lockMat));
+    const lockCar = cadMesh('lock_carriage'); if (lockCar) carriage.add(lockCar);
+    const crank = makeCrank(frame, P.lock_servo_axis, P.lock_crank_r_mm, 204, carriage);
     return { group: g, frame, carriage, crank };
   })();
   // 유닛 번호(mechanism.js) → 크랭크 목록

@@ -19,8 +19,8 @@ OUT = ROOT / 'models' / 'robot_v4'
 box, cyl, ball, rounded, fuse = v2.box, v2.cyl, v2.ball, v2.rounded, v2.fuse
 P = dict(v2.P, lock_bar_mm=8., lock_socket_mm=8.4, lock_stroke_mm=30.,
          lock_crank_r_mm=15., lock_length_mm=230., recess_depth_mm=2.,
-         lock_tip_y_mm=-23.5,
-         hollow_id_mm=12., hollow_od_mm=17., hollow_length_mm=82.,
+         lock_tip_y_mm=-23.8,
+         hollow_id_mm=12.5, hollow_od_mm=17., hollow_length_mm=82.,
          crank_r_mm=12., link_mm=36., servo_axis=[22., -44., 195.],
          rail_front_chamfer_mm=1.6,
          lock_servo_axis=[22., 24., 255.], pin_positions=[[0., 19.1], [0., -19.1]])
@@ -39,6 +39,11 @@ def cube_parts():
     # Holes are WORLD U/D. Only the recessed centre template faces -Z.
     for sign in (-1, 1):
         parts['cube_core'] = parts['cube_core'].cut(box(8.3, 9, 8.3, (0, sign*15.5, 0)))
+        # Square pockets remove V2's outer U/D insert seats. Move those two
+        # seats BELOW the key pocket instead of threading directly into PLA.
+        axis=(0,sign,0)
+        parts['cube_core']=parts['cube_core'].cut(cyl(2.5,5.5,11.1,axis))
+        parts['cube_core']=parts['cube_core'].cut(cyl(4.6,7,11.05,axis))
     # See HARDWARE_V4 section 2: an 8-mm recess cuts through V2 retention feet.
     # Retain the V2 track envelope, a 2-mm recess and a rotationally symmetric
     # plate rim so the U/D centre may remain keyed during a Y-layer turn.
@@ -83,12 +88,34 @@ def drive_plate(pitch):
 
 def servo_mount():
     # Output shaft is near the FRONT of the body, not at its Z centre.
-    s = fuse(box(49, 28, 4, (-4, -44, 228)),
+    s = fuse(box(49, 26, 4, (-4, -44, 228)),
              box(49, 3, 44, (-4, -55.5, 206)),
              box(49, 3, 44, (-4, -32.5, 206)))
     for y in (-55.5, -32.5):
         for x in (-20, 12):
             s = s.cut(cyl(3.4, 182, 231, origin=(x, y, 0)))
+    # A positively captured body: three fixed sides plus a removable X cap.
+    # Do not rely on glue or an unmodelled spline in a printed crank.
+    s = s.fuse(box(5.05, 20, 49, (-27.475, -44, 209.5)))
+    for y in (-55.5, -32.5):
+        s = s.fuse(box(49, 3, 50, (-4, y, 209)))
+    for a,b in ((179,184.65),(225.95,234)):
+        s=s.fuse(box(48,20,b-a,(-6,-44,(a+b)/2)))
+    # Overlap the rear X plate by a face, not merely along its lower edge.
+    s=s.fuse(box(48,8,9,(-6,-30,181.5)))
+    for y,z in ((-30,181),(-44,231)):
+        s=s.cut(cyl(3.4,-31,23,(1,0,0),(0,y,z)))
+    for y in (-55.5,-32.5):
+        for x in (-20,12):
+            s=s.cut(cyl(3.4,172,235,origin=(x,y,0)))
+    return s.clean()
+
+
+def servo_clamp():
+    s=box(4,26,55,(20.3,-44,206.5)).fuse(box(4,8,8,(20.3,-30,181)))
+    s=s.cut(cyl(10,17,24,(1,0,0),(0,-44,195)))
+    for y,z in ((-30,181),(-44,231)):
+        s=s.cut(cyl(3.4,17,24,(1,0,0),(0,y,z)))
     return s.clean()
 
 
@@ -111,6 +138,12 @@ def crank_link(theta=0, lock=False):
     radius = P['lock_crank_r_mm'] if lock else P['crank_r_mm']
     x, y, z = P['lock_servo_axis'] if lock else P['servo_axis']
     crank = arm(radius, 6, 4, x+4, y, z).rotate((0, y, z), (1, y, z), theta)
+    disk=cyl(16,x+2,x+6,(1,0,0),(0,y,z))
+    disk=disk.cut(cyl(3.2,x+1,x+7,(1,0,0),(0,y,z)))
+    for dy in (-5,5):
+        disk=disk.cut(cyl(2.2,x+1,x+7,(1,0,0),(0,y+dy,z)))
+    disk=disk.rotate((0,y,z),(1,y,z),theta)
+    crank=crank.fuse(disk).clean()
     a = math.radians(theta)
     ey, ez = y+radius*math.sin(a), z-radius*math.cos(a)
     sz = slider_z(theta, radius, z)
@@ -152,21 +185,36 @@ def module_design(hollow=False):
     support = support.cut(box(43.9, 22, 43, (-3.5, -44, 205.3)))
     for z in range(15, 176, 25):
         support = support.cut(cyl(3.4, -58, -50, (0, 1, 0), (0, 0, z)))
-    for x, z in itertools.product((-24, 24), (8, 174)):
+    for x, z in itertools.product((-20, 20), (25, 120)):
         support = support.cut(cyl(5.4, -58, -50, (0, 1, 0), (x, 0, z)))
+    for x in (18.75,25.25):
+        slot=cq.Workplane('XZ',origin=(x,-50,154.9)).slot2D(8,2.4,90).extrude(8).val()
+        support=support.cut(slot)
+    support=support.cut(box(10,8,10,(27,-54,186)))
     heads['rail_support'] = support.clean()
     heads['servo_mount'] = servo_mount()
+    heads['servo_clamp'] = servo_clamp()
     heads['crank'], heads['link'] = crank_link()
     hardware['servo_MG996R'] = box(42.9, 19.7, 40.7, (-3.5, -44, 205.3))
     hardware['servo_output'] = cyl(6, 17.95, 24, (1, 0, 0), (0, -44, 195))
     hardware['engage_switch'] = box(12.8, 6.5, 5.8, (22, -47.75, 154.9))
+    if not hollow:
+        hardware['rear_thrust_F8_16M']=cyl(16,54,59).cut(cyl(8.05,53,60))
+        hardware['shaft_collar_8']=cyl(16,59,66).cut(cyl(8.05,58,67))
     if hollow:
-        heads['shaft_hub'] = heads['shaft_hub'].cut(cyl(17.15, 10, 29)).clean()
+        hub=heads['shaft_hub'].fuse(cyl(32,16,28)).cut(cyl(17.15,10,29))
+        for axis in ((1,0,0),(0,1,0)):
+            hub=hub.cut(cyl(4.3,0,17,axis,(0,0,22)))
+            hub=hub.cut(cyl(5.6,12,17,axis,(0,0,22)))
+        heads['shaft_hub']=hub.clean()
         h = fuse(box(44, 44, 23, (0, 0, 46.5)),
                  box(44, 10, 23, (0, -27, 46.5)), box(60, 6, 23, (0, -29, 46.5)))
         h = h.cut(cyl(18.2, 34, 59)).cut(cyl(35.15, 34.9, 45)).cut(cyl(35.15, 48, 58.1))
         for x, y in itertools.product((-17, 17), repeat=2):
             h = h.cut(cyl(2.5, 34, 59, origin=(x, y, 0)))
+            h=h.cut(cyl(4.6,34.9,39,origin=(x,y,0))).cut(cyl(4.6,54,58.1,origin=(x,y,0)))
+        for x,z in itertools.product((-24,24),(38.5,48.5)):
+            h=h.cut(cyl(3.4,-33,-25,(0,1,0),(x,0,z)))
         heads['bearing_housing'] = h.clean()
         for name, z in (('bearing_front_cap', 34), ('bearing_rear_cap', 59)):
             s = box(44, 44, 2, (0, 0, z)).cut(cyl(18.2, z-2, z+2))
@@ -175,12 +223,13 @@ def module_design(hollow=False):
             heads[name] = s.clean()
         hardware = {k: s for k, s in hardware.items()
                     if not k.startswith(('spindle_hollow_', 'bearing_6001_', 'front_thrust_', 'rear_thrust_'))}
-        hardware['spindle_hollow_17x12'] = cyl(17, 16, 98).cut(cyl(12, 15, 99))
+        hardware['spindle_hollow_17x12'] = cyl(17, 16, 98).cut(cyl(P['hollow_id_mm'], 15, 99))
         for i, z in enumerate((35, 48)):
             hardware[f'bearing_6003_{i}'] = cyl(35, z, z+10).cut(cyl(17.05, z-1, z+11))
         for name, a, b in (('front', 28, 33), ('rear', 60, 65)):
             hardware[name+'_thrust_17x30'] = cyl(30, a, b).cut(cyl(17.05, a-1, b+1))
         hardware['pulley_40T_driven'] = hardware['pulley_40T_driven'].cut(cyl(17.05, 75, 95))
+        hardware['shaft_collar_17']=cyl(28,65,73).cut(cyl(17.05,64,74))
     return heads, hardware
 
 
@@ -188,15 +237,12 @@ def lock_design():
     # Local D z=-5 is world y=-23.5. Chamfer ONLY the leading end.
     tip = -P['lock_tip_y_mm']-P['cube_mm']/2
     bar = cq.Workplane('XY').box(8, 8, P['lock_length_mm']).faces('<Z').edges().chamfer(1).val().translate((0, 0, tip+P['lock_length_mm']/2))
-    guide = fuse(box(24, 24, 12, (0, 0, 180)), box(24, 24, 12, (0, 0, 190)),
-                 box(6, 24, 65, (-15, 0, 206.5)),
-                 box(22, 63, 6, (-23, -19.5, 236)),
-                 box(4, 6, 54, (-32, -48, 212)),
-                 box(4, 6, 5, (-28, -48, 187.5)),
-                 box(36, 3, 57, (0, 39.5, 261.5)),
-                 box(6, 41, 6, (-15, 20.5, 236)))
+    guide = fuse(box(28,28,22,(0,0,185)),box(18,28,22,(-21,0,185)))
     for z in (180, 190):
         guide = guide.cut(box(8.3, 8.3, 14, (0, 0, z)))
+    for y,z in itertools.product((-9,9),(180,190)):
+        guide=guide.cut(cyl(4.4,-31,15,(1,0,0),(0,y,z)))
+    # Guide is bolted to a metal spine; blind slots do not establish retention.
     # Clamp grips the bar below the lower guide, translated with the slider.
     carriage = fuse(box(18, 18, 10, (0, 0, 204)), box(8, 31, 8, (0, 11.5, 204)),
                     box(26, 10, 8, (9, 24, 204)),
@@ -204,17 +250,19 @@ def lock_design():
     carriage = carriage.cut(box(8.1, 8.1, 12, (0, 0, 204)))
     carriage = carriage.cut(cyl(3, 15, 34, (1, 0, 0), (0, 24, 204)))
     carriage = carriage.cut(cyl(2.5, 3, 11, (1, 0, 0), (0, 0, 204)))
+    carriage = carriage.cut(cyl(4.6,5,10,(1,0,0),(0,0,204)))
     crank, link = crank_link(lock=True)
     heads = dict(lock_guide=guide.clean(), lock_carriage=carriage.clean(),
                  lock_servo_mount=servo_mount().translate((0, 68, 60)),
+                 lock_servo_clamp=servo_clamp().translate((0,68,60)),
                  lock_crank=crank, lock_link=link)
     hardware = dict(lock_bar=bar, lock_servo_MG996R=box(42.9, 19.7, 40.7, (-3.5, 24, 265.3)),
                     lock_engage_switch=box(12.8, 6.5, 5.8, (22, 14.75, 211.9)))
     return heads, hardware
 
 
-FIXED = {'rail_support', 'servo_mount', 'rail_MGN12', 'servo_MG996R', 'servo_output', 'engage_switch'}
-LOCK_FIXED = {'lock_guide', 'lock_servo_mount', 'lock_servo_MG996R', 'lock_engage_switch'}
+FIXED = {'rail_support', 'servo_mount', 'servo_clamp', 'rail_MGN12', 'servo_MG996R', 'servo_output', 'engage_switch'}
+LOCK_FIXED = {'lock_guide', 'lock_servo_mount', 'lock_servo_clamp', 'lock_servo_MG996R', 'lock_engage_switch'}
 
 
 def module_pose(module, shift):
@@ -239,7 +287,7 @@ def make_design():
 def printable_parts(cubes, modules, lock):
     qty = dict(cube_core=1, cube_center=4, center_recessed=2, cube_edge=12, cube_corner=8, socket_coupon=1)
     parts = {n: (s, qty[n]) for n, s in cubes.items()}
-    shared = {'drive_plate_2pin', 'rail_support', 'servo_mount', 'crank', 'link'}
+    shared = {'drive_plate_2pin', 'rail_support', 'servo_mount', 'servo_clamp', 'crank', 'link'}
     for hollow, (heads, _) in modules.items():
         for n, s in heads.items():
             if n in shared:

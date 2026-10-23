@@ -14,8 +14,8 @@
   "lock_crank_r_mm": 15.0,
   "lock_length_mm": 230.0,
   "recess_depth_mm": 2.0,
-  "lock_tip_y_mm": -23.5,
-  "hollow_id_mm": 12.0,
+  "lock_tip_y_mm": -23.8,
+  "hollow_id_mm": 12.5,
   "hollow_od_mm": 17.0,
   "hollow_length_mm": 82.0,
   "crank_r_mm": 12.0,
@@ -175,9 +175,14 @@
       0.7999999999999998
     ],
     "servo_mount": [
-      -4.0,
-      -44.0,
-      184.0
+      -4.750000050000001,
+      -41.50000000000007,
+      176.9999999
+    ],
+    "servo_clamp": [
+      20.3,
+      -41.5,
+      177.0
     ],
     "crank": [
       26.0,
@@ -216,7 +221,7 @@
     ],
     "lock_guide": [
       -8.0,
-      -5.0,
+      0.0,
       174.0
     ],
     "lock_carriage": [
@@ -225,9 +230,14 @@
       199.0
     ],
     "lock_servo_mount": [
-      -4.0,
-      24.0,
-      244.0
+      -4.750000050000001,
+      26.499999999999922,
+      236.9999999
+    ],
+    "lock_servo_clamp": [
+      20.3,
+      26.5,
+      237.0
     ],
     "lock_crank": [
       26.0,
@@ -493,6 +503,34 @@
       "qty": 5,
       "module": "all"
     },
+    "rear_thrust_F8_16M_direct": {
+      "size": [
+        16.0,
+        16.0,
+        5.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        56.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "shaft_collar_8_direct": {
+      "size": [
+        16.0,
+        16.0,
+        7.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        62.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
     "motor_NEMA17_offset_hollow": {
       "size": [
         42.300000000000004,
@@ -633,16 +671,30 @@
       "qty": 1,
       "module": "D"
     },
-    "lock_bar": {
+    "shaft_collar_17_hollow": {
       "size": [
-        8.0,
-        8.0,
-        230.0
+        28.0,
+        28.0,
+        8.0
       ],
       "center": [
         0.0,
         0.0,
-        110.0
+        69.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "lock_bar": {
+      "size": [
+        8.0,
+        8.0,
+        230.00000000000003
+      ],
+      "center": [
+        0.0,
+        0.0,
+        110.3
       ],
       "qty": 1,
       "module": "LOCK"

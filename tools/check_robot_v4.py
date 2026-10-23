@@ -6,6 +6,7 @@ module, bolted mounting faces, and the bar clamp are not cross-module pairs.
 import itertools
 import json
 import math
+import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
 
 import cadquery as cq
@@ -46,7 +47,7 @@ def load_design():
     exported = {p.stem: cq.importers.importStep(str(p)).val() for p in (d.OUT/'print').glob('*.step')}
     for n in cubes:
         cubes[n] = exported[n]
-    shared = {'drive_plate_2pin', 'rail_support', 'servo_mount', 'crank', 'link'}
+    shared = {'drive_plate_2pin', 'rail_support', 'servo_mount', 'servo_clamp', 'crank', 'link'}
     for hollow, (heads, _) in modules.items():
         for n in heads:
             heads[n] = exported[n if n in shared else d.export_name(n, hollow)]
@@ -95,7 +96,9 @@ def main():
     # Both signs of all three axes. Keyed U/D centres remain fixed to the core
     # during Y turns; their spherical track is the sliding interface.
     jobs = list(itertools.product(range(3), (-1, 1), range(15, 91, 15)))
-    with ProcessPoolExecutor(max_workers=3, initializer=init_layer_worker) as pool:
+    # OCC starts native threads before this point; Linux fork can deadlock its
+    # inherited thread pool. Spawn gives each geometric worker a fresh runtime.
+    with ProcessPoolExecutor(max_workers=3, mp_context=multiprocessing.get_context('spawn'), initializer=init_layer_worker) as pool:
         for sample in pool.map(layer_sample, jobs):
             record(f"layer {sample['axis']} {sample['side']} {sample['angle_deg']}", sample['collisions'])
             report['cube_layer_samples'].append(sample)

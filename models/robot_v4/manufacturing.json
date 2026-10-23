@@ -5,15 +5,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 20067.5231,
+      "volume_mm3": 19957.1511,
       "size_mm": [
         34.09105454514429,
         33.38367864690768,
         34.091054545144324
       ],
       "mesh_cleanup": {
-        "triangles_before": 2520,
-        "triangles_after": 2520,
+        "triangles_before": 2856,
+        "triangles_after": 2856,
         "weld_mm": 1e-05
       }
     },
@@ -149,15 +149,15 @@
       "qty": 5,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 66364.9404,
+      "volume_mm3": 65717.3737,
       "size_mm": [
         60.0,
         6.0,
         190.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 1928,
-        "triangles_after": 1928,
+        "triangles_before": 2296,
+        "triangles_after": 2296,
         "weld_mm": 1e-05
       }
     },
@@ -213,15 +213,31 @@
       "qty": 5,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 16237.9949,
+      "volume_mm3": 32631.2362,
       "size_mm": [
-        49.0,
-        28.0,
-        46.0
+        50.5000001,
+        31.00000000000015,
+        57.00000019999999
       ],
       "mesh_cleanup": {
-        "triangles_before": 788,
-        "triangles_after": 788,
+        "triangles_before": 1592,
+        "triangles_after": 1592,
+        "weld_mm": 1e-05
+      }
+    },
+    "servo_clamp": {
+      "qty": 5,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5517.2071,
+      "size_mm": [
+        4.0,
+        31.0,
+        57.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 544,
+        "triangles_after": 544,
         "weld_mm": 1e-05
       }
     },
@@ -229,15 +245,15 @@
       "qty": 5,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 336.7575,
+      "volume_mm3": 866.646,
       "size_mm": [
         4.0,
-        6.0,
-        18.0
+        16.0,
+        23.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 516,
-        "triangles_after": 516,
+        "triangles_before": 924,
+        "triangles_after": 924,
         "weld_mm": 1e-05
       }
     },
@@ -261,15 +277,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 6149.6258,
+      "volume_mm3": 10246.8551,
       "size_mm": [
-        32.0,
-        32.0,
+        32.0000002,
+        32.0000002,
         17.000000200000002
       ],
       "mesh_cleanup": {
-        "triangles_before": 2166,
-        "triangles_after": 2166,
+        "triangles_before": 2478,
+        "triangles_after": 2478,
         "weld_mm": 1e-05
       }
     },
@@ -277,15 +293,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 36216.3881,
+      "volume_mm3": 35623.7581,
       "size_mm": [
         60.0,
         54.0,
         23.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 1224,
-        "triangles_after": 1224,
+        "triangles_before": 3256,
+        "triangles_after": 3256,
         "weld_mm": 1e-05
       }
     },
@@ -341,15 +357,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 36332.42,
+      "volume_mm3": 22912.2857,
       "size_mm": [
-        52.0,
-        92.0,
-        116.0
+        44.0,
+        28.0,
+        22.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 94,
-        "triangles_after": 94,
+        "triangles_before": 720,
+        "triangles_after": 720,
         "weld_mm": 1e-05
       }
     },
@@ -357,15 +373,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 5779.4706,
+      "volume_mm3": 5732.6295,
       "size_mm": [
         38.0,
         38.0,
         10.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 586,
-        "triangles_after": 586,
+        "triangles_before": 754,
+        "triangles_after": 754,
         "weld_mm": 1e-05
       }
     },
@@ -373,15 +389,31 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 16237.9949,
+      "volume_mm3": 32631.2362,
       "size_mm": [
-        49.0,
-        28.0,
-        46.0
+        50.5000001,
+        31.000000000000153,
+        57.00000020000002
       ],
       "mesh_cleanup": {
-        "triangles_before": 788,
-        "triangles_after": 788,
+        "triangles_before": 1592,
+        "triangles_after": 1592,
+        "weld_mm": 1e-05
+      }
+    },
+    "lock_servo_clamp": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5517.2071,
+      "size_mm": [
+        4.0,
+        31.0,
+        57.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 544,
+        "triangles_after": 544,
         "weld_mm": 1e-05
       }
     },
@@ -389,15 +421,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 408.7575,
+      "volume_mm3": 938.646,
       "size_mm": [
         4.0,
-        6.0,
-        21.0
+        16.0,
+        26.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 516,
-        "triangles_after": 516,
+        "triangles_before": 924,
+        "triangles_after": 924,
         "weld_mm": 1e-05
       }
     },
@@ -674,6 +706,34 @@
       "qty": 5,
       "module": "all"
     },
+    "rear_thrust_F8_16M_direct": {
+      "size": [
+        16.0,
+        16.0,
+        5.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        56.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "shaft_collar_8_direct": {
+      "size": [
+        16.0,
+        16.0,
+        7.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        62.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
     "motor_NEMA17_offset_hollow": {
       "size": [
         42.300000000000004,
@@ -814,16 +874,30 @@
       "qty": 1,
       "module": "D"
     },
-    "lock_bar": {
+    "shaft_collar_17_hollow": {
       "size": [
-        8.0,
-        8.0,
-        230.0
+        28.0,
+        28.0,
+        8.0
       ],
       "center": [
         0.0,
         0.0,
-        110.0
+        69.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "lock_bar": {
+      "size": [
+        8.0,
+        8.0,
+        230.00000000000003
+      ],
+      "center": [
+        0.0,
+        0.0,
+        110.3
       ],
       "qty": 1,
       "module": "LOCK"

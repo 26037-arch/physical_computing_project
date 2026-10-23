@@ -1,5 +1,10 @@
 # 실제 제작은 V4 문서에서 시작하세요
 
+- 상세 제작 PDF(39쪽): [docs/BUILD_V4_상세제작설명서.pdf](docs/BUILD_V4_상세제작설명서.pdf) — 첫 장은 번호가 있는 3D 부품 지도, 이후 조립·체결·배선·오차 검사
+- 본문 원문: [docs/BUILD_V4.md](docs/BUILD_V4.md)
+- 보강 프레임·가공도·지그·부품표: `models/robot_v4/assembly_kit/` (전체 프레임 조립 STEP, 패널/금속판 DXF, 추가 STL, CSV)
+- 출력은 Rev A 부품을 사용하고 V4 Draft 파일과 혼용하지 않습니다. 실물 강도·잠금 유격·뒤집기 마찰은 PDF의 시험표로 확인합니다.
+
 - 기구·절차·핀 배치·장치 목록: [docs/HARDWARE_V4.md](docs/HARDWARE_V4.md) (0절에 장치마다 기능과 추가한 이유)
 - CAD: `tools/build_robot_v4.py` → `models/robot_v4/` (출력 STL, 조립 STEP, parameters.json, 검사 결과)
 - 펌웨어: `firmware/main/` (`mechanism.*` 가 이송·뒤집기·장착을 자동으로 수행, 결합 스위치 확인)
