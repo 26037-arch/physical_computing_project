@@ -1,7 +1,8 @@
 #include "solver.h"
 
-static const uint8_t MAX_DEPTH = 14;      // 안전 한계
-static const uint8_t F2L_EASY_DEPTH = 8;  // 이 깊이 안에 풀리는 슬롯을 먼저 고른다
+static const uint8_t MAX_DEPTH = 14;       // 크로스 안전 한계 (크로스는 항상 8수 이내)
+static const uint8_t F2L_MAX_BOUND = 20;   // F2L 한 쌍 안전 한계 (생성기 전수 검사: 최장 11수)
+static const uint8_t N_MACROS = 27;
 static const char SLOT_NAMES[4][3] = {"FR", "FL", "BL", "BR"};
 
 // 코너 상태(위치*3+방향)의 위치. AVR에서 매번 /3, %3을 계산하지 않는다.
@@ -35,11 +36,7 @@ static uint16_t pllKey(const Cube& c) {
   return ((uint16_t)c.cp[0] << 14) | ((uint16_t)c.cp[1] << 12) | ((uint16_t)c.cp[2] << 10) | ((uint16_t)c.cp[3] << 8) | (c.ep[0] << 6) | (c.ep[1] << 4) | (c.ep[2] << 2) | c.ep[3];
 }
 
-void Solver::tracked(const Cube& c, uint8_t* es, uint8_t* cs) const {
-  for (uint8_t i = 0; i < 4; i++) es[i] = c.edgeState(4 + i);  // DR DF DL DB
-  for (uint8_t i = 0; i < nSlots; i++) { es[4 + i] = c.edgeState(8 + slots[i]); cs[i] = c.cornerState(4 + slots[i]); }
-}
-
+// ======================= Cross =======================
 // h_cross(s) = max over 6 쌍 {a,b} ⊂ {DR,DF,DL,DB} of d_{a,b}(π_a(s), π_b(s)).
 //   각 d_{a,b} 는 두 엣지의 사영 그래프(24×24) 에서의 BFS 거리 → 허용적, 최댓값도 허용적 (docs/MATH.md 4절).
 //   쌍 표는 한 조각 표보다 강하다: d_{a,b} ≥ max(d_a, d_b) 이고 서로 길을 막는 경우를 반영 (표 최댓값 5).
@@ -56,54 +53,14 @@ inline __attribute__((always_inline)) uint8_t Solver::hCross(const uint8_t* es, 
   return h;
 }
 
-// h(s) = max( h_cross(s),  max_{slot∈추적} d_slot(π_corner(s), π_edge(s)) )  — F2L 쌍 표는 D 제외 15수 기준 BFS.
-//   꺼내기 모드: h' = max(유지할 것들의 h, [목표 두 조각 중 하나라도 U층 밖]) — U층 밖이면 최소 1수 필요하므로 허용적.
-uint8_t Solver::heuristic(const uint8_t* es, const uint8_t* cs) const {
-  uint8_t h = hCross(es, 255);
-  for (uint8_t i = 0; i < nPairs; i++) {
-    uint8_t d = pgm_read_byte(pairTable[i] + cs[i] * 24 + es[4 + i]);
-    if (d > h) h = d;
-  }
-  if (mode == MODE_EXTRACT) {  // 마지막 슬롯의 두 조각이 U층(위치 0..3)에 있어야 목표
-    uint8_t l = nSlots - 1;
-    if (cs[l] >= 12 || es[4 + l] >= 8) { if (h < 1) h = 1; }
-  }
-  return h;
-}
-
-uint8_t Solver::hSlot(const Cube& c, uint8_t s) const {
-  return pgm_read_byte(&F2L_PAIR[s][c.cornerState(4 + s) * 24 + c.edgeState(8 + s)]);
-}
-
 // 자식 n' 의 IDA* 조건  g+1+h(n') ≤ bound  ⇔  h(n') ≤ bound-g-1 =: limit.
-// h 는 거리표들의 최댓값이므로 거리표 중 하나라도 limit 를 넘으면 최댓값도 넘는다 → 나머지 조각은 갱신할 필요가 없다.
-inline __attribute__((always_inline)) bool Solver::childFits(const uint8_t* es, const uint8_t* cs,
-    uint8_t* es2, uint8_t* cs2, uint8_t m, uint8_t limit, uint8_t& h) const {
+// h 는 거리표들의 최댓값이므로 거리표 중 하나라도 limit 를 넘으면 최댓값도 넘는다 → 조기 탈출.
+inline __attribute__((always_inline)) bool Solver::childFits(const uint8_t* es, uint8_t* es2, uint8_t m, uint8_t limit, uint8_t& h) const {
   const uint8_t* et = EDGE_TO[m];
   const uint8_t* ed = EDGE_DO[m];
   for (uint8_t i = 0; i < 4; i++) es2[i] = eStep(es[i], et, ed);
   h = hCross(es2, limit);
-  if (h > limit) return false;
-  const uint8_t* ct = CORNER_TO[m];
-  const uint8_t* cd = CORNER_DO[m];
-  for (uint8_t i = 0; i < nPairs; i++) {
-    uint8_t e = eStep(es[4 + i], et, ed), c = cStep(cs[i], ct, cd);
-    es2[4 + i] = e; cs2[i] = c;
-    const uint8_t* row = pairTable[i] + c * 24;
-    uint8_t d = pgm_read_byte(row + e);
-    if (d > limit) return false;
-    if (d > h) h = d;
-  }
-  if (mode == MODE_EXTRACT) {
-    uint8_t l = nSlots - 1;
-    es2[4 + l] = eStep(es[4 + l], et, ed);
-    cs2[l] = cStep(cs[l], ct, cd);
-    if (cs2[l] >= 12 || es2[4 + l] >= 8) {
-      if (limit == 0) return false;
-      if (h < 1) h = 1;
-    }
-  }
-  return true;
+  return h <= limit;
 }
 
 // IDA*: f = g + h ≤ bound 인 노드만 내려간다 (remaining = bound - g).
@@ -111,11 +68,10 @@ inline __attribute__((always_inline)) bool Solver::childFits(const uint8_t* es, 
 //   면 번호가 작은 쪽을 먼저 오는 순서만 허용 (U D 허용, D U 금지). 분기 18 → 평균 ≈ 13.3.
 //   h 가 허용적이므로 bound 를 h(s0) 부터 1씩 올리며 처음 찾는 해는 허용 수 집합 안에서 최단이다.
 // 진입 시 휴리스틱 검사는 끝난 상태. 탈락할 자식에 대한 재귀 호출을 생략한다.
-bool Solver::search(const uint8_t* es, const uint8_t* cs, uint8_t g, uint8_t remaining, int8_t lastFace) {
-  uint8_t es2[8], cs2[4];
+bool Solver::searchCross(const uint8_t* es, uint8_t g, uint8_t remaining, int8_t lastFace) {
+  uint8_t es2[4];
   uint8_t limit = remaining - 1;
   for (int8_t f = 0; f < 6; f++) {
-    if (!allowD && f == FACE_D) continue;
     if (f == lastFace) continue;
     if (lastFace >= 3 && f == lastFace - 3) continue;
     // f*3, f*3+1, f*3+2 순서이므로 원래 m=0..17 순서와 같다.
@@ -123,30 +79,67 @@ bool Solver::search(const uint8_t* es, const uint8_t* cs, uint8_t g, uint8_t rem
     for (uint8_t m = end - 3; m < end; m++) {
       nodes++;  // 생성한 자식마다 한 번, 반드시 그 자식의 휴리스틱 검사 전
       uint8_t h;
-      if (!childFits(es, cs, es2, cs2, m, limit, h)) continue;
+      if (!childFits(es, es2, m, limit, h)) continue;
       path[g] = m;
       if (h == 0) { pathLen = g + 1; return true; }
-      if (search(es2, cs2, g + 1, limit, f)) return true;
+      if (searchCross(es2, g + 1, limit, f)) return true;
     }
   }
   return false;
 }
 
-bool Solver::ida(const uint8_t* es, const uint8_t* cs, uint8_t maxBound) {
-  // 이번 IDA* 동안 변하지 않는 쌍 번호와 슬롯별 거리표 주소를 미리 읽는다.
+bool Solver::idaCross(const uint8_t* es, uint8_t maxBound) {
+  // 이번 IDA* 동안 변하지 않는 쌍 번호를 미리 읽는다.
   for (uint8_t i = 0; i < 6; i++) {
     crossA[i] = pgm_read_byte(&CROSS_PAIRS[i][0]) - 4;
     crossB[i] = pgm_read_byte(&CROSS_PAIRS[i][1]) - 4;
   }
-  nPairs = (mode == MODE_EXTRACT) ? nSlots - 1 : nSlots;
-  for (uint8_t i = 0; i < nPairs; i++) pairTable[i] = F2L_PAIR[slots[i]];
-  uint8_t h = heuristic(es, cs);
+  uint8_t h = hCross(es, 255);
   if (h == 0) { pathLen = 0; return true; }
   for (uint8_t bound = h; bound <= maxBound; bound++)
-    if (search(es, cs, 0, bound, -1)) return true;
+    if (searchCross(es, 0, bound, -1)) return true;
   return false;
 }
 
+// ======================= F2L =======================
+// 매크로 번호 i → 겉면 수열. 0..2 = U U2 U' (비용 1), 3 + (slot*2+fam)*3 + k = X U^(k+1) X^-1 (비용 3),
+//   X = F2L_TRIG[slot][fam] (fam 0: a U^k a', fam 1: b' U^k b).  sim/solver.js 의 MACROS 와 같은 번호·같은 수열.
+uint8_t Solver::macroMoves(uint8_t i, uint8_t* out) {
+  if (i < 3) { out[0] = FACE_U * 3 + i; return 1; }
+  uint8_t t = i - 3;
+  uint8_t X = pgm_read_byte(&F2L_TRIG[t / 6][(t / 3) & 1]);
+  out[0] = X;
+  out[1] = FACE_U * 3 + t % 3;
+  out[2] = (X / 3) * 3 + 2 - X % 3;  // X 의 역수
+  return 3;
+}
+uint8_t Solver::macroKind(uint8_t i) { return i < 3 ? 0xFF : (i - 3) / 3; }
+
+// 매크로 IDA*: 상태 = 쌍 (cs, es) 2바이트, h = F2L_PAIR[slot] (매크로 그래프의 최단 겉면 수, 255 = 도달 불가).
+//   allowedMask 비트 q = 슬롯 q 의 트리거 허용(미완성 슬롯). 완성 슬롯의 트리거를 금지하면 표 값은 하한이 된다.
+//   같은 종류 연속 금지: U U = 한 수, (X U^a X')(X U^b X') = X U^(a+b) X'.  g 는 겉면 수, depth 는 매크로 수.
+bool Solver::searchF2L(uint8_t cs, uint8_t es, uint8_t g, uint8_t depth, uint8_t bound, int8_t last, const uint8_t* table, uint8_t allowedMask) {
+  uint8_t h = pgm_read_byte(table + cs * 24 + es);
+  if (h == 255 || g + h > bound) return false;
+  if (h == 0) { mpathLen = depth; return true; }
+  uint8_t mv[3];
+  for (uint8_t i = 0; i < N_MACROS; i++) {
+    if (i >= 3 && !(allowedMask & (1 << ((i - 3) / 6)))) continue;
+    if (last >= 0 && macroKind(last) == macroKind(i)) continue;
+    nodes++;  // 전개한 매크로마다 한 번 (sim/solver.js 와 같은 셈)
+    uint8_t n = macroMoves(i, mv);
+    uint8_t c2 = cs, e2 = es;
+    for (uint8_t j = 0; j < n; j++) {
+      c2 = cStep(c2, CORNER_TO[mv[j]], CORNER_DO[mv[j]]);
+      e2 = eStep(e2, EDGE_TO[mv[j]], EDGE_DO[mv[j]]);
+    }
+    mpath[depth] = i;
+    if (searchF2L(c2, e2, g + n, depth + 1, bound, i, table, allowedMask)) return true;
+  }
+  return false;
+}
+
+// ======================= OLL / PLL =======================
 // s·r·A 가 방향 0  ⇔  key_OLL(s·r) = key_OLL(I·A^-1).  r ∈ {id, U, U2, U'} 순서로 첫 매치 (sim/solver.js 와 동일 순서).
 bool Solver::lookupOLL(const Cube& c, uint8_t* out, uint8_t& n, char* name) {
   for (uint8_t r = 0; r < 4; r++) {
@@ -192,64 +185,49 @@ bool Solver::lookupPLL(const Cube& c, uint8_t* out, uint8_t& n, char* name) {
   return false;
 }
 
+// ======================= 전체 =======================
 bool Solver::solve(const Cube& start, uint8_t* out, uint8_t& outLen, StageCallback cb) {
   Cube c = start;
   outLen = 0; nodes = 0;
-  uint8_t es[8], cs[4];
   uint8_t stage[STAGE_MAX], stageLen;
   char name[12];
 
-  // 1. Cross
+  // 1. Cross — 크로스 엣지 DR DF DL DB 의 상태만 추적
   uint32_t t0 = millis(), n0 = nodes;
-  mode = MODE_CROSS; nSlots = 0; allowD = true;
-  tracked(c, es, cs);
-  if (!ida(es, cs, MAX_DEPTH)) return false;
+  uint8_t es[4];
+  for (uint8_t i = 0; i < 4; i++) es[i] = c.edgeState(4 + i);
+  if (!idaCross(es, MAX_DEPTH)) return false;
   memcpy(stage, path, pathLen); stageLen = pathLen;
   c.apply(stage, stageLen); memcpy(out + outLen, stage, stageLen); outLen += stageLen;
   if (cb) cb("CROSS", stage, stageLen, nodes - n0, millis() - t0);
 
-  // 2. F2L
-  uint8_t done[4], nDone = 0;
-  allowD = false;
+  // 2. F2L — 쌍마다 가장 쉬운 슬롯부터 (그리디)
+  uint8_t allowedMask = 0x0F;  // 미완성 슬롯 비트
   for (uint8_t k = 0; k < 4; k++) {
     t0 = millis(); n0 = nodes;
     // 후보 슬롯: 거리표 값 오름차순, 같으면 번호 순 (삽입 정렬)
-    uint8_t cand[4], candH[4], nc = 0;
+    uint8_t cand[4], candD[4], candC[4], candE[4], nc = 0;
     for (uint8_t s = 0; s < 4; s++) {
-      bool isDone = false;
-      for (uint8_t i = 0; i < nDone; i++) if (done[i] == s) isDone = true;
-      if (isDone) continue;
-      uint8_t h = hSlot(c, s), j = nc;
-      while (j > 0 && candH[j - 1] > h) { cand[j] = cand[j - 1]; candH[j] = candH[j - 1]; j--; }
-      cand[j] = s; candH[j] = h; nc++;
+      if (!(allowedMask & (1 << s))) continue;
+      uint8_t cs = c.cornerState(4 + s), e = c.edgeState(8 + s);
+      uint8_t d = pgm_read_byte(&F2L_PAIR[s][cs * 24 + e]), j = nc;
+      while (j > 0 && candD[j - 1] > d) { cand[j] = cand[j - 1]; candD[j] = candD[j - 1]; candC[j] = candC[j - 1]; candE[j] = candE[j - 1]; j--; }
+      cand[j] = s; candD[j] = d; candC[j] = cs; candE[j] = e; nc++;
     }
-    memcpy(slots, done, nDone); nSlots = nDone + 1;
-    uint8_t chosen = cand[0];
-    bool found = false;
-    mode = MODE_F2L;
-    for (uint8_t i = 0; i < nc && !found; i++) {
-      slots[nDone] = cand[i];
-      tracked(c, es, cs);
-      if (ida(es, cs, F2L_EASY_DEPTH)) { found = true; chosen = cand[i]; }
+    // 한계 B 를 가장 작은 표 값부터 1씩 올리며 B 안에 풀리는 첫 후보를 택한다
+    int8_t chosen = -1;
+    for (uint8_t B = candD[0]; B <= F2L_MAX_BOUND && chosen < 0; B++) {
+      for (uint8_t i = 0; i < nc; i++) {
+        if (candD[i] > B) continue;
+        if (searchF2L(candC[i], candE[i], 0, 0, B, -1, F2L_PAIR[cand[i]], allowedMask)) { chosen = cand[i]; break; }
+      }
     }
-    if (found) {
-      memcpy(stage, path, pathLen); stageLen = pathLen;
-    } else {  // 모두 깊이 8 초과: 첫 후보의 두 조각을 U층으로 꺼낸 뒤 다시 끼운다
-      // bound 9 의 비용 ≈ 13 × bound 8 이므로, 짧은 탐색 둘(꺼내기 ≤ 4수 + 끼우기 ≤ 8수)로 나눈다.
-      // 최단보다 2~3수 길 수 있지만 노드 수는 수십 배 줄어든다 (docs/MATH.md 6절).
-      slots[nDone] = chosen;
-      mode = MODE_EXTRACT;
-      tracked(c, es, cs);
-      if (!ida(es, cs, MAX_DEPTH)) return false;
-      memcpy(stage, path, pathLen); stageLen = pathLen;
-      Cube t = c; t.apply(stage, stageLen);
-      mode = MODE_F2L;
-      tracked(t, es, cs);
-      if (!ida(es, cs, MAX_DEPTH)) return false;
-      memcpy(stage + stageLen, path, pathLen); stageLen += pathLen;
-    }
+    if (chosen < 0) return false;
+    stageLen = 0;
+    for (uint8_t i = 0; i < mpathLen; i++) stageLen += macroMoves(mpath[i], stage + stageLen);
+    stageLen = simplifySeq(stage, stageLen);  // 트리거 경계의 같은 면 연속(R' R 등)을 합친다
     c.apply(stage, stageLen); memcpy(out + outLen, stage, stageLen); outLen += stageLen;
-    done[nDone++] = chosen;
+    allowedMask &= ~(1 << chosen);
     strcpy(name, "F2L "); strcat(name, SLOT_NAMES[chosen]);
     if (cb) cb(name, stage, stageLen, nodes - n0, millis() - t0);
   }

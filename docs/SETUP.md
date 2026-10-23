@@ -23,6 +23,7 @@
 ```
 node tools/gen_tables.js
 node tools/test_solver.js 300 1
+node tools/host_check.js 1 300        # g++ 필요 (MinGW-w64/MSYS2 등). 펌웨어 풀이기 PC 빌드 → JS 와 출력 비교
 powershell -ExecutionPolicy Bypass -File scripts/build.ps1
 powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000
 powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/buttons.test.yaml -TimeoutMs 180000

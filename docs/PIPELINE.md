@@ -8,12 +8,13 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
           └────────────► node tools/gen_tables.js ◄──────┘
                          ├─ 공식 → 겉면 6면 수열 변환(wide/슬라이스/회전 제거)
                          ├─ 역연산으로 OLL/PLL 인식 키 생성, 216/288 전 경우 커버리지 검증
-                         └─ BFS 로 크로스·F2L 쌍 거리표 생성
+                         └─ 크로스 쌍 BFS 거리표, F2L 트리거 매크로 거리표 생성 (+ F2L 전수 해결 가능성 검사)
                  ┌─────────────────┴──────────────────┐
      firmware/main/tables.h (PROGMEM ≈10.8 KB)  sim/tables.js
                  │                                     │
    firmware/main/{cube,solver,motors}.cpp + main.ino   sim/solver.js (같은 IDA*·같은 순서)
                  │                                     │
+                 ├──── node tools/host_check.js ───────┤  (g++ 로 펌웨어 풀이기 PC 빌드 → JS 와 시드별 출력 비교)
    scripts/build.ps1 (arduino-cli, Uno)                node tools/test_solver.js (300회 회귀)
    arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi --output-dir build/r4 firmware/main (실물)
                                                        node tools/gen_wokwi_test.js <seed>
@@ -35,6 +36,7 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 |---|---|---|
 | 1. 표 생성 | `node tools/gen_tables.js` | `firmware/main/tables.h`, `sim/tables.js` (커버리지 검증 포함, 실패 시 종료코드 1) |
 | 2. 풀이기 회귀 | `node tools/test_solver.js 300 1` | 300 섞기 전부 풀림 + 수/노드/시간 통계 |
+| 2'. 펌웨어 == JS (호스트) | `node tools/host_check.js 1 300` | g++ 로 `cube.cpp`·`solver.cpp` 를 PC 빌드해 300 시드의 단계·수열·노드 수가 JS 와 글자 단위로 같은지 확인 (Wokwi 없이 수 초) |
 | 3. 컴파일(시뮬) | `powershell -ExecutionPolicy Bypass -File scripts/build.ps1` | `build/main.ino.hex` (Uno) |
 | 3'. 컴파일(실물) | `arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi --output-dir build/r4 firmware/main` | R4 WiFi 바이너리 |
 | 4. 교차검증 시나리오 | `node tools/gen_wokwi_test.js 1` | `tests/solve_seed1.test.yaml` |
