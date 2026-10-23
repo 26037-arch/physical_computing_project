@@ -1,6 +1,7 @@
 # robot_v4 제작 보강 Rev A
 
-기준: `b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9` (`robot_v4 Draft`).
+최신 통합 기준: `513647021cccfc23386335948cd5963cadf98bcb`.
+기구 원형: `b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9` (`robot_v4 Draft`).
 제작 설명서는 `docs/BUILD_V4_상세제작설명서.pdf`(39페이지)를 먼저 읽습니다.
 첫 장은 A2 가로 부품 지도, 나머지는 A4입니다. PDF는 가공용 축척 도면이 아닙니다.
 

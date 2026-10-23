@@ -113,7 +113,7 @@ def flat_dxf(name,shape,axis):
 def build():
     panels,metal,prints,fixtures=design()
     for sub in ('cut','print','jigs'):(OUT/sub).mkdir(parents=True,exist_ok=True)
-    info={'revision':'V4 assembly Rev A','source_commit':'b37de3e9','units':'mm','physical_validation':False,'parts':{}}
+    info={'revision':'V4 assembly Rev A','source_commit':'b37de3e9','integration_base_commit':'513647021cccfc23386335948cd5963cadf98bcb','units':'mm','physical_validation':False,'parts':{}}
     for group,parts in [('cut',{**panels,**metal}),('print',prints),('jigs',fixtures)]:
         for name,value in parts.items():
             shape,qty=value if isinstance(value,tuple) else (value,1)

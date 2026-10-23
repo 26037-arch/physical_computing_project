@@ -1,5 +1,5 @@
 # robot_v4 상세 제작 설명서 · Rev A
-기준 커밋: b37de3e9, 작성일: 2026-10-24 (한국 시간)
+최신 통합 기준: 5136470 · 기구 원형: b37de3e9 · 작성일: 2026-10-24 (한국 시간)
 
 ## 이 문서를 사용하는 순서
 
@@ -11,7 +11,7 @@ P는 출력, J는 조립 지그 출력, B는 구매, K는 사진 속 키트에�
 
 ### 제작 기준
 
-원본은 robot_v4 Draft, 커밋 b37de3e9(2026-10-24 한국 시간)이다. 본 문서는 이 구조의 제작 보강 Rev A를 설명한다. V2/V3 STL을 섞어 쓰지 않는다. 구동부 STL은 models/robot_v4/print, 추가 받침은 assembly_kit/print, 정렬 지그는 assembly_kit/jigs에 있다.
+최신 통합 기준은5136470이며 시뮬레이터의 CAD 좌표와 F2L 탐색 개선을 유지했다. 기구 원형은 robot_v4 Draft의 b37de3e9다. 본 문서는 제작 보강 Rev A를 설명한다. V2/V3 STL을 섞지 않는다. 본체 출력은 models/robot_v4/print, 추가 받침은 assembly_kit/print, 지그는 assembly_kit/jigs다.
 
 ### 그림의 방향
 

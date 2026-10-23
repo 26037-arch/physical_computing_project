@@ -247,7 +247,7 @@ def flat_drawing(w,name,height=88,swap=False):
 
 def write_outputs(cards,pmap):
     w=Writer();catalog(w,cards)
-    md=['# robot_v4 상세 제작 설명서 · Rev A','기준 커밋: b37de3e9, 작성일: 2026-10-24 (한국 시간)','']
+    md=['# robot_v4 상세 제작 설명서 · Rev A','최신 통합 기준: 5136470 · 기구 원형: b37de3e9 · 작성일: 2026-10-24 (한국 시간)','']
     # Intro and kit page before bills.
     for title,img,sections in PAGES[:2]:
         w.start(title)
@@ -305,7 +305,7 @@ def write_outputs(cards,pmap):
     w.section('검증의 범위','기하 검사는 명목강체와 구매외형의 이산자세 검사다. 모든나사머리·스위치레버·혼의실제형상·케이블·탄성변형·마찰·출력수축은 포함되지 않는다. 계산상의안전계수나반복정밀도를증명하지않는다. 본문의실물확인표로제작품별합격을기록한다.')
     w.start('설계 출처와 사용 조건')
     for h,t in [
-      ('원본 V4','https://github.com/26037-arch/physical_computing_project/commit/b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9<br/>docs/HARDWARE_V4.md, tools/build_robot_v4.py 및 models/robot_v4/ 제조기록을 기준으로 했다.'),
+      ('최신 통합 기준과 기구 원형','최신 통합 기준5136470: https://github.com/26037-arch/physical_computing_project/commit/513647021cccfc23386335948cd5963cadf98bcb<br/>기구 원형b37de3e9: https://github.com/26037-arch/physical_computing_project/commit/b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9<br/>최신 시뮬레이터의 CAD 좌표 반영과 F2L 풀이기를 유지하고 제작 보강 구조를 병합했다.'),
       ('큐브 유지 트랙','Jared Deckard의 MIT 3×3×3 cube puzzle을 재구성한 V2 형상을 계승한다. models/robot_v4/THIRD_PARTY_LICENSE.md에 원본·라이선스를 보존했다. 공개 CAD가 실물 성능을 보증하지는 않는다.'),
       ('전기 참고','Pololu A4988 제품1182의 전류제한·VMOT 콘덴서 설명: https://www.pololu.com/product/1182<br/>실제 복제품의 감지저항·방열·회로는 구매 도면을 우선한다.'),
       ('D 추력 유닛 치수 확인','JTEKT/Koyo AXK1730TN 자료는17×30×2 케이지와 AS1730 1T 와셔를 명시한다. 케이지2+와셔1×2+정밀 시임1=총5T로 맞추는 예다.<br/>https://koyo.jtekt.co.jp/en/products/detail/?pno=AXK1730TN'),

@@ -64,5 +64,6 @@
   ],
   "bookmarks": 39,
   "clipped_text_spans": [],
-  "pdf_sha256": "13c88b0bf0079197d1da69a5a89c8da2c580f4d6af5178a030147f5d3f91e723"
+  "pdf_sha256": "2919fd874842118025d6aa96af35bce4bab28b8434947f36b3c4886d502898d7",
+  "integration_base_commit": "513647021cccfc23386335948cd5963cadf98bcb"
 }

@@ -179,7 +179,7 @@ FLIP = `ENGAGE RL → RETRACT FB → RETRACT D → RETRACT LOCK → R·L 동시 
 | 비어 있음·D 결합 (큐브 올려놓음) | ENGAGE LOCK → ENGAGE FB → `loaded` | `ENGAGE LOCK` `ENGAGE FB` `LOADED orient=1` |
 | 장착됨 | 배출: (D 결합 확인) → RETRACT LOCK → RETRACT FB·RL → LCD `REMOVE CUBE` (D 핀 위의 큐브를 손으로 꺼낸다) | `EJECT` … `EJECTED` |
 
-실제 모드(`Q 0`)에서 `S`/`V`/`M` 은 `loaded` 가 아니면 `ERR not loaded`. 가상 모드(`Q 1`)는 절차를 **계획·출력만** 하고 서보·센서·스텝은 건너뛴다 (Wokwi 교차검증 시나리오가 flips/regrips 횟수까지 비교).
+실제 모드(`Q 0`)에서 `S`/`V`/`M`/`F` 는 `loaded` 가 아니면 `ERR not loaded`. 가상 모드(`Q 1`)는 절차를 **계획·출력만** 하고 서보·센서·스텝은 건너뛴다 (Wokwi 교차검증 시나리오가 flips/regrips 횟수까지 비교).
 
 ## 4. 핀 배치 (UNO R3/R4 공통, 18핀 전부 사용)
 
@@ -205,12 +205,12 @@ A4988 ENABLE 은 묶어서 LOW(항상 활성 → 유지 토크). 서보 6개는 
 | 90° 회전 | 50 스텝, 12→8 ms 램프 ≈ 0.45 s + 정착 0.25 s (현행 상수; 실물 토크 확인 후 단축) |
 | 서보 이송 | 0.4 s + 센서 확인 |
 | 뒤집기 | 100 스텝 교차 ≈ 1.0 s + 막대·D·FB 후퇴 |
-| 시드 1 풀이 50수 | 회전 60회, 결합·뒤집기 횟수는 시뮬레이터/보드가 센다 (`flips= regrips=`) |
+| 시드 1 풀이 53수 | 회전 62회, 결합·뒤집기 횟수는 시뮬레이터/보드가 센다 (`flips= regrips=`) |
 
 ## 6. 파일
 
 - `tools/build_robot_v4.py`, `check_robot_v4.py`, `render_robot_v4.py` → `models/robot_v4/` (출력 STL/STEP, `robot_assembly.step`, `parameters.json`, `mechanical_checks.json`)
-- `node tools/embed_models.js` 는 `models/robot_v4/parameters.json` 과 `models/robot_v4/print/*.stl` 을 `sim/models.js` 에 넣는다
+- `node tools/embed_models_v4.js` 는 `models/robot_v4/parameters.json` 과 `models/robot_v4/print/*.stl` 을 `sim/models.js` 에 넣는다
 - `firmware/main/mechanism.h/.cpp` (절차·센서·서보), `motors.h/.cpp` (STEP 5 + DIR 공용, 뒤집기), `main.ino` (버튼 짧게/길게, `L`/`E`/`F`/`T` 명령)
 - `sim/mechanism.js` (펌웨어와 같은 절차 → 동작 목록), `sim/app.js` (V4 3D), `tools/gen_mechanism_test.js` (Wokwi 실제 모드 시나리오), `tools/gen_wokwi_test.js` (풀이 교차검증 + 뒤집기·결합 횟수)
 

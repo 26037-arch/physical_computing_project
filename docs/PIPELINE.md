@@ -8,12 +8,13 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
           └────────────► node tools/gen_tables.js ◄──────┘
                          ├─ 공식 → 겉면 6면 수열 변환(wide/슬라이스/회전 제거)
                          ├─ 역연산으로 OLL/PLL 인식 키 생성, 216/288 전 경우 커버리지 검증
-                         └─ BFS 로 크로스·F2L 쌍 거리표 생성
+                         └─ 크로스 쌍 BFS 거리표, F2L 트리거 매크로 거리표 생성 (+ F2L 전수 해결 가능성 검사)
                  ┌─────────────────┴──────────────────┐
      firmware/main/tables.h (PROGMEM ≈10.8 KB)  sim/tables.js
                  │                                     │
    firmware/main/{cube,solver,motors}.cpp + main.ino   sim/solver.js (같은 IDA*·같은 순서)
                  │                                     │
+                 ├──── node tools/host_check.js ───────┤  (g++ 로 펌웨어 풀이기 PC 빌드 → JS 와 시드별 출력 비교)
    scripts/build.ps1 (arduino-cli, Uno)                node tools/test_solver.js (300회 회귀)
    arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi --output-dir build/r4 firmware/main (실물)
                                                        node tools/gen_wokwi_test.js <seed>
@@ -24,9 +25,9 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
 
 tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|step, parameters.json
   (V1: fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► models/*.stl)   │
-                                                     node tools/embed_models.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
+                                                     node tools/embed_models_v4.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
                                                                                    │
-                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 큐브 + 핀 구동 헤드 6개 + 결합/후퇴 전환)
+                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 도넛 큐브 + 측면 2핀 헤드 4 + 아래 D 헤드 + 잠금 막대, 서보 크랭크 결합/후퇴·뒤집기)
 ```
 
 ## 단계별 명령
@@ -35,6 +36,7 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 |---|---|---|
 | 1. 표 생성 | `node tools/gen_tables.js` | `firmware/main/tables.h`, `sim/tables.js` (커버리지 검증 포함, 실패 시 종료코드 1) |
 | 2. 풀이기 회귀 | `node tools/test_solver.js 300 1` | 300 섞기 전부 풀림 + 수/노드/시간 통계 |
+| 2'. 펌웨어 == JS (호스트) | `node tools/host_check.js 1 300` | g++ 로 `cube.cpp`·`solver.cpp` 를 PC 빌드해 300 시드의 단계·수열·노드 수가 JS 와 글자 단위로 같은지 확인 (Wokwi 없이 수 초) |
 | 3. 컴파일(시뮬) | `powershell -ExecutionPolicy Bypass -File scripts/build.ps1` | `build/main.ino.hex` (Uno) |
 | 3'. 컴파일(실물) | `arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi --output-dir build/r4 firmware/main` | R4 WiFi 바이너리 |
 | 4. 교차검증 시나리오 | `node tools/gen_wokwi_test.js 1` | `tests/solve_seed1.test.yaml` |
@@ -44,7 +46,7 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 | 6. 3D 부품 (V4) | `.venv-cad\Scripts\python.exe tools/build_robot_v4.py` → `check_robot_v4.py` → `render_robot_v4.py` (CadQuery 2.7, Python 3.12 venv) | `models/robot_v4/**` STL·STEP·GLB, `parameters.json`, `mechanical_checks.json` |
 | 6'. 3D 부품 (V2, 이력) | `python tools/build_robot_v2.py` → `check_robot_v2.py` → `render_robot_v2.py` | `models/robot_v2/**` |
 | 6'. 3D 부품 (V1) | Claude Code 에서 `fusion_exec` 로 `fusion/scripts/cube_robot_parts.py` 실행 | `models/center_coupler.stl`, `center_cap.stl`, `motor_mount.stl` |
-| 7. STL 임베드 | `node tools/embed_models.js` | `sim/models.js` (V4 출력 부품 STL + `parameters.json` 의 `print_offsets`/`purchased`) |
+| 7. STL 임베드 | `node tools/embed_models_v4.js` | `sim/models.js` (V4 출력 부품 STL + `parameters.json` 의 `print_offsets`/`purchased`) |
 | 8. 시뮬레이터 | `node tools/serve.js` → http://localhost:8765/sim/ (또는 `sim/index.html` 더블클릭) | 3D 시연 |
 | 9. 업로드 | `powershell -ExecutionPolicy Bypass -File scripts/upload.ps1 -Port COMx -Fqbn arduino:renesas_uno:unor4wifi` | 실물 보드 |
 
