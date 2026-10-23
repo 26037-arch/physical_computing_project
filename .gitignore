@@ -1,0 +1,7 @@
+build/
+*.elf
+*.hex
+screenshot.png
+*.vcd
+__pycache__/
+.env

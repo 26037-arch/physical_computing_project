@@ -1,0 +1,20 @@
+name: 버튼 누르면 LED 토글
+version: 1
+author: physical_computing_project
+steps:
+  - wait-serial: "READY"
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - wait-serial: "LED ON"
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 100ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 1
+  - wait-serial: "LED OFF"

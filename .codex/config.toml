@@ -1,0 +1,9 @@
+# Project-scoped Codex config (Codex loads this when the project is trusted).
+[mcp_servers.wokwi]
+command = 'C:\Users\junwoo\.wokwi\bin\wokwi-cli.exe'
+args = ["mcp"]
+env_vars = ["WOKWI_CLI_TOKEN"]
+
+[mcp_servers.fusion]
+command = "node"
+args = ["tools/fusion-bridge/mcp-server.mjs"]
