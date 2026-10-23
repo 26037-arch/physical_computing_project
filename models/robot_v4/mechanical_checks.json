@@ -1,0 +1,611 @@
+{
+  "volume_tolerance_mm3": 0.02,
+  "unique_cube_positions": 27,
+  "limitations": "Discrete BRep samples, purchased envelopes; no printing, friction, deflection, load or continuous swept-volume validation.",
+  "cube_layer_samples": [
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 90,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 90,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": -1,
+      "angle_deg": 90,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "side": 1,
+      "angle_deg": 90,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": -1,
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": -1,
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": -1,
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": -1,
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": -1,
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": -1,
+      "angle_deg": 90,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": 1,
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": 1,
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": 1,
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": 1,
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": 1,
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "side": 1,
+      "angle_deg": 90,
+      "collisions": []
+    }
+  ],
+  "flip_samples": [
+    {
+      "angle_deg": 0,
+      "collisions": []
+    },
+    {
+      "angle_deg": 15,
+      "collisions": []
+    },
+    {
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "angle_deg": 75,
+      "collisions": []
+    },
+    {
+      "angle_deg": 90,
+      "collisions": []
+    },
+    {
+      "angle_deg": 105,
+      "collisions": []
+    },
+    {
+      "angle_deg": 120,
+      "collisions": []
+    },
+    {
+      "angle_deg": 135,
+      "collisions": []
+    },
+    {
+      "angle_deg": 150,
+      "collisions": []
+    },
+    {
+      "angle_deg": 165,
+      "collisions": []
+    },
+    {
+      "angle_deg": 180,
+      "collisions": []
+    }
+  ],
+  "module_poses": [
+    {
+      "pose": "FB",
+      "collisions": []
+    },
+    {
+      "pose": "RL",
+      "collisions": []
+    },
+    {
+      "pose": "retracted",
+      "collisions": []
+    }
+  ],
+  "support_checks": [
+    {
+      "pose": "all",
+      "collisions": []
+    },
+    {
+      "lock_shift_mm": 0,
+      "collisions": []
+    },
+    {
+      "lock_shift_mm": 30,
+      "collisions": []
+    }
+  ],
+  "kinematics": [
+    {
+      "unit": "head",
+      "theta_deg": 0,
+      "z_mm": 147.0,
+      "expected_mm": 147,
+      "error_mm": 0.0
+    },
+    {
+      "unit": "head",
+      "theta_deg": 180,
+      "z_mm": 171.0,
+      "expected_mm": 171,
+      "error_mm": 0.0
+    },
+    {
+      "unit": "LOCK",
+      "theta_deg": 0,
+      "z_mm": 204.0,
+      "expected_mm": 204,
+      "error_mm": 0.0
+    },
+    {
+      "unit": "LOCK",
+      "theta_deg": 180,
+      "z_mm": 234.0,
+      "expected_mm": 234,
+      "error_mm": 0.0
+    }
+  ],
+  "print_parts": {
+    "bearing_front_cap_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_front_cap_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_housing_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_housing_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_rear_cap_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_rear_cap_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "carriage_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "carriage_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "center_recessed": {
+      "valid": true,
+      "solids": 1
+    },
+    "crank": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_center": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_core": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_corner": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_edge": {
+      "valid": true,
+      "solids": 1
+    },
+    "drive_plate_2pin": {
+      "valid": true,
+      "solids": 1
+    },
+    "link": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_carriage": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_crank": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_guide": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_link": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_servo_mount": {
+      "valid": true,
+      "solids": 1
+    },
+    "rail_support": {
+      "valid": true,
+      "solids": 1
+    },
+    "servo_mount": {
+      "valid": true,
+      "solids": 1
+    },
+    "shaft_hub": {
+      "valid": true,
+      "solids": 1
+    },
+    "shaft_hub_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "socket_coupon": {
+      "valid": true,
+      "solids": 1
+    }
+  },
+  "cube_assembled_collisions": [],
+  "lock_cube_collisions": [],
+  "lock_to_D_edge_clearance_mm": 2.8589357775095063,
+  "nominal_lock_to_edge_wall_mm": 5.699999999999999,
+  "lock_to_hollow_diagonal_clearance_mm": 0.3431457505076194,
+  "lock_hollow_samples": [
+    {
+      "shift_mm": 0,
+      "clearance_mm": 0.34314575050761925,
+      "collisions": []
+    },
+    {
+      "shift_mm": 24,
+      "clearance_mm": 0.34314575050761925,
+      "collisions": []
+    }
+  ],
+  "sample_counts": {
+    "cube_pairs": 351,
+    "layer_poses": 36,
+    "flip_poses": 13,
+    "module_poses": 3
+  },
+  "failure_count": 0,
+  "failures": [],
+  "passed": true
+}

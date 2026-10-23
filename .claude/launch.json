@@ -4,8 +4,20 @@
     {
       "name": "sim",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["tools/serve.js", "8765"],
+      "runtimeArgs": [
+        "tools/serve.js",
+        "8765"
+      ],
       "port": 8765
+    },
+    {
+      "name": "sim2",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/serve.js",
+        "8766"
+      ],
+      "port": 8766
     }
   ]
 }

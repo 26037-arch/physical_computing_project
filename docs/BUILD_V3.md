@@ -1,5 +1,7 @@
 # 실제 제작안 V3 - 중앙축 고정, 반대 면 잠금
 
+> **이 문서는 이력이다.** 현재 설계는 [HARDWARE_V4.md](HARDWARE_V4.md)(위 헤드·중앙축 제거, 바닥 키, 자동 이송·뒤집기·장착)이며 펌웨어의 `H` 승인 모드와 `manual_v3` 시나리오는 V4 에서 제거됐다.
+
 2026-10-23. 상태: **제작용 CAD 시제품 / 실물 출력·조립·부하 시험 전**.
 
 먼저 `BUILD_V3_제작설계도.pdf`를 읽는다. 치수 단위는 mm이며 PDF는 축척 인쇄용이 아니다. 패널 절단에는 `models/robot_v3/purchase_and_cut/*.dxf`, Fusion 등 CAD에는 STEP, 출력에는 `models/robot_v3/print/*.stl`을 사용한다. 기존 V1/V2 부품과 혼용하지 않는다.
@@ -137,7 +139,7 @@ node tools/gen_manual_v3_test.js
 powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/manual_v3.test.yaml -TimeoutMs 90000
 ```
 
-V3 생성기는 V2의 큐브 유지 트랙/기본 헤드를 재사용하지만 V2 출력물을 덮어쓰지 않는다. 현재 고정 치수로 작성한 생성 스크립트이며 `P`는 주요 값 기록이다. `P`의 숫자만 바꾸면 모든 형상이 자동으로 갱신된다고 가정하지 않는다. 변경할 때 형상 코드와 도면/BOM/검사를 함께 수정한다. `sim/app.js`는 V2 배치를 보존하므로 V3 검토에는 STEP/GLB와 PDF를 사용한다.
+V3 생성기는 V2의 큐브 유지 트랙/기본 헤드를 재사용하지만 V2 출력물을 덮어쓰지 않는다. 현재 고정 치수로 작성한 생성 스크립트이며 `P`는 주요 값 기록이다. `P`의 숫자만 바꾸면 모든 형상이 자동으로 갱신된다고 가정하지 않는다. 변경할 때 형상 코드와 도면/BOM/검사를 함께 수정한다. `sim/app.js`에도 V3를 반영했으며 바깥 부분은 개방 프레임으로 표시한다. 이 개방 프레임은 표시 변형이므로 실제 제작은 STEP/GLB/PDF 치수를 따른다. 시뮬레이터 갱신 방법은 `docs/SIM_V3.md` 참고.
 
 Fusion에서 `models/robot_v3/robot_assembly.step`을 열면 솔리드를 편집할 수 있다. 생성 피처 타임라인/운동 조인트는 없다. Fusion용 가져오기 스크립트도 제공하지만 실제 가져오기 성공 여부는 별도 기록을 따른다.
 

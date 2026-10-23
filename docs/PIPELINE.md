@@ -40,9 +40,11 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 | 4. 교차검증 시나리오 | `node tools/gen_wokwi_test.js 1` | `tests/solve_seed1.test.yaml` |
 | 5. 시뮬레이션 | `powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000` | `Scenario completed successfully` |
 | 5'. 버튼 시나리오 | `... -Scenario tests/buttons.test.yaml -TimeoutMs 180000` | 무작위 시드로 섞고 풀어 `SOLVED ok=1` |
-| 6. 3D 부품 (V2) | `python tools/build_robot_v2.py` → `check_robot_v2.py` → `render_robot_v2.py` (CadQuery 필요) | `models/robot_v2/**` STL·STEP·GLB, `parameters.json`, `mechanical_checks.json` |
+| 5''. V4 기구 절차 | `node tools/gen_mechanism_test.js` → `... -Scenario tests/mechanism_v4.test.yaml -TimeoutMs 150000` | 실제 모드: LOAD 장착 → `M F R U D`(지지 전환·막대·뒤집기, 시나리오가 결합 스위치를 눌러 줌) → 결합 실패 중단 → 배출 |
+| 6. 3D 부품 (V4) | `.venv-cad\Scripts\python.exe tools/build_robot_v4.py` → `check_robot_v4.py` → `render_robot_v4.py` (CadQuery 2.7, Python 3.12 venv) | `models/robot_v4/**` STL·STEP·GLB, `parameters.json`, `mechanical_checks.json` |
+| 6'. 3D 부품 (V2, 이력) | `python tools/build_robot_v2.py` → `check_robot_v2.py` → `render_robot_v2.py` | `models/robot_v2/**` |
 | 6'. 3D 부품 (V1) | Claude Code 에서 `fusion_exec` 로 `fusion/scripts/cube_robot_parts.py` 실행 | `models/center_coupler.stl`, `center_cap.stl`, `motor_mount.stl` |
-| 7. STL 임베드 | `node tools/embed_models.js` | `sim/models.js` (V2 헤드 STL 7종 + `parameters.json`) |
+| 7. STL 임베드 | `node tools/embed_models.js` | `sim/models.js` (V4 출력 부품 STL + `parameters.json` 의 `print_offsets`/`purchased`) |
 | 8. 시뮬레이터 | `node tools/serve.js` → http://localhost:8765/sim/ (또는 `sim/index.html` 더블클릭) | 3D 시연 |
 | 9. 업로드 | `powershell -ExecutionPolicy Bypass -File scripts/upload.ps1 -Port COMx -Fqbn arduino:renesas_uno:unor4wifi` | 실물 보드 |
 
@@ -59,6 +61,6 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 
 - `firmware/main/tables.h`, `sim/tables.js` ← `tools/gen_tables.js`
 - `sim/models.js` ← `tools/embed_models.js` (입력: `models/robot_v2/head/*.stl`, `models/robot_v2/parameters.json`)
-- `tests/solve_seed*.test.yaml` ← `tools/gen_wokwi_test.js`
+- `tests/solve_seed*.test.yaml` ← `tools/gen_wokwi_test.js` (풀이 + 뒤집기/결합 횟수), `tests/mechanism_v4.test.yaml` ← `tools/gen_mechanism_test.js`
 
-핀 배치를 바꾸면 `diagram.json` 과 `firmware/main/motors.h`(STEP/DIR), `main.ino`(버튼·부저) 를 함께 바꾼다.
+핀 배치를 바꾸면 `diagram.json` 과 `firmware/main/motors.h`(STEP/DIR), `mechanism.h`(서보·결합 스위치), `main.ino`(버튼·부저), `docs/HARDWARE_V4.md` 4절을 함께 바꾼다. 기구 절차는 `sim/mechanism.js` 와 `firmware/main/mechanism.cpp` 를 함께 바꾼다.

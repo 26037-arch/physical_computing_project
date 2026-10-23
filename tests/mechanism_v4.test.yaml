@@ -1,0 +1,128 @@
+# 자동 생성: node tools/gen_mechanism_test.js — V4 기구 절차(장착·지지 전환·막대·뒤집기·결합 실패·배출)를 실제 모드로 검사
+name: V4 기구 절차 — LOAD 장착, F R U D (지지 전환·막대·뒤집기), 결합 실패 중단, 배출
+version: 1
+author: physical_computing_project
+steps:
+  - wait-serial: "READY"
+  - write-serial: "T 0\n"
+  - wait-serial: "TIMEOUT 0"
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 1
+  - wait-serial: "ENGAGE D"
+  - set-control:
+      part-id: sensD
+      control: pressed
+      value: 1
+  - wait-serial: "READY TO LOAD"
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 0
+  - delay: 300ms
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 1
+  - wait-serial: "ENGAGE LOCK"
+  - set-control:
+      part-id: sensLock
+      control: pressed
+      value: 1
+  - wait-serial: "ENGAGE FB"
+  - set-control:
+      part-id: sensF
+      control: pressed
+      value: 1
+  - set-control:
+      part-id: sensB
+      control: pressed
+      value: 1
+  - wait-serial: "LOADED orient=1"
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 0
+  - write-serial: "M F R U D\n"
+  - wait-serial: "RETRACT D"
+  - set-control:
+      part-id: sensD
+      control: pressed
+      value: 0
+  - wait-serial: "ENGAGE RL"
+  - set-control:
+      part-id: sensR
+      control: pressed
+      value: 1
+  - set-control:
+      part-id: sensL
+      control: pressed
+      value: 1
+  - wait-serial: "RETRACT FB"
+  - set-control:
+      part-id: sensF
+      control: pressed
+      value: 0
+  - set-control:
+      part-id: sensB
+      control: pressed
+      value: 0
+  - wait-serial: "ENGAGE D"
+  - set-control:
+      part-id: sensD
+      control: pressed
+      value: 1
+  - wait-serial: "FLIP"
+  - wait-serial: "RETRACT D"
+  - set-control:
+      part-id: sensD
+      control: pressed
+      value: 0
+  - wait-serial: "RETRACT LOCK"
+  - set-control:
+      part-id: sensLock
+      control: pressed
+      value: 0
+  - wait-serial: "FLIPPED orient=0"
+  - wait-serial: "ENGAGE LOCK"
+  - set-control:
+      part-id: sensLock
+      control: pressed
+      value: 1
+  - wait-serial: "ENGAGE D"
+  - set-control:
+      part-id: sensD
+      control: pressed
+      value: 1
+  - wait-serial: "MOVED 4 flips=1 regrips=4"
+  - write-serial: "P\n"
+  - wait-serial: "STATE LUULUUFFFLBBRRRFFDUUUFFDLLDDDRDDRBBBFFRLLDUBBLLDUBBRRR"
+  - wait-serial: "MECH fb=0 rl=1 d=1 lock=1 orient=0 loaded=1"
+  - write-serial: "T 1500\n"
+  - wait-serial: "TIMEOUT 1500"
+  - write-serial: "M F\n"
+  - wait-serial: "ENGAGE FB"
+  - wait-serial: "ERR ENGAGE FB timeout"
+  - wait-serial: "ABORTED completed=0"
+  - write-serial: "P\n"
+  - wait-serial: "STATE LUULUUFFFLBBRRRFFDUUUFFDLLDDDRDDRBBBFFRLLDUBBLLDUBBRRR"
+  - write-serial: "T 0\n"
+  - wait-serial: "TIMEOUT 0"
+  - write-serial: "E\n"
+  - wait-serial: "EJECT"
+  - wait-serial: "RETRACT LOCK"
+  - set-control:
+      part-id: sensLock
+      control: pressed
+      value: 0
+  - wait-serial: "RETRACT RL"
+  - set-control:
+      part-id: sensR
+      control: pressed
+      value: 0
+  - set-control:
+      part-id: sensL
+      control: pressed
+      value: 0
+  - wait-serial: "EJECTED"

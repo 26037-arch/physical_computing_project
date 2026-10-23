@@ -1,3 +1,14 @@
+// Default: regenerate V3 assembly-coordinate meshes. --v2 is legacy only.
+// node tools/embed_models.js [--python path/to/python.exe]
+if (!process.argv.includes('--v2')) {
+  const args=process.argv.slice(2), i=args.indexOf('--python');
+  if(i>=0 && !args[i+1])throw new Error('--python requires an executable path');
+  const python=i>=0?args[i+1]:(process.env.CADQUERY_PYTHON||'python');
+  const result=require('node:child_process').spawnSync(python,[require('node:path').join(__dirname,'export_sim_v3.py')],{stdio:'inherit'});
+  if(result.error)console.error('Install tools/requirements-robot-v3.txt in the CAD Python and pass --python. '+result.error.message);
+  process.exit(result.status===null?1:result.status);
+}
+// Legacy V2 export below; do not use it with the V3 app.
 // tools/embed_models.js — V2 헤드 출력 부품 STL(models/robot_v2/head/*.stl)과 CAD 매개변수
 // (models/robot_v2/parameters.json)를 base64/JSON 으로 sim/models.js 에 넣는다.
 //   node tools/embed_models.js

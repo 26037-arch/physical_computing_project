@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>큐브 풀이 로봇 시뮬레이터</title>
+<title>큐브 풀이 로봇 시뮬레이터 V4</title>
 <link rel="icon" href="data:,">
 <style>
   :root { --bg:#0f1216; --panel:#171b21; --line:#262c35; --fg:#e6e9ee; --dim:#8b94a3; --acc:#4cc2ff; --ok:#3ddc84; --warn:#ffb020; }
@@ -55,21 +55,21 @@
 <div id="app">
   <div id="left">
     <canvas id="view"></canvas>
-    <div id="hud"><b>큐브 풀이 로봇 V2 — 엣지 핀 구동 · 후퇴 헤드 6개</b><br>드래그: 회전 · 휠: 확대 · 구동판/허브/하우징/캐리지/레일은 V2 CAD STL(models/robot_v2/head)</div>
+    <div id="hud"><b>큐브 풀이 로봇 V4 — 측면 2핀 헤드 4 + 아래 D 헤드(중공축) + 잠금 막대 · 위 개방 · 뒤집기</b><br>드래그: 회전 · 휠: 확대 · 서보 크랭크 이송 6유닛 · 붉은 막대 = 코어 고정(뒤집기 때만 내려감)</div>
   </div>
   <aside id="panel">
-    <h1>큐브 풀이 로봇 시뮬레이터 (V2 기구)</h1>
-    <div class="note">펌웨어(firmware/main)와 같은 풀이 알고리즘(sim/solver.js)과 같은 섞기 수열을 쓴다. 아래 시리얼 로그의 회전 수열·단계 이름은 실제 보드 출력과 같고(Wokwi 교차검증: tests/solve_seed*.test.yaml), 시간값(ms)은 PC 기준이다. 기구는 docs/HARDWARE_V2.md 의 57 mm 출력 큐브와 핀 구동 헤드를 CAD 치수 그대로 그리며, 축이 바뀔 때마다 새 축 두 헤드 결합 → 기존 두 헤드 24 mm 후퇴 순서를 보여 준다.</div>
+    <h1>큐브 풀이 로봇 시뮬레이터 (V4 기구)</h1>
+    <div class="note">펌웨어(firmware/main)와 같은 풀이 알고리즘(sim/solver.js)·같은 섞기 수열·같은 기구 절차(sim/mechanism.js = mechanism.cpp)를 쓴다. 시리얼 로그의 회전 수열·단계 이름·ENGAGE/RETRACT/FLIP 줄과 뒤집기·결합 횟수는 Wokwi 보드 출력과 같다(tests/solve_seed*.test.yaml, mechanism_v4.test.yaml). 기구는 docs/HARDWARE_V4.md: 위 헤드와 중앙축이 없고, 흰색(U) 면을 아래로 장착해 U 수는 아래 D 헤드가 돌리며 D 수는 R/L 헤드가 큐브를 180° 뒤집은 뒤 D 헤드가 돌린다. 잠금 막대가 중공 D 축을 지나 큐브 중심을 잡아(V3 중앙축 대신) 측면 회전 중 큐브 전체가 따라 돌지 않는다.</div>
 
     <section>
-      <h2>헤드 상태 (결합 = 핀 4개 삽입 3 mm · 후퇴 24 mm)</h2>
+      <h2>이송 유닛 상태 (측면 4 = 적도 핀 2개 · D = DF/DB 핀 2개 · LOCK = 막대 8 mm 코어 고정 · 후퇴 24 / 30 mm)</h2>
       <div class="chips" id="heads"></div>
       <div class="note" id="headText" style="margin-top:4px"></div>
     </section>
 
     <section>
       <h2>LCD1602 (보드 표시와 동일)</h2>
-      <div class="lcd" id="lcd">CUBE ROBOT
+      <div class="lcd" id="lcd">CUBE LOADED
 SCRAMBLE / SOLVE</div>
     </section>
 
@@ -79,21 +79,23 @@ SCRAMBLE / SOLVE</div>
         <label>시드 <input type="number" id="seed" value="1" min="0"></label>
         <button id="btnScramble">SCRAMBLE</button>
         <button id="btnSolve" class="primary">SOLVE</button>
+        <button id="btnLoad" title="보드에서는 버튼을 1.2 s 이상 길게. 장착됨 → 배출(막대·F/B·R/L 해제, D 핀이 받침) / D 결합 → 막대·F/B 결합(장착)">LOAD (길게)</button>
+        <button id="btnFlip" title="R/L 만 결합한 채 두 헤드가 같은 방향으로 180° (시연용)">FLIP</button>
         <button id="btnPause">일시정지</button>
         <button id="btnReset">리셋</button>
-        <button id="btnView" title="6면 모듈 전체가 보이는 구도">전체 보기</button>
-        <button id="btnViewCube" title="큐브와 구동판만 크게">큐브 보기</button>
+        <button id="btnView" title="다섯 모듈 전체가 보이는 구도">전체 보기</button>
+        <button id="btnViewCube" title="큐브와 구동판·키만 크게">큐브 보기</button>
       </div>
       <div class="row" style="margin-top:6px">
         <label style="white-space:nowrap">90° 회전 시간 <span id="speedVal">150</span> ms</label>
         <input type="range" id="speed" min="40" max="600" step="10" value="150">
       </div>
       <div class="row">
-        <label style="white-space:nowrap" title="헤드 24 mm 이송(결합/해제) 한 번에 걸리는 시간. 현재 시제품은 수동 M5 이송이라 자동화 목표값이다">헤드 이송 시간 <span id="feedVal">500</span> ms</label>
-        <input type="range" id="feed" min="0" max="1500" step="50" value="500">
+        <label style="white-space:nowrap" title="서보 크랭크 24 mm 이송(결합/해제) 한 번에 걸리는 시간. MG996R 기준 목표값 400 ms, 실측 아님">이송 시간 <span id="feedVal">400</span> ms</label>
+        <input type="range" id="feed" min="0" max="1500" step="50" value="400">
       </div>
       <div class="row">
-        <label class="chk"><input type="checkbox" id="chkFrame" checked> 레일·캐리지·하우징 표시</label>
+        <label class="chk"><input type="checkbox" id="chkFrame" checked> 레일·캐리지·하우징·서보 표시</label>
         <label class="chk"><input type="checkbox" id="chkMotor" checked> 모터 표시</label>
       </div>
     </section>
@@ -113,7 +115,7 @@ SCRAMBLE / SOLVE</div>
         <div><b id="stMoves">–</b><span>전체 수</span></div>
         <div><b id="stNodes">–</b><span>탐색 노드</span></div>
         <div><b id="stTime">–</b><span>JS 계산 ms</span></div>
-        <div><b id="stRegrip">–</b><span>축 전환</span></div>
+        <div><b id="stRegrip">–</b><span>결합 / 뒤집기</span></div>
       </div>
       <table id="stages"><thead><tr><th>단계</th><th>수</th><th>수열</th><th>노드</th><th>Uno 예상</th></tr></thead><tbody></tbody></table>
       <div class="note" id="estNote"></div>
@@ -130,6 +132,7 @@ SCRAMBLE / SOLVE</div>
 <script src="tables.js"></script>
 <script src="solver.js"></script>
 <script src="models.js"></script>
+<script src="mechanism.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

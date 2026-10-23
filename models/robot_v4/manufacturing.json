@@ -1,0 +1,860 @@
+{
+  "status": "CAD prototype; no physical printing/load validation",
+  "print_parts": {
+    "cube_core": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 20067.5231,
+      "size_mm": [
+        34.09105454514429,
+        33.38367864690768,
+        34.091054545144324
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 2520,
+        "triangles_after": 2520,
+        "weld_mm": 1e-05
+      }
+    },
+    "cube_center": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1815.6516,
+      "size_mm": [
+        18.8000002,
+        18.8000002,
+        11.562172512391108
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 1846,
+        "triangles_after": 1840,
+        "weld_mm": 1e-05
+      }
+    },
+    "cube_edge": {
+      "qty": 12,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5639.2931,
+      "size_mm": [
+        18.800000200000007,
+        23.800000100000005,
+        23.800000100000005
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 2506,
+        "triangles_after": 2500,
+        "weld_mm": 1e-05
+      }
+    },
+    "cube_corner": {
+      "qty": 8,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 7406.6849,
+      "size_mm": [
+        23.800000100000005,
+        23.800000100000005,
+        23.800000100000005
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 1858,
+        "triangles_after": 1850,
+        "weld_mm": 1e-05
+      }
+    },
+    "socket_coupon": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5261.3382,
+      "size_mm": [
+        42.0,
+        16.0,
+        8.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 516,
+        "triangles_after": 516,
+        "weld_mm": 1e-05
+      }
+    },
+    "center_recessed": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1133.8514,
+      "size_mm": [
+        18.8000002,
+        18.8000002,
+        14.500000100000001
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 958,
+        "triangles_after": 958,
+        "weld_mm": 1e-05
+      }
+    },
+    "shaft_hub": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 9028.7525,
+      "size_mm": [
+        32.0,
+        32.0,
+        17.000000200000002
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 2520,
+        "triangles_after": 2520,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_housing_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 24453.4713,
+      "size_mm": [
+        60.0,
+        49.0,
+        17.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 3256,
+        "triangles_after": 3256,
+        "weld_mm": 1e-05
+      }
+    },
+    "carriage_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 62480.0919,
+      "size_mm": [
+        60.0,
+        77.0,
+        120.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 2620,
+        "triangles_after": 2620,
+        "weld_mm": 1e-05
+      }
+    },
+    "rail_support": {
+      "qty": 5,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 66364.9404,
+      "size_mm": [
+        60.0,
+        6.0,
+        190.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 1928,
+        "triangles_after": 1928,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_front_cap_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 2106.4142,
+      "size_mm": [
+        34.0,
+        34.0,
+        2.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 872,
+        "triangles_after": 872,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_rear_cap_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 2106.4142,
+      "size_mm": [
+        34.0,
+        34.0,
+        2.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 872,
+        "triangles_after": 872,
+        "weld_mm": 1e-05
+      }
+    },
+    "drive_plate_2pin": {
+      "qty": 5,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 13328.3485,
+      "size_mm": [
+        50.0,
+        50.0,
+        10.2
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 1952,
+        "triangles_after": 1952,
+        "weld_mm": 1e-05
+      }
+    },
+    "servo_mount": {
+      "qty": 5,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 16237.9949,
+      "size_mm": [
+        49.0,
+        28.0,
+        46.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 788,
+        "triangles_after": 788,
+        "weld_mm": 1e-05
+      }
+    },
+    "crank": {
+      "qty": 5,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 336.7575,
+      "size_mm": [
+        4.0,
+        6.0,
+        18.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 516,
+        "triangles_after": 516,
+        "weld_mm": 1e-05
+      }
+    },
+    "link": {
+      "qty": 5,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1288.7221,
+      "size_mm": [
+        4.0,
+        8.0,
+        44.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 516,
+        "triangles_after": 516,
+        "weld_mm": 1e-05
+      }
+    },
+    "shaft_hub_hollow": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 6149.6258,
+      "size_mm": [
+        32.0,
+        32.0,
+        17.000000200000002
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 2166,
+        "triangles_after": 2166,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_housing_hollow": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 36216.3881,
+      "size_mm": [
+        60.0,
+        54.0,
+        23.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 1224,
+        "triangles_after": 1224,
+        "weld_mm": 1e-05
+      }
+    },
+    "carriage_hollow": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 86436.6324,
+      "size_mm": [
+        116.0,
+        77.0,
+        120.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 3372,
+        "triangles_after": 3372,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_front_cap_hollow": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 3279.0558,
+      "size_mm": [
+        44.0,
+        44.0,
+        2.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 872,
+        "triangles_after": 872,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_rear_cap_hollow": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 3279.0558,
+      "size_mm": [
+        44.0,
+        44.0,
+        2.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 872,
+        "triangles_after": 872,
+        "weld_mm": 1e-05
+      }
+    },
+    "lock_guide": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 36332.42,
+      "size_mm": [
+        52.0,
+        92.0,
+        116.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 94,
+        "triangles_after": 94,
+        "weld_mm": 1e-05
+      }
+    },
+    "lock_carriage": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5779.4706,
+      "size_mm": [
+        38.0,
+        38.0,
+        10.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 586,
+        "triangles_after": 586,
+        "weld_mm": 1e-05
+      }
+    },
+    "lock_servo_mount": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 16237.9949,
+      "size_mm": [
+        49.0,
+        28.0,
+        46.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 788,
+        "triangles_after": 788,
+        "weld_mm": 1e-05
+      }
+    },
+    "lock_crank": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 408.7575,
+      "size_mm": [
+        4.0,
+        6.0,
+        21.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 516,
+        "triangles_after": 516,
+        "weld_mm": 1e-05
+      }
+    },
+    "lock_link": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1288.7221,
+      "size_mm": [
+        4.0,
+        8.0,
+        44.0
+      ],
+      "mesh_cleanup": {
+        "triangles_before": 516,
+        "triangles_after": 516,
+        "weld_mm": 1e-05
+      }
+    }
+  },
+  "purchased_parts_are_envelopes": true,
+  "stl_tolerance_mm": 0.1,
+  "stl_angular_tolerance": 0.3,
+  "purchased_parts": {
+    "spindle_8mm_direct": {
+      "size": [
+        8.0,
+        8.0,
+        67.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        49.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "axial_pad_0": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        -19.1,
+        -19.1,
+        0.4
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "axial_pad_1": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        -19.1,
+        19.1,
+        0.4
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "axial_pad_2": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        19.1,
+        -19.1,
+        0.4
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "axial_pad_3": {
+      "size": [
+        8.0,
+        8.0,
+        0.8
+      ],
+      "center": [
+        19.1,
+        19.1,
+        0.4
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "bearing_608_0_direct": {
+      "size": [
+        22.0,
+        22.0,
+        7.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        38.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "bearing_608_1_direct": {
+      "size": [
+        22.0,
+        22.0,
+        7.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        48.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "thrust_F8_16M_direct": {
+      "size": [
+        16.0,
+        16.0,
+        5.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        30.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "coupling_5x8_direct": {
+      "size": [
+        19.0,
+        19.0,
+        25.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        82.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "motor_NEMA17_direct": {
+      "size": [
+        42.3,
+        42.3,
+        42.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        123.0
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "motor_shaft_direct": {
+      "size": [
+        5.0,
+        5.0,
+        20.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        94.0
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "rail_MGN12": {
+      "size": [
+        12.0,
+        8.0,
+        180.0
+      ],
+      "center": [
+        0.0,
+        -47.0,
+        95.0
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "block_MGN12H": {
+      "size": [
+        27.0,
+        11.0,
+        45.400000000000006
+      ],
+      "center": [
+        0.0,
+        -43.5,
+        84.0
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "pin_0": {
+      "size": [
+        3.0,
+        3.0,
+        16.0
+      ],
+      "center": [
+        0.0,
+        19.1,
+        5.0
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "pin_1": {
+      "size": [
+        3.0,
+        3.0,
+        16.0
+      ],
+      "center": [
+        0.0,
+        -19.1,
+        5.0
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "servo_MG996R": {
+      "size": [
+        42.9,
+        19.700000000000003,
+        40.70000000000002
+      ],
+      "center": [
+        -3.5,
+        -44.0,
+        205.3
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "servo_output": {
+      "size": [
+        6.050000000000001,
+        6.0,
+        6.0
+      ],
+      "center": [
+        20.975,
+        -44.0,
+        195.0
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "engage_switch": {
+      "size": [
+        12.799999999999999,
+        6.5,
+        5.800000000000011
+      ],
+      "center": [
+        22.0,
+        -47.75,
+        154.9
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "motor_NEMA17_offset_hollow": {
+      "size": [
+        42.300000000000004,
+        42.3,
+        42.0
+      ],
+      "center": [
+        60.0,
+        0.0,
+        123.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "motor_shaft_offset_hollow": {
+      "size": [
+        5.0,
+        5.0,
+        20.0
+      ],
+      "center": [
+        60.0,
+        0.0,
+        94.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "pulley_40T_driven_hollow": {
+      "size": [
+        28.0,
+        28.0,
+        18.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        85.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "pulley_40T_driver_hollow": {
+      "size": [
+        28.0,
+        28.0,
+        18.0
+      ],
+      "center": [
+        60.0,
+        0.0,
+        85.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "belt_200_2GT_6_pitch_envelope_hollow": {
+      "size": [
+        87.465,
+        27.465,
+        6.0
+      ],
+      "center": [
+        30.0,
+        0.0,
+        80.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "spindle_hollow_17x12_hollow": {
+      "size": [
+        17.0,
+        17.0,
+        82.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        57.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "bearing_6003_0_hollow": {
+      "size": [
+        35.0,
+        35.0,
+        10.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        40.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "bearing_6003_1_hollow": {
+      "size": [
+        35.0,
+        35.0,
+        10.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        53.0
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "front_thrust_17x30_hollow": {
+      "size": [
+        30.0,
+        30.0,
+        5.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        30.5
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "rear_thrust_17x30_hollow": {
+      "size": [
+        30.0,
+        30.0,
+        5.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        62.5
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "lock_bar": {
+      "size": [
+        8.0,
+        8.0,
+        230.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        110.0
+      ],
+      "qty": 1,
+      "module": "LOCK"
+    },
+    "lock_servo_MG996R": {
+      "size": [
+        42.9,
+        19.700000000000003,
+        40.70000000000002
+      ],
+      "center": [
+        -3.5,
+        24.0,
+        265.3
+      ],
+      "qty": 1,
+      "module": "LOCK"
+    },
+    "lock_engage_switch": {
+      "size": [
+        12.799999999999999,
+        6.5,
+        5.800000000000011
+      ],
+      "center": [
+        22.0,
+        14.75,
+        211.9
+      ],
+      "qty": 1,
+      "module": "LOCK"
+    }
+  }
+}
