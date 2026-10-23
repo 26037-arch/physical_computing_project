@@ -1,0 +1,35 @@
+{
+  "unique_cube_positions": 27,
+  "cube_samples": [
+    {
+      "angle_deg": 30,
+      "collisions": []
+    },
+    {
+      "angle_deg": 45,
+      "collisions": []
+    },
+    {
+      "angle_deg": 60,
+      "collisions": []
+    },
+    {
+      "angle_deg": 90,
+      "collisions": []
+    }
+  ],
+  "head_poses": [
+    {
+      "pose": "handoff_all_inserted",
+      "collisions": []
+    },
+    {
+      "pose": "F_B_inserted",
+      "collisions": []
+    }
+  ],
+  "volume_tolerance_mm3": 0.01,
+  "limitations": "Discrete CAD checks only; printing, friction, deflection, fasteners and loaded motion unverified",
+  "passed": true,
+  "failures": []
+}

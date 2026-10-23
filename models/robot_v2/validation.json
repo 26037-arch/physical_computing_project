@@ -1,0 +1,148 @@
+{
+  "parameters": {
+    "cube_mm": 57,
+    "piece_gap_mm": 0.3,
+    "bevel_mm": 4.0,
+    "plate_thickness_mm": 6.0,
+    "pin_mm": 3.0,
+    "socket_mm": 3.4,
+    "socket_depth_mm": 4.2,
+    "pin_engagement_mm": 3.0,
+    "retract_mm": 24.0
+  },
+  "derived": {
+    "piece_mm": 18.8,
+    "pitch_mm": 19.1,
+    "track_outer_r_mm": 23.5,
+    "track_inner_r_mm": 17.5,
+    "core_r_mm": 17.2
+  },
+  "parts": {
+    "cube_core": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 20711.43,
+      "size_mm": [
+        34.091,
+        34.091,
+        34.091
+      ]
+    },
+    "cube_center": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1815.65,
+      "size_mm": [
+        18.8,
+        18.8,
+        11.562
+      ]
+    },
+    "cube_edge": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5639.29,
+      "size_mm": [
+        18.8,
+        23.8,
+        23.8
+      ]
+    },
+    "cube_corner": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 7406.68,
+      "size_mm": [
+        23.8,
+        23.8,
+        23.8
+      ]
+    },
+    "socket_coupon": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 5261.34,
+      "size_mm": [
+        42.0,
+        16.0,
+        8.0
+      ]
+    },
+    "drive_plate": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 13249.09,
+      "size_mm": [
+        50.0,
+        50.0,
+        10.2
+      ]
+    },
+    "shaft_hub": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 9028.75,
+      "size_mm": [
+        32.0,
+        32.0,
+        17.0
+      ]
+    },
+    "bearing_housing": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 24453.47,
+      "size_mm": [
+        60.0,
+        49.0,
+        17.0
+      ]
+    },
+    "carriage": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 62097.01,
+      "size_mm": [
+        60.0,
+        77.0,
+        120.0
+      ]
+    },
+    "rail_support": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 68922.47,
+      "size_mm": [
+        60.0,
+        25.0,
+        190.0
+      ]
+    },
+    "bearing_front_cap": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 2106.41,
+      "size_mm": [
+        34.0,
+        34.0,
+        2.0
+      ]
+    },
+    "bearing_rear_cap": {
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 2106.41,
+      "size_mm": [
+        34.0,
+        34.0,
+        2.0
+      ]
+    }
+  },
+  "status": "CAD prototype; Fusion import and physical printing not yet verified",
+  "clearance": {
+    "inactive_head_to_cube_swept_envelope_mm": 9.195,
+    "pin_tip_to_socket_bottom_mm": 1.2,
+    "nominal_pin_radial_clearance_mm": 0.19999999999999996
+  }
+}

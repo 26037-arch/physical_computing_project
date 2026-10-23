@@ -3,17 +3,55 @@
   "author": "physical_computing_project",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
-    { "type": "wokwi-led", "id": "led1", "top": -90, "left": 120, "attrs": { "color": "red" } },
-    { "type": "wokwi-resistor", "id": "r1", "top": -40, "left": 160, "rotate": 90, "attrs": { "value": "220" } },
-    { "type": "wokwi-pushbutton", "id": "btn1", "top": -100, "left": 250, "attrs": { "color": "green" } }
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 180, "left": 20, "attrs": {} },
+
+    { "type": "wokwi-a4988", "id": "drvU", "top": -200, "left": 380, "attrs": {} },
+    { "type": "wokwi-a4988", "id": "drvR", "top": -200, "left": 520, "attrs": {} },
+    { "type": "wokwi-a4988", "id": "drvF", "top": -200, "left": 660, "attrs": {} },
+    { "type": "wokwi-a4988", "id": "drvD", "top": 60, "left": 380, "attrs": {} },
+    { "type": "wokwi-a4988", "id": "drvL", "top": 60, "left": 520, "attrs": {} },
+    { "type": "wokwi-a4988", "id": "drvB", "top": 60, "left": 660, "attrs": {} },
+
+    { "type": "wokwi-stepper-motor", "id": "motU", "top": -300, "left": 820, "attrs": { "size": "17", "display": "angle", "arrow": "white" } },
+    { "type": "wokwi-stepper-motor", "id": "motR", "top": -300, "left": 960, "attrs": { "size": "17", "display": "angle", "arrow": "red" } },
+    { "type": "wokwi-stepper-motor", "id": "motF", "top": -300, "left": 1100, "attrs": { "size": "17", "display": "angle", "arrow": "green" } },
+    { "type": "wokwi-stepper-motor", "id": "motD", "top": -40, "left": 820, "attrs": { "size": "17", "display": "angle", "arrow": "yellow" } },
+    { "type": "wokwi-stepper-motor", "id": "motL", "top": -40, "left": 960, "attrs": { "size": "17", "display": "angle", "arrow": "orange" } },
+    { "type": "wokwi-stepper-motor", "id": "motB", "top": -40, "left": 1100, "attrs": { "size": "17", "display": "angle", "arrow": "blue" } },
+
+    { "type": "wokwi-lcd1602", "id": "lcd1", "top": 420, "left": 300, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-pushbutton", "id": "btnScramble", "top": 420, "left": 700, "attrs": { "color": "red", "label": "SCRAMBLE" } },
+    { "type": "wokwi-pushbutton", "id": "btnSolve", "top": 420, "left": 800, "attrs": { "color": "green", "label": "SOLVE" } },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": 400, "left": 920, "attrs": { "volume": "0.1" } }
   ],
   "connections": [
-    [ "uno:13", "r1:2", "green", [] ],
-    [ "r1:1", "led1:A", "green", [] ],
-    [ "led1:C", "uno:GND.1", "black", [] ],
-    [ "btn1:1.l", "uno:2", "blue", [] ],
-    [ "btn1:2.l", "uno:GND.2", "black", [] ]
+    [ "uno:2", "drvU:STEP", "green", [] ], [ "uno:8", "drvU:DIR", "orange", [] ],
+    [ "uno:3", "drvR:STEP", "green", [] ], [ "uno:9", "drvR:DIR", "orange", [] ],
+    [ "uno:4", "drvF:STEP", "green", [] ], [ "uno:10", "drvF:DIR", "orange", [] ],
+    [ "uno:5", "drvD:STEP", "green", [] ], [ "uno:11", "drvD:DIR", "orange", [] ],
+    [ "uno:6", "drvL:STEP", "green", [] ], [ "uno:12", "drvL:DIR", "orange", [] ],
+    [ "uno:7", "drvB:STEP", "green", [] ], [ "uno:13", "drvB:DIR", "orange", [] ],
+
+    [ "drvU:RESET", "drvU:SLEEP", "gray", [] ], [ "drvU:GND", "uno:GND.1", "black", [] ], [ "drvU:VDD", "uno:5V", "red", [] ],
+    [ "drvR:RESET", "drvR:SLEEP", "gray", [] ], [ "drvR:GND", "uno:GND.1", "black", [] ], [ "drvR:VDD", "uno:5V", "red", [] ],
+    [ "drvF:RESET", "drvF:SLEEP", "gray", [] ], [ "drvF:GND", "uno:GND.1", "black", [] ], [ "drvF:VDD", "uno:5V", "red", [] ],
+    [ "drvD:RESET", "drvD:SLEEP", "gray", [] ], [ "drvD:GND", "uno:GND.1", "black", [] ], [ "drvD:VDD", "uno:5V", "red", [] ],
+    [ "drvL:RESET", "drvL:SLEEP", "gray", [] ], [ "drvL:GND", "uno:GND.1", "black", [] ], [ "drvL:VDD", "uno:5V", "red", [] ],
+    [ "drvB:RESET", "drvB:SLEEP", "gray", [] ], [ "drvB:GND", "uno:GND.1", "black", [] ], [ "drvB:VDD", "uno:5V", "red", [] ],
+
+    [ "drvU:1A", "motU:B+", "blue", [] ], [ "drvU:1B", "motU:B-", "blue", [] ], [ "drvU:2A", "motU:A+", "purple", [] ], [ "drvU:2B", "motU:A-", "purple", [] ],
+    [ "drvR:1A", "motR:B+", "blue", [] ], [ "drvR:1B", "motR:B-", "blue", [] ], [ "drvR:2A", "motR:A+", "purple", [] ], [ "drvR:2B", "motR:A-", "purple", [] ],
+    [ "drvF:1A", "motF:B+", "blue", [] ], [ "drvF:1B", "motF:B-", "blue", [] ], [ "drvF:2A", "motF:A+", "purple", [] ], [ "drvF:2B", "motF:A-", "purple", [] ],
+    [ "drvD:1A", "motD:B+", "blue", [] ], [ "drvD:1B", "motD:B-", "blue", [] ], [ "drvD:2A", "motD:A+", "purple", [] ], [ "drvD:2B", "motD:A-", "purple", [] ],
+    [ "drvL:1A", "motL:B+", "blue", [] ], [ "drvL:1B", "motL:B-", "blue", [] ], [ "drvL:2A", "motL:A+", "purple", [] ], [ "drvL:2B", "motL:A-", "purple", [] ],
+    [ "drvB:1A", "motB:B+", "blue", [] ], [ "drvB:1B", "motB:B-", "blue", [] ], [ "drvB:2A", "motB:A+", "purple", [] ], [ "drvB:2B", "motB:A-", "purple", [] ],
+
+    [ "lcd1:SDA", "uno:A4", "cyan", [] ], [ "lcd1:SCL", "uno:A5", "magenta", [] ],
+    [ "lcd1:VCC", "uno:5V", "red", [] ], [ "lcd1:GND", "uno:GND.2", "black", [] ],
+
+    [ "btnScramble:1.l", "uno:A0", "yellow", [] ], [ "btnScramble:2.l", "uno:GND.2", "black", [] ],
+    [ "btnSolve:1.l", "uno:A1", "yellow", [] ], [ "btnSolve:2.l", "uno:GND.2", "black", [] ],
+    [ "bz1:2", "uno:A2", "white", [] ], [ "bz1:1", "uno:GND.3", "black", [] ]
   ],
   "dependencies": {}
 }
