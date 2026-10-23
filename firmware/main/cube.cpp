@@ -5,6 +5,7 @@ void Cube::reset() {
   for (uint8_t i = 0; i < 12; i++) { ep[i] = i; eo[i] = 0; }
 }
 
+// s·M :  σ'(i) = σ(σ^M(i)),  o'(i) = o(σ^M(i)) + o^M(i)   (docs/MATH.md 2절)
 void Cube::move(uint8_t m) {
   uint8_t ncp[8], nco[8], nep[12], neo[12];
   for (uint8_t i = 0; i < 8; i++) {
@@ -28,6 +29,8 @@ bool Cube::isSolved() const {
   return true;
 }
 
+// 조각 x 하나의 사영 π_x(s) = (p, o),  p = σ^-1(x) (조각이 있는 위치), o = o(p).
+//   엣지 상태 = 2p + o (24가지), 코너 상태 = 3p + o (24가지). 탐색은 이 값만 추적한다 (solver.cpp).
 uint8_t Cube::edgeState(uint8_t cubie) const {
   for (uint8_t p = 0; p < 12; p++) if (ep[p] == cubie) return p * 2 + eo[p];
   return 0;
@@ -100,6 +103,7 @@ uint8_t parseSeq(const char* str, uint8_t* out, uint8_t maxN) {
   return n;
 }
 
+// 같은 면 연속은 한 수로 합친다: X^a · X^b = X^(a+b mod 4), 0 이면 소거.
 uint8_t simplifySeq(uint8_t* seq, uint8_t n) {
   uint8_t out = 0;
   for (uint8_t i = 0; i < n; i++) {
@@ -114,6 +118,9 @@ uint8_t simplifySeq(uint8_t* seq, uint8_t n) {
   return out;
 }
 
+// xorshift32: x ^= x<<13; x ^= x>>17; x ^= x<<5 (주기 2^32-1, 시드 0 은 0x9E3779B9 로 대체).
+// 면 f = x mod 6 (직전 면과 같으면 버림), 회전 k = x' mod 3. JS(sim/cube.js) 와 같은 32비트 산술이라
+// 같은 시드 → 같은 수열. 이것이 "JS 기대 출력 = 보드 출력" 교차검증의 전제다 (docs/MATH.md 9절).
 void scrambleSeq(uint32_t seed, uint8_t* out, uint8_t n) {
   uint32_t s = seed ? seed : 0x9E3779B9UL;
   int8_t last = -1;

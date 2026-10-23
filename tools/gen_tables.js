@@ -167,6 +167,18 @@ const lines = (name, type, arr2d, cols) => {
 const MOVE_CP = MOVES.map((m) => m.cp), MOVE_CO = MOVES.map((m) => m.co), MOVE_EP = MOVES.map((m) => m.ep), MOVE_EO = MOVES.map((m) => m.eo);
 let h = `// 자동 생성 파일 — 수정하지 말 것. 생성: node tools/gen_tables.js (${new Date().toISOString().slice(0, 10)})
 // 큐브 치환표, IDA* 가지치기 거리표, OLL/PLL 인식 키와 공식 수열. 모두 PROGMEM(플래시)에 둔다.
+//
+// [수학적 정의 — docs/MATH.md]
+//  MOVE_*[m]        : 수 M_m = (σ^M, o^M).  적용: σ'(i) = σ(σ^M(i)), o'(i) = o(σ^M(i)) + o^M(i)
+//  EDGE_TO/DO[m][p] : 조각 상태 전이 T_M(p,o) = (q, o + o^M(q)), q = (σ^M)^-1(p)   (코너도 동일)
+//  *_PAIR[..]       : 조각 집합 P 의 사영 그래프에서 목표까지 BFS 거리 d_P(u). 실제 L수 해의 사영 경로도 길이 L
+//                     이므로 d_P(π_P(s)) ≤ d*(s) — 허용적 휴리스틱. 크로스 쌍은 18수, F2L 쌍은 D 제외 15수 기준.
+//  OLL_KEY[i]       : key_OLL(I·A_i^-1) — 공식 A_i 의 역연산을 풀린 큐브에 적용한 상태의 방향 키.
+//                     s·r·A 가 방향 0 ⇔ key_OLL(s·r) = OLL_KEY  (방향은 위치와 무관한 아핀 함수로 변하므로)
+//  PLL_KEY[i]       : key_PLL(I·u^-1·A^-1), PLL_AUF[i] = u.   s·r·A·u = I ⇔ s·r = u^-1·A^-1
+//  공식 수열은 wide/슬라이스/회전을 겉면 6면 수로 변환한 것: ρ X = X^ρ ρ 로 회전을 오른쪽으로 밀어 S = S'·ρ_net,
+//                     풀린 상태는 회전 불변이므로 s·S = I ⇔ s·S' = I.  (sim/cube.js expandAlg)
+//  생성 시 OLL 216 상태·PLL 288 상태 전부에 대해 "조회됨 ∧ 적용 후 목표 달성" 을 검사한다.
 #pragma once
 #include <stdint.h>
 #include <avr/pgmspace.h>  // AVR: 플래시 접근, UNO R4(Renesas): 호환 매크로

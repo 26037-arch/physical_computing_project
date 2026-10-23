@@ -5,7 +5,7 @@
 > 섞인 3×3 큐브를 **아두이노 보드 안에서** CFOP(IDA* + 공식표)로 풀어 **6개 스텝모터가 각 면을 직접 돌려** 맞추는 로봇.
 > 이번 산출물: 펌웨어(Uno·UNO R4 WiFi 컴파일 통과), Wokwi 회로·자동 검증, Fusion 360 출력 부품 3종(STL), JS 3D 시뮬레이터, 보고서.
 
-관련 문서: [파이프라인](PIPELINE.md) · [자랑하고 싶은 기술](HIGHLIGHTS.md) · [3D 설계 검토](DESIGN_REVIEW.md) · [환경 설정](SETUP.md)
+관련 문서: [파이프라인](PIPELINE.md) · [자랑하고 싶은 기술](HIGHLIGHTS.md) · [알고리즘의 수학적 정리](MATH.md) · [3D 설계 검토](DESIGN_REVIEW.md) · [환경 설정](SETUP.md)
 
 ---
 
