@@ -1,0 +1,27 @@
+name: V3 manual confirm, abort, partial-state retention
+version: 1
+author: physical_computing_project
+steps:
+  - wait-serial: "READY"
+  - write-serial: "M F R\n"
+  - wait-serial: "PREPARE F: ENGAGE FB; LOCK B; PARK F"
+  - write-serial: "HX\n"
+  - delay: 100ms
+  - write-serial: "X\n"
+  - wait-serial: "ABORTED completed=0"
+  - write-serial: "P\n"
+  - wait-serial: "STATE UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+  - write-serial: "M F R\n"
+  - wait-serial: "PREPARE F: ENGAGE FB; LOCK B; PARK F"
+  - write-serial: "H\n"
+  - wait-serial: "PREPARE R: ENGAGE RL; LOCK L; PARK R"
+  - write-serial: "X\n"
+  - wait-serial: "ABORTED completed=1"
+  - write-serial: "P\n"
+  - wait-serial: "STATE UUUUUULLLURRURRURRFFFFFFFFFRRRDDDDDDLLDLLDLLDBBBBBBBBB"
+  - write-serial: "Q 1\n"
+  - wait-serial: "MOTORS OFF"
+  - write-serial: "M F'\n"
+  - wait-serial: "MOVED 1"
+  - write-serial: "P\n"
+  - wait-serial: "STATE UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"

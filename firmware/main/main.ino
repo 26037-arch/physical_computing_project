@@ -1,7 +1,7 @@
 // main.ino — 3x3 큐브 풀이 로봇 (컴퓨터과학2 피지컬 컴퓨팅)
 //
 // 보드: Arduino UNO R4 WiFi (실물) / UNO R3 (Wokwi 시뮬레이션, 헤더 핀 배치 동일)
-// 회로: A4988 ×6 (STEP D2~D7, DIR D8~D13) → NEMA17 ×6 (U R F D L B 면 센터 직결)
+// 회로: A4988 ×6 (STEP D2~D7, DIR D8~D13) → NEMA17 ×6 (U R F D L B V3 핀 구동; F/B 중공축 벨트 1:1)
 //       LCD1602 I2C (A4/A5, 0x27), 버튼 SCRAMBLE(A0)·SOLVE(A1) 풀업, 부저(A2)
 //
 // 동작: [SCRAMBLE] 로봇이 20수 무작위 섞기를 직접 돌리며 그 수열을 기록한다 → 큐브 상태를 센서 없이 정확히 안다.
@@ -46,10 +46,48 @@ void lcdShowF(const __FlashStringHelper* row0, const char* row1) {
 
 void beep(uint16_t hz, uint16_t ms) { tone(BUZZER, hz, ms); delay(ms); }
 
-// ---- 수열 실행: 모터 + 큐브 모델을 함께 갱신 ----
-void execute(const uint8_t* seq, uint8_t n, const __FlashStringHelper* label) {
+// V3 manual commissioning. Confirmation is operator evidence, not a sensor.
+// Q 1 is explicitly virtual: no motor pulse and no mechanical acknowledgement.
+bool prepareMove(uint8_t m) {
+  if (!motors.isEnabled()) return true;
+  static const char faces[] = "URFDLB";
+  static const uint8_t opposite[] = {3,4,5,0,1,2};
+  const uint8_t f = m / 3, o = opposite[f];
+  while (Serial.available()) Serial.read(); // reject stale confirmations
+  Serial.print(F("PREPARE ")); Serial.print(faces[f]);
+  if (m % 3 == 1) Serial.print('2');
+  if (m % 3 == 2) Serial.print('\'');
+  Serial.print(F(": ENGAGE ")); Serial.print(faces[f]); Serial.print(faces[o]);
+  Serial.print(F("; LOCK ")); Serial.print(faces[o]);
+  Serial.print(F("; PARK ")); Serial.print(faces[f]);
+  Serial.println(F("; RETRACT others >=24mm; H=confirm X=abort (180s)"));
+  lcdShowF(F("MANUAL PREPARE"), "H:run X:abort");
+  uint32_t started = millis();
+  char ack = 0; bool bad = false;
+  while (millis() - started < 180000UL) {
+    if (!Serial.available()) { delay(1); continue; }
+    char c = Serial.read();
+    if (c == '\n' || c == '\r') {
+      if (!bad && (ack == 'H' || ack == 'h')) return true;
+      if (!bad && (ack == 'X' || ack == 'x')) return false;
+      ack = 0; bad = false;
+    } else if (c != ' ' && c != '\t') {
+      if (ack) bad = true; else ack = c;
+    }
+  }
+  Serial.println(F("ERR manual confirmation timeout"));
+  return false;
+}
+
+// ---- 수열 실행: 승인한 한 수만 돌리고 모델 갱신 ----
+bool execute(const uint8_t* seq, uint8_t n, const __FlashStringHelper* label) {
   char row1[17];
   for (uint8_t i = 0; i < n; i++) {
+    if (!prepareMove(seq[i])) {
+      Serial.print(F("ABORTED completed=")); Serial.println(i);
+      lcdShowF(F("ABORTED"), "state retained");
+      return false;
+    }
     motors.turn(seq[i]);
     cube.move(seq[i]);
     if ((i & 3) == 0 || i == n - 1) {
@@ -57,6 +95,7 @@ void execute(const uint8_t* seq, uint8_t n, const __FlashStringHelper* label) {
       lcdShowF(label, row1);
     }
   }
+  return true;
 }
 
 // ---- 섞기 ----
@@ -68,7 +107,7 @@ void doScramble(uint32_t seed) {
   Serial.print(F(" (")); Serial.print(SCRAMBLE_LEN); Serial.print(F("): "));
   printSeq(Serial, seq, SCRAMBLE_LEN); Serial.println();
   uint32_t t0 = millis();
-  execute(seq, SCRAMBLE_LEN, F("SCRAMBLING"));
+  if (!execute(seq, SCRAMBLE_LEN, F("SCRAMBLING"))) return;
   char row1[17];
   snprintf(row1, sizeof(row1), "seed %lu", (unsigned long)seed);
   lcdShowF(F("SCRAMBLED 20mv"), row1);
@@ -103,7 +142,7 @@ void doSolve() {
   printSeq(Serial, solution, solutionLen); Serial.println();
   Serial.print(F("CALC nodes=")); Serial.print(solver.nodes); Serial.print(F(" ms=")); Serial.println(calcMs);
   t0 = millis();
-  execute(solution, solutionLen, F("EXECUTING"));
+  if (!execute(solution, solutionLen, F("EXECUTING"))) return;
   uint32_t execMs = millis() - t0;
   bool solved = cube.isSolved();
   Serial.print(F("SOLVED ok=")); Serial.print(solved ? 1 : 0);
@@ -134,7 +173,7 @@ void handleLine(char* s) {
       uint8_t seq[64];
       uint8_t n = parseSeq(arg, seq, sizeof(seq));
       if (!n) { Serial.println(F("ERR bad moves")); break; }
-      execute(seq, n, F("MOVING"));
+      if (!execute(seq, n, F("MOVING"))) break;
       Serial.print(F("MOVED ")); Serial.println(n);
       break;
     }
@@ -177,7 +216,7 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcdShowF(F("CUBE ROBOT"), "SCRAMBLE / SOLVE");
-  Serial.println(F("READY cube-robot v1 (S [seed] | V | M <moves> | P | R | Q 0|1)"));
+  Serial.println(F("READY cube-robot v3 MANUAL H=confirm X=abort (S [seed] | V | M <moves> | P | R | Q 0|1)"));
 }
 
 void loop() {

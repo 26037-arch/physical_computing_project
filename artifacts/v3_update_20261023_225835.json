@@ -1,0 +1,710 @@
+{
+  "project": "C:\\program code\\physical_computing_project",
+  "backup": "C:\\program code\\physical_computing_project\\artifacts\\before_v3_20261023_225835.zip",
+  "file_count": 139,
+  "files": [
+    {
+      "path": "README_BUILD.md",
+      "before": null,
+      "after": "81b6a995115818ae7bc8c344e007f88084852cd3a6014b40b26050322f845f66"
+    },
+    {
+      "path": "docs/BUILD_V3.md",
+      "before": null,
+      "after": "a5d8d7b50daff1585a4f2bd4fa89c28af2e7579b958ae30fbc47bddd3dda356e"
+    },
+    {
+      "path": "docs/BUILD_V3_\uc81c\uc791\uc124\uacc4\ub3c4.pdf",
+      "before": null,
+      "after": "359c2283fcc7c24d5dc27d7ab1539ffd3165fa0ee6a73b2ba9871889c12267b0"
+    },
+    {
+      "path": "docs/images/robot_v3_assembly.png",
+      "before": null,
+      "after": "765e224f935e7d4c288840c275b7c86f2a22e4cc76cb65d80996ad4369a5ce4c"
+    },
+    {
+      "path": "docs/images/robot_v3_hollow_head.png",
+      "before": null,
+      "after": "03e9f5331feb7be3b3e0f36f80dfe60ddfaf0590f66e6d18219c138389bd33ea"
+    },
+    {
+      "path": "tools/build_robot_v3.py",
+      "before": null,
+      "after": "1745ea3eb42d92faba82178637f63aae4cb61db6f45ba61152e32261fc3bd44d"
+    },
+    {
+      "path": "tools/check_robot_v3.py",
+      "before": null,
+      "after": "1efc5b9cddd4b027c6e12f9ad662e3d4d26f3265f1834e14a5f50953c46fcc83"
+    },
+    {
+      "path": "tools/check_print_meshes_v3.py",
+      "before": null,
+      "after": "dcc775d981e0ee0ed44311c24894b6f2bb276743d3b2058db1fcd81934c401d9"
+    },
+    {
+      "path": "tools/draw_robot_v3.py",
+      "before": null,
+      "after": "9241234a5b886c79205cb1be87cac8be452aa964e70c77d34a8a61ad5935657e"
+    },
+    {
+      "path": "tools/requirements-robot-v3.txt",
+      "before": null,
+      "after": "536c54871aff51b9520ee4edf4810f31040d0ab49cdd852bd6334a6cb05a7c3c"
+    },
+    {
+      "path": "tools/gen_manual_v3_test.js",
+      "before": null,
+      "after": "370eb377d93392117217c774ecd1b82c9270775960abcb616f44c689869782bd"
+    },
+    {
+      "path": "tools/gen_wokwi_test.js",
+      "before": "341db6ef81ce65f19677940a4c576dbb0c13b43b1c834af6a60d9a9c36d00c5b",
+      "after": "40eca94f9091c3d08289c2266b21004c023dd90012001f8d407748f40f3f5120"
+    },
+    {
+      "path": "tools/fusion-bridge/import-robot-v3.mjs",
+      "before": null,
+      "after": "04fab97315bf87d3f5b8edb056d32893a79eae52c7774e5a75a4946dfbb515d8"
+    },
+    {
+      "path": "fusion/scripts/import_robot_v3.py",
+      "before": null,
+      "after": "5363fc26629b864bbfb6a8980f64eab9f16005593e469a0b93ad63ee0ec54981"
+    },
+    {
+      "path": "firmware/main/main.ino",
+      "before": "31947e1fe22ee3934706026d1d100ed288642ae416f0c353a164ea8877b99e3e",
+      "after": "42c18db274db76dabef04ad2094f63269d5b0d473b0024b29ff29259920ffcb6"
+    },
+    {
+      "path": "firmware/main/motors.h",
+      "before": "ef354197df4cae3fd7c3d61fc4e993a72dd83c348b193bba3b8afb7496f0a345",
+      "after": "2c330a4de5d7ecf5a93739f9c035754f498c15581b819e95ae915cb19840c6f5"
+    },
+    {
+      "path": "tests/buttons.test.yaml",
+      "before": "80e2dbbc55a946887d02819b358b9d4fd56e7885568beb34cd48049425c8301b",
+      "after": "443e474b627cc45410b14936686dc5cf154e2ebc69845763de709c9d5085d2a3"
+    },
+    {
+      "path": "tests/manual_v3.test.yaml",
+      "before": null,
+      "after": "4938cee06cbe8306ff787e168d3c63b30cfd86f9e4c5c0c9f8eecd3a53590b95"
+    },
+    {
+      "path": "tests/solve_seed1.test.yaml",
+      "before": "0db702eb1993a6c45537d89d65955aefbf473f089c33187d250ac56508adb1ac",
+      "after": "7ab421e0e7ad3ad784c3838892c1c7d78a02307b9dad2d4caa75a54640804e48"
+    },
+    {
+      "path": "tests/solve_seed2.test.yaml",
+      "before": "e3c57cf0c83aba8bc7475b512ab5170685ae4d1f3d8c2e1aac6c502e2b66f771",
+      "after": "2ba9d58403d2f760e0c1fca25b77b0331735f12a184a6a52cd6126ef58b98703"
+    },
+    {
+      "path": "tests/solve_seed3.test.yaml",
+      "before": "b46018489b370e1d72597147d25ac8a7fd418f224acebbfdcc59ff1079156d19",
+      "after": "2537256e834a079528d85d2d35f5c061241cfec6f9d0f1621980f77c11aa6d64"
+    },
+    {
+      "path": "models/robot_v3/cube_with_fixed_axle.step",
+      "before": null,
+      "after": "773d3277841ce5b5e8fd1a0a3dd2c2d84909c7be1c2806c006ad18751eb6fddd"
+    },
+    {
+      "path": "models/robot_v3/fastener_BOM.csv",
+      "before": null,
+      "after": "dd33a3d0e0ed9d66dd7491e98c97ecc711221eab11467829a3ab08de70c8d9d5"
+    },
+    {
+      "path": "models/robot_v3/manufacturing.json",
+      "before": null,
+      "after": "47d9e7f4679758d737fb4dadb4a09242e4204463be1aa4f2fde99aa4c21aa2dc"
+    },
+    {
+      "path": "models/robot_v3/mechanical_checks.json",
+      "before": null,
+      "after": "438d79f76f5f44e28208f622487ba6a3ce586bc0848306296f579895e16d169a"
+    },
+    {
+      "path": "models/robot_v3/mesh_checks.json",
+      "before": null,
+      "after": "f91bb6d7a50f87358f2ecfb29ffd1db00837e32d786473753c415c8838541f7d"
+    },
+    {
+      "path": "models/robot_v3/module_direct.step",
+      "before": null,
+      "after": "f8345e3bcb32ce2f7f5f224681b1f6d0bd2d3e85470f722e10c333cb7a5de7d1"
+    },
+    {
+      "path": "models/robot_v3/module_hollow.step",
+      "before": null,
+      "after": "c328826c4bd0e9ccd2b9ceabe1ca7ce2bcb075251e5651d711d4a2cded436c39"
+    },
+    {
+      "path": "models/robot_v3/purchase_BOM.csv",
+      "before": null,
+      "after": "fa45cc19ff49cbc97292f6cd43eacda8d8623cd6cc5b5e21e8ad5f7b626ba914"
+    },
+    {
+      "path": "models/robot_v3/robot_assembly.glb",
+      "before": null,
+      "after": "a725d6911564e390f412cf91cde2709dadcede907d9fc4ef5b99f6b80f56e141"
+    },
+    {
+      "path": "models/robot_v3/robot_assembly.step",
+      "before": null,
+      "after": "c94f1fb31fe925c4b27d0680bf5cbd306e71fc46e051d64cdfa78b1c1a841aa1"
+    },
+    {
+      "path": "models/robot_v3/THIRD_PARTY_LICENSE.md",
+      "before": null,
+      "after": "9c418c44248ff1f4408dc2e303056623628a9fdb727ece6ce4cad111cead6d94"
+    },
+    {
+      "path": "models/robot_v3/print/axle_coupon.step",
+      "before": null,
+      "after": "c7371388adb7c71bbf5fe9b85779ca71692b0fb5a875fcc053e75cc4d91d7331"
+    },
+    {
+      "path": "models/robot_v3/print/axle_coupon.stl",
+      "before": null,
+      "after": "b80019e23404bead81d30a7aebe29b39d277e7f69edf89f5e950e340fe89b264"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_front_cap_direct.step",
+      "before": null,
+      "after": "be1836ae2ff3db831ae8f6db138cbea910c8a6c2888b750433d06043b4ab84fb"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_front_cap_direct.stl",
+      "before": null,
+      "after": "0222ed55bfcc929827316bbd7953e674cf462124fb2c3e1a95eeaee6c6a45bb2"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_front_cap_hollow.step",
+      "before": null,
+      "after": "88bbe3fe951363fdc7665d7355e586c22429be952131af26b27cddbc0e9addf8"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_front_cap_hollow.stl",
+      "before": null,
+      "after": "f1eb816c1d450bebf76eb3d7288d89b1bae52493130b3889c1a145a054a03a59"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_housing_direct.step",
+      "before": null,
+      "after": "37e5fc2c7d1a765f091c2836556eb6d7e4adf332657ee0fa50a90d5ab52646bd"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_housing_direct.stl",
+      "before": null,
+      "after": "79482fd7a1b8e52cbb7c97673ca304131b08c3de28f31bd1c13a649076297503"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_housing_hollow.step",
+      "before": null,
+      "after": "8fc73797fa78dbd982377b0296e72006c0fd8d195b72dfe6e9228f4c6ac4b18f"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_housing_hollow.stl",
+      "before": null,
+      "after": "2bbbcc7d8f229cc664230b1b793efeb928689958db21a1341ba8008f2f38dbc9"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_rear_cap_direct.step",
+      "before": null,
+      "after": "193f4489c221a2351542c3f7313e66972036ad8ee66a3e0ba829b89e9d328412"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_rear_cap_direct.stl",
+      "before": null,
+      "after": "0222ed55bfcc929827316bbd7953e674cf462124fb2c3e1a95eeaee6c6a45bb2"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_rear_cap_hollow.step",
+      "before": null,
+      "after": "8aa200abcb002726f61605a8c5da682866c992618d583669d24696134b689193"
+    },
+    {
+      "path": "models/robot_v3/print/bearing_rear_cap_hollow.stl",
+      "before": null,
+      "after": "f1eb816c1d450bebf76eb3d7288d89b1bae52493130b3889c1a145a054a03a59"
+    },
+    {
+      "path": "models/robot_v3/print/carriage_direct.step",
+      "before": null,
+      "after": "d51c2486f332d0712e003d3ed9b0c9b565d469266220dcadd8d3a7f0efdacfc4"
+    },
+    {
+      "path": "models/robot_v3/print/carriage_direct.stl",
+      "before": null,
+      "after": "c508d707cf00c4413a900974636fdcffb6c3601b950ea21795d02794fac698d3"
+    },
+    {
+      "path": "models/robot_v3/print/carriage_hollow.step",
+      "before": null,
+      "after": "fc1fd78f26423654b568498a148e943e4a29b67c664d0a4e637951a55212013f"
+    },
+    {
+      "path": "models/robot_v3/print/carriage_hollow.stl",
+      "before": null,
+      "after": "3084d483dd62e39ee3067a6c31e72f4009596c3f6dc3660867e39fe629ef7cec"
+    },
+    {
+      "path": "models/robot_v3/print/center_axle.step",
+      "before": null,
+      "after": "994b814d643a81536ad2c16aa6070bf68dc3402561ce192b1d5575931642abd7"
+    },
+    {
+      "path": "models/robot_v3/print/center_axle.stl",
+      "before": null,
+      "after": "d8c1885c1367e05a4089fedcec5ba9c4e9f4312f60ff31dfd157ca129c8c4bcf"
+    },
+    {
+      "path": "models/robot_v3/print/center_standard.step",
+      "before": null,
+      "after": "003a99c9f05a863ecd1757307692d3c4f74c223ff43194d1ab418fedc28445db"
+    },
+    {
+      "path": "models/robot_v3/print/center_standard.stl",
+      "before": null,
+      "after": "ccb8f3885a92ae0726bc24afada645f65bfa04779f04357f05802d3544053f93"
+    },
+    {
+      "path": "models/robot_v3/print/core_left.step",
+      "before": null,
+      "after": "1fad6d666fa35dc4648ec551c2f43d4d8985a042d2a14cf66a9b80ae98a3750a"
+    },
+    {
+      "path": "models/robot_v3/print/core_left.stl",
+      "before": null,
+      "after": "e5e79fb83a266db2f249de5598d69f61598df555aab87b79ae18ab1e0237c58b"
+    },
+    {
+      "path": "models/robot_v3/print/core_right.step",
+      "before": null,
+      "after": "4f98dbd0861495c336a721b71a46bde9a5e31d170121e37477f7298a99c1a2b6"
+    },
+    {
+      "path": "models/robot_v3/print/core_right.stl",
+      "before": null,
+      "after": "4c6f7332369b5c82c5c285bcb07a83936915ada38e2561b20ba25fa3ab29592b"
+    },
+    {
+      "path": "models/robot_v3/print/cube_corner.step",
+      "before": null,
+      "after": "f3fcc6bedaed32add5eb78bab0dc4b4037a465819e50d4494deedf6d024139aa"
+    },
+    {
+      "path": "models/robot_v3/print/cube_corner.stl",
+      "before": null,
+      "after": "8f384d90ad34909e67ef790ec6ede1883acbfc66337ca7f6732f7a5f70c5a08a"
+    },
+    {
+      "path": "models/robot_v3/print/cube_edge.step",
+      "before": null,
+      "after": "182bb0264b400693d45febf57b646e3ba0d4b17d27ff3ae9acd624b6eb50b082"
+    },
+    {
+      "path": "models/robot_v3/print/cube_edge.stl",
+      "before": null,
+      "after": "fc266f8534b194657d91bebe3d141e602c12da2ceed19e9910b7740a5742fe1d"
+    },
+    {
+      "path": "models/robot_v3/print/drive_plate.step",
+      "before": null,
+      "after": "c35dce3d6be9500d4ea4a518c24f9686338b3aa2aa1250703387b92d17c13913"
+    },
+    {
+      "path": "models/robot_v3/print/drive_plate.stl",
+      "before": null,
+      "after": "d5c57cc17e4a65d62a2172c3f2df888759811256f17d2efa3fc34f6f7133ecfe"
+    },
+    {
+      "path": "models/robot_v3/print/index_pin_bracket_direct.step",
+      "before": null,
+      "after": "dcbe04e0619074af74cf5a69e35a4509cfaef52df16300395a9418895fc08feb"
+    },
+    {
+      "path": "models/robot_v3/print/index_pin_bracket_direct.stl",
+      "before": null,
+      "after": "73b6be61beb91ea73dfcc87a64fa33feb2cb656ad79519626a9882c7778d1e35"
+    },
+    {
+      "path": "models/robot_v3/print/index_pin_bracket_hollow.step",
+      "before": null,
+      "after": "0538fa59df5de11f52715c896d7b343bcbbac07965ff0cc81d7734e9467ab9f0"
+    },
+    {
+      "path": "models/robot_v3/print/index_pin_bracket_hollow.stl",
+      "before": null,
+      "after": "d4ce17f2bab4fd32aa4994798a3ea443379faaacdc39c49ec478b345f3b1d4f8"
+    },
+    {
+      "path": "models/robot_v3/print/nut_cover.step",
+      "before": null,
+      "after": "bb051cce84fb408c6e91dfd0878e7ffb02d795e43352c5ca3c3f38f7dd5f39da"
+    },
+    {
+      "path": "models/robot_v3/print/nut_cover.stl",
+      "before": null,
+      "after": "a0cbe250b437740c30646c6bc11a71bb1e2d39c313dabe82138fc6bbcec4d17f"
+    },
+    {
+      "path": "models/robot_v3/print/rail_support.step",
+      "before": null,
+      "after": "c5fd7f31533567c8cfdf51acb1c49e7b281c06c850d60f89aeb44cc1fe502cbd"
+    },
+    {
+      "path": "models/robot_v3/print/rail_support.stl",
+      "before": null,
+      "after": "d3597348fe4aa410bee1ae8d11dc7cf2eb7702374b82c0be0d9d0e0686463ccb"
+    },
+    {
+      "path": "models/robot_v3/print/shaft_hub_direct.step",
+      "before": null,
+      "after": "6acaa500a0fd8b2d519f1ca821e616c16c7a7fd44ccb5c8c85a54f92eedcf979"
+    },
+    {
+      "path": "models/robot_v3/print/shaft_hub_direct.stl",
+      "before": null,
+      "after": "ffb0716ad90d4ec5b86d007e7bde2e1cfb6b57837c7d96f43e97e739265a09e3"
+    },
+    {
+      "path": "models/robot_v3/print/shaft_hub_hollow.step",
+      "before": null,
+      "after": "e6c9b9ac99d21be3fecc6c91a48d96682d025f913d01e3eb38dc83ac738b8562"
+    },
+    {
+      "path": "models/robot_v3/print/shaft_hub_hollow.stl",
+      "before": null,
+      "after": "ac30a1b0a315f72c62ca6c9576127bc94c00703e62b94254e991e898e1c2c14c"
+    },
+    {
+      "path": "models/robot_v3/print/socket_coupon.step",
+      "before": null,
+      "after": "6c901ccfd6f5646250b898f4c40cd4c1e5f8c4a61b488f5e843f82d777c6f8f1"
+    },
+    {
+      "path": "models/robot_v3/print/socket_coupon.stl",
+      "before": null,
+      "after": "1d516f2075c59476f70dbf4f27aeca9a371c20d9bbdad75c91b0d24bc9a92a83"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/core_flat_shim_0_1.step",
+      "before": null,
+      "after": "8fa91ba1072bfa48faae954b4ae5d3ed43956321a309ae14900cb0c5c0452b97"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_-1_-1_-180.step",
+      "before": null,
+      "after": "46348f7fe111dc04aa634912f4b990fe8f62c4f93744b75258387ed312810aaa"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_-1_-1_180.step",
+      "before": null,
+      "after": "3337295385b4c3c8881ee5fe50e971bab5c255ce0aa9c732af5a475d9ca6dea2"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_-1_1_-180.step",
+      "before": null,
+      "after": "2951334957215b7fe382889383b7cf6b2696203568299e87a454e81a12cedeff"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_-1_1_180.step",
+      "before": null,
+      "after": "669cd594822a5dc0f51805467a7f10b2b5999831a03783fd78c6b0d263b1dc0d"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_1_-1_-180.step",
+      "before": null,
+      "after": "130e214491316650262cc529600aac6ecb434e4f2d412c4651b258ce5ca2f56f"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_1_-1_180.step",
+      "before": null,
+      "after": "ddbe00eb37d4ee1c364bdd6e79b04cf0949d0f009f51fe162d5f1b7b5f0cc90b"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_1_1_-180.step",
+      "before": null,
+      "after": "faa5d9ac21c1c692b3fc73c4aeaa4973b3a051ed15186ddd42efeb9d547bec0c"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_0_1_1_180.step",
+      "before": null,
+      "after": "c6abca486225dc4b1e80fbef568244da51031875c89d836231498616ddbf68f6"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_-1_-1_-180.step",
+      "before": null,
+      "after": "8de963bc8e547b6c50052abdab222f0fec50d5114dbe07e913dffdd9fd2e785c"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_-1_-1_180.step",
+      "before": null,
+      "after": "ab264700ad35cc1949508cc6da6d25151c15485721e03af6684d6dc1945498a2"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_-1_1_-180.step",
+      "before": null,
+      "after": "2fe67d084378096220e00bcc9f555405566b9ee0b84ee488fff40e93715d1005"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_-1_1_180.step",
+      "before": null,
+      "after": "7513174b7715d93d3fa2fed1d05a18452365ba22b5e319c9f37f0fbede9bda4f"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_1_-1_-180.step",
+      "before": null,
+      "after": "526f2e097c0ebf577b6b15b1cdd53a5bc0710bb42b515c19c551cfbebf0016b7"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_1_-1_180.step",
+      "before": null,
+      "after": "74083f20539cbfaa747c1c5be4f38652c5cfe939f61710138338900c5f50bebb"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_1_1_-180.step",
+      "before": null,
+      "after": "3322a466c3c13e8e0b6a5e0cc430cca474aa03073401e8e71082c283a672012a"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_1_1_1_180.step",
+      "before": null,
+      "after": "59ee6fb2cc683cc2d08037419c8d64ea75c8376e11dc2120d7dba1c7d9115a3d"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_-1_-1_-180.step",
+      "before": null,
+      "after": "a642855012b08844b4ca929be24f1908de5dd08e04bd5aad9db2ac10f9338079"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_-1_-1_180.step",
+      "before": null,
+      "after": "271d3c09ab704349b2247eed176767640d25a4ecf52101e5c4441c84ef8f9c25"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_-1_1_-180.step",
+      "before": null,
+      "after": "4fbfbdf962844d787373ddc432694db07115e0daec53c9c149e1d7aa88018a4e"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_-1_1_180.step",
+      "before": null,
+      "after": "48cdab2857f6dd83ef20ca354755d8dbc45f476dbe48140c8822d50cf2ef6366"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_1_-1_-180.step",
+      "before": null,
+      "after": "785b6f4286375f9c621c1f981d344d6d0e5c06f9c81b7c74649f95d883f2270a"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_1_-1_180.step",
+      "before": null,
+      "after": "cf8d85f2af46d9468234d96e3a55a08c441688dfcf5241c479ea256e6a680843"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_1_1_-180.step",
+      "before": null,
+      "after": "b6c2e370b37be7ad2506ec5f2e9dc839cdd675036ac48c2d8b743208f1c24fdd"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/corner_bracket_2_1_1_180.step",
+      "before": null,
+      "after": "42a64739c4c7b63c6dbba8110147505be757da9baca1cc8b8011039a5799e930"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/fixed_axle_D6_L620.step",
+      "before": null,
+      "after": "8584125d36b5030636edba9a36028be79089dec1418e1312bd99ae0de758e56a"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/fixed_axle_D8_L620.step",
+      "before": null,
+      "after": "7091a6bf52deba196355d15728d713af0a0c9f6c9dec83fa2801d78cd9503a19"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/index_wheel_bore12.step",
+      "before": null,
+      "after": "b9f5ec63ef2fdba31e29da0357b44e55d167e5fd409b290873f5da65ccde0f15"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/index_wheel_bore8.step",
+      "before": null,
+      "after": "2986fcc2110be6f6d931d443d8d3274d193edb831f6edbe8905009c6a58bf6ea"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_B.dxf",
+      "before": null,
+      "after": "ebbff17c10c08a60db38c0b640019a8d81417d584b73c248b4f5c7eb0529422d"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_B.step",
+      "before": null,
+      "after": "f9d8e728b4c7335f6400fefa77ba0b1fb58895088f4a82f0ca473ef8bccf0f05"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_D.dxf",
+      "before": null,
+      "after": "68d3b6057fa4326be2e16fa7aa65d3617bbf0813621f42f7a16d7a9c4f5fe663"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_D.step",
+      "before": null,
+      "after": "49f2c1fa1d6eb25d386d0f798e1ab0cacef5a3e1645fb94d2ba393b7d13fd0f1"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_F.dxf",
+      "before": null,
+      "after": "df8060997cfc11cc268a3f56e68be772cea1ea7c8579fb883b53870324711500"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_F.step",
+      "before": null,
+      "after": "9cdfb90e646c541aeb2ecb38c7f04377fb47c38d843269456a13f064722ae9a0"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_L.dxf",
+      "before": null,
+      "after": "ed4b833ed0598baccd066a9922da08377821b9b11ad8ee3dbfc136c056a295bd"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_L.step",
+      "before": null,
+      "after": "998f96e4d39fe4fb57b35de9b1022f5314ebd020b437ef1295765cea33beb713"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_R.dxf",
+      "before": null,
+      "after": "74825882b49190783ebda91e298929367cf66d0ec8b311912321f10aa156eacd"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_R.step",
+      "before": null,
+      "after": "f8e8a430de5c30c8e6b662d182744bb294ac0db8ba3bcb628745be8642da9bb4"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_U.dxf",
+      "before": null,
+      "after": "24e4d93db322b1338f6b6da3ed79a531eb34bca77a4470b714cb8e9ee2507213"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/panel_U.step",
+      "before": null,
+      "after": "45d3842a1272ebed69b36291acd559375c82aa4c0f44869b16af4ed66cd22e50"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_B.step",
+      "before": null,
+      "after": "a724bf1edf66bfebe471f4ef31a73438f2a598a3c1dfb83d786657ed9802d899"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_D.step",
+      "before": null,
+      "after": "6d23b23dfc308c839648a483ec8d2b77a7e8d263521cc8ad8db4d6ffd561b971"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate.dxf",
+      "before": null,
+      "after": "6077ff713a1cb253277e0e12c9595f49a965efd9a7886e56857709773d6128ff"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate_B.step",
+      "before": null,
+      "after": "1a1f2929c37a009a8fda1ff3818ffceacfa4485372966bc5e6e6699592495636"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate_D.step",
+      "before": null,
+      "after": "0ef65d2153f9b98b8522e011686db975d9da7295835583debc614a462fdf0ab7"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate_F.step",
+      "before": null,
+      "after": "599b0ecbad62ee60f41d3759d6e2faf5f2803fbf724520c1340191835de65433"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate_L.step",
+      "before": null,
+      "after": "15fe5b4851bd11b6a60bcf4412e0d84ccf06f414f07a5e07bb603a1de1746f57"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate_R.step",
+      "before": null,
+      "after": "6963e775afbb5ec5210f13edf0ddb15f481bb6df0b06ad56ab15565cf24a7d81"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_end_plate_U.step",
+      "before": null,
+      "after": "bd363da2d73ebe99a6504d67efdeaa7022d2dc66d17c2cf13783d95f00af5a0f"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_F.step",
+      "before": null,
+      "after": "2338684bf7a046ebde74044bb64b51007929a463e0c2219fc511ae3d8609f281"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_L.step",
+      "before": null,
+      "after": "e4553df76787e90f6728cb58e7c4f388ef91da5a0c8d6e0b88d1c3307b926e81"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_R.step",
+      "before": null,
+      "after": "fc1c3e2f5ff408899a18ebf484f9f720b3dcd18bcf6748bc07c3d0c29566b442"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/profile_U.step",
+      "before": null,
+      "after": "59fcd8682cc86f8efb05d015298b6cc6612b0b738e7ea0cc96f217e233dfa14c"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/shaft_bridge.dxf",
+      "before": null,
+      "after": "23411e9c6b0c7447a30fa35b73b7bddb0f78127f976f853285b4aa9239976141"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/shaft_bridge_B.step",
+      "before": null,
+      "after": "b01eb124ebf5720c31efd4ec7b01df451928ce66dd1dff5a9f7686018fdeb623"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/shaft_bridge_F.step",
+      "before": null,
+      "after": "84e42c2e55c1cb4746cce6ecd37091e5ff42426758850e6e34e1b5de5d187e9e"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/SHF6_envelope_B.step",
+      "before": null,
+      "after": "c41fa163297222053d0815e8808635bfd64ff80b779a3593e92f3b49ba6f8cf7"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/SHF6_envelope_F.step",
+      "before": null,
+      "after": "26af0024aecfa96df43047364dea18acfa7f7439119ef127c264fad7cdf57e66"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/SHF8_envelope_B.step",
+      "before": null,
+      "after": "1fca16191654af5f445c664a4a2d605cbd846f98597ded5bab5cc87a6b42ba58"
+    },
+    {
+      "path": "models/robot_v3/purchase_and_cut/SHF8_envelope_F.step",
+      "before": null,
+      "after": "6b23cca050c3c45373f9a0cc52904ab598397f9b2f32881d30f906024a72bec1"
+    }
+  ],
+  "preserved": [
+    "V1 models",
+    "V2 models and CAD generators",
+    "sim/app.js V2 renderer",
+    "solver algorithm",
+    "git index and commits"
+  ],
+  "no_hardware_upload": true
+}

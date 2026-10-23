@@ -1,5 +1,5 @@
 // motors.h — 6면 직결 스텝모터 제어 (A4988 STEP/DIR ×6)
-//   면 순서 U R F D L B 가 STEP_PINS/DIR_PINS 의 인덱스. 모터가 큐브 센터에 직결되어 면을 바로 돌린다.
+//   면 순서 U R F D L B 가 STEP_PINS/DIR_PINS 의 인덱스. V3 F/B는 40T:40T 벨트, 나머지 면은 직접 핀 구동한다.
 //   한 수(90°) = STEPS_PER_QUARTER 스텝(풀스텝 200 스텝/회전 기준 50). 180° 는 같은 방향으로 2배.
 //   사다리꼴 가감속: START_US 로 시작해 스텝마다 ACCEL_US 씩 빨라지고 MIN_US 에서 등속, 끝에서 대칭 감속.
 #pragma once
@@ -22,6 +22,6 @@ class Motors {
 static const uint8_t STEP_PINS[6] = {2, 3, 4, 5, 6, 7};
 static const uint8_t DIR_PINS[6] = {8, 9, 10, 11, 12, 13};
 static const uint16_t STEPS_PER_QUARTER = 50;
-static const uint16_t START_US = 1400, MIN_US = 600, ACCEL_US = 60;
-static const uint8_t SETTLE_MS = 15;      // 면이 멈춘 뒤 다음 수까지 정착 시간
+static const uint16_t START_US = 12000, MIN_US = 8000, ACCEL_US = 100;
+static const uint8_t SETTLE_MS = 250;      // 면이 멈춘 뒤 다음 수까지 정착 시간
 static const bool CW_LEVEL = HIGH;        // DIR 이 이 레벨이면 면이 시계 방향(면을 정면에서 볼 때)

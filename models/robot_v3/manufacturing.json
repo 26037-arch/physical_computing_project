@@ -1,0 +1,390 @@
+{
+  "parameters": {
+    "axle_d": 6.0,
+    "axle_length": 620.0,
+    "axle_bore": 6.2,
+    "axle_flat_x": 2.0,
+    "hollow_od": 12.0,
+    "hollow_id": 8.6,
+    "hollow_length": 82.0,
+    "frame_inner": 560.0,
+    "wall": 12.0,
+    "profile_start": 5.0,
+    "profile_length": 246.5,
+    "motor_offset": 60.0,
+    "retract": 24.0,
+    "belt_pitch_length": 200.0,
+    "status": "CAD manufacturing prototype; physical acceptance tests required"
+  },
+  "print_parts": {
+    "core_left": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        33.92,
+        34.17,
+        17.08
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 7146,
+        "triangles_after": 7146,
+        "weld_mm": 1e-05
+      }
+    },
+    "core_right": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        34.29,
+        34.24,
+        17.15
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 8698,
+        "triangles_after": 8698,
+        "weld_mm": 1e-05
+      }
+    },
+    "center_standard": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        18.81,
+        18.81,
+        11.63
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 7660,
+        "triangles_after": 7654,
+        "weld_mm": 1e-05
+      }
+    },
+    "center_axle": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        18.81,
+        18.81,
+        11.61
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 7094,
+        "triangles_after": 7088,
+        "weld_mm": 1e-05
+      }
+    },
+    "cube_edge": {
+      "qty": 12,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        18.91,
+        23.83,
+        23.83
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 9836,
+        "triangles_after": 9830,
+        "weld_mm": 1e-05
+      }
+    },
+    "cube_corner": {
+      "qty": 8,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        23.84,
+        23.84,
+        23.84
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 8150,
+        "triangles_after": 8142,
+        "weld_mm": 1e-05
+      }
+    },
+    "socket_coupon": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        42.0,
+        16.0,
+        8.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 1272,
+        "triangles_after": 1272,
+        "weld_mm": 1e-05
+      }
+    },
+    "axle_coupon": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        48.0,
+        20.0,
+        8.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 756,
+        "triangles_after": 756,
+        "weld_mm": 1e-05
+      }
+    },
+    "drive_plate": {
+      "qty": 6,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        50.0,
+        50.0,
+        10.2
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 5572,
+        "triangles_after": 5572,
+        "weld_mm": 1e-05
+      }
+    },
+    "shaft_hub_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        32.0,
+        32.0,
+        17.01
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 6356,
+        "triangles_after": 6356,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_housing_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        60.0,
+        49.0,
+        17.01
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 8044,
+        "triangles_after": 8044,
+        "weld_mm": 1e-05
+      }
+    },
+    "carriage_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        120.0,
+        77.0,
+        63.0
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 7272,
+        "triangles_after": 7272,
+        "weld_mm": 1e-05
+      }
+    },
+    "rail_support": {
+      "qty": 6,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        60.0,
+        201.0,
+        25.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 8064,
+        "triangles_after": 8064,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_front_cap_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        34.0,
+        34.0,
+        2.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 2132,
+        "triangles_after": 2132,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_rear_cap_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        34.0,
+        34.0,
+        2.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 2132,
+        "triangles_after": 2132,
+        "weld_mm": 1e-05
+      }
+    },
+    "nut_cover": {
+      "qty": 6,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        22.0,
+        19.0,
+        8.5
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 1308,
+        "triangles_after": 1308,
+        "weld_mm": 1e-05
+      }
+    },
+    "index_pin_bracket_direct": {
+      "qty": 4,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        22.0,
+        30.0,
+        36.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 1724,
+        "triangles_after": 1724,
+        "weld_mm": 1e-05
+      }
+    },
+    "shaft_hub_hollow": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        32.0,
+        32.0,
+        17.01
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 6348,
+        "triangles_after": 6348,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_housing_hollow": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        60.0,
+        49.0,
+        19.01
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 8044,
+        "triangles_after": 8044,
+        "weld_mm": 1e-05
+      }
+    },
+    "carriage_hollow": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        120.0,
+        77.0,
+        116.0
+      ],
+      "support_review_required": true,
+      "mesh_cleanup": {
+        "triangles_before": 8204,
+        "triangles_after": 8204,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_front_cap_hollow": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        34.0,
+        34.0,
+        2.01
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 2132,
+        "triangles_after": 2132,
+        "weld_mm": 1e-05
+      }
+    },
+    "bearing_rear_cap_hollow": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        34.0,
+        34.0,
+        2.01
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 2132,
+        "triangles_after": 2132,
+        "weld_mm": 1e-05
+      }
+    },
+    "index_pin_bracket_hollow": {
+      "qty": 2,
+      "valid": true,
+      "solids": 1,
+      "bed_size_mm": [
+        22.0,
+        36.0,
+        36.0
+      ],
+      "support_review_required": false,
+      "mesh_cleanup": {
+        "triangles_before": 1716,
+        "triangles_after": 1716,
+        "weld_mm": 1e-05
+      }
+    }
+  },
+  "purchased_parts_are_envelopes": true
+}

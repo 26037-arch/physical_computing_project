@@ -1,0 +1,237 @@
+{
+  "passed": true,
+  "weld_precision_mm": 1e-05,
+  "limitations": "Topology only; no slicer, support, layer strength or dimensional accuracy validation.",
+  "parts": [
+    {
+      "file": "axle_coupon.stl",
+      "triangles": 756,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 7218.523,
+      "passed": true
+    },
+    {
+      "file": "bearing_front_cap_direct.stl",
+      "triangles": 2132,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 2106.537,
+      "passed": true
+    },
+    {
+      "file": "bearing_front_cap_hollow.stl",
+      "triangles": 2132,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 1965.877,
+      "passed": true
+    },
+    {
+      "file": "bearing_housing_direct.stl",
+      "triangles": 8044,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 24457.362,
+      "passed": true
+    },
+    {
+      "file": "bearing_housing_hollow.stl",
+      "triangles": 8044,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 23290.651,
+      "passed": true
+    },
+    {
+      "file": "bearing_rear_cap_direct.stl",
+      "triangles": 2132,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 2106.537,
+      "passed": true
+    },
+    {
+      "file": "bearing_rear_cap_hollow.stl",
+      "triangles": 2132,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 1965.877,
+      "passed": true
+    },
+    {
+      "file": "carriage_direct.stl",
+      "triangles": 7272,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 63199.711,
+      "passed": true
+    },
+    {
+      "file": "carriage_hollow.stl",
+      "triangles": 8204,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 87270.161,
+      "passed": true
+    },
+    {
+      "file": "center_axle.stl",
+      "triangles": 7088,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 1766.449,
+      "passed": true
+    },
+    {
+      "file": "center_standard.stl",
+      "triangles": 7654,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 1817.037,
+      "passed": true
+    },
+    {
+      "file": "core_left.stl",
+      "triangles": 7146,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 8502.292,
+      "passed": true
+    },
+    {
+      "file": "core_right.stl",
+      "triangles": 8698,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 8553.507,
+      "passed": true
+    },
+    {
+      "file": "cube_corner.stl",
+      "triangles": 8142,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 7401.868,
+      "passed": true
+    },
+    {
+      "file": "cube_edge.stl",
+      "triangles": 9830,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 5641.521,
+      "passed": true
+    },
+    {
+      "file": "drive_plate.stl",
+      "triangles": 5572,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 13250.772,
+      "passed": true
+    },
+    {
+      "file": "index_pin_bracket_direct.stl",
+      "triangles": 1724,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 7719.078,
+      "passed": true
+    },
+    {
+      "file": "index_pin_bracket_hollow.stl",
+      "triangles": 1716,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 8511.078,
+      "passed": true
+    },
+    {
+      "file": "nut_cover.stl",
+      "triangles": 1308,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 1306.395,
+      "passed": true
+    },
+    {
+      "file": "rail_support.stl",
+      "triangles": 8064,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 69636.122,
+      "passed": true
+    },
+    {
+      "file": "shaft_hub_direct.stl",
+      "triangles": 6356,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 9026.636,
+      "passed": true
+    },
+    {
+      "file": "shaft_hub_hollow.stl",
+      "triangles": 6348,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 8002.594,
+      "passed": true
+    },
+    {
+      "file": "socket_coupon.stl",
+      "triangles": 1272,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "components": 1,
+      "volume_mm3": 5261.407,
+      "passed": true
+    }
+  ]
+}

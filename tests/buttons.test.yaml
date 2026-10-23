@@ -5,6 +5,8 @@ version: 1
 author: physical_computing_project
 steps:
   - wait-serial: "READY"
+  - write-serial: "Q 1\n"
+  - wait-serial: "MOTORS OFF"
   - set-control:
       part-id: btnScramble
       control: pressed

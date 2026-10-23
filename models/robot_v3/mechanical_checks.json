@@ -1,0 +1,24 @@
+{
+  "tolerance_mm3": 0.02,
+  "collisions": [],
+  "checks": {
+    "central_axle_runs_between_two_frame_clamps": true,
+    "axle_to_hollow_radial_clearance_mm": 1.2999999999999998,
+    "opposite_face_lock_holes_count": 4,
+    "lock_hole_radius_mm": 16,
+    "index_pin_nominal_radial_clearance_mm": 0.02499999999999991,
+    "travelling_nut_inserted_from_open_z152_face": true,
+    "nut_cover_to_feed_support_at_full_retract_mm": 16,
+    "all_print_parts_fit_220mm_bed": true,
+    "nominal_belt_center_distance_mm": 60.0,
+    "shaft_torsion_upper_bound_deg_100Nmm_one_end": 0.15960580264334503,
+    "core_axial_collars_count": 2
+  },
+  "limitations": [
+    "Discrete nominal CAD only, no structural or friction validation.",
+    "Fasteners, belt teeth, extrusion slots and spring wire are simplified.",
+    "Supplier envelope and tolerances must match purchase drawings.",
+    "Index wheel metal machining and manual confirmation are mandatory."
+  ],
+  "passed": true
+}

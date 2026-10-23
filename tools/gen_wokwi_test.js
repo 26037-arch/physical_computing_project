@@ -12,6 +12,8 @@ const r = new Solver().solve(new C.Cube().apply(scr));
 const q = (s) => JSON.stringify(s);
 const steps = [
   `  - wait-serial: "READY"`,
+  `  - write-serial: ${q("Q 1" + String.fromCharCode(10))}`,
+  `  - wait-serial: "MOTORS OFF"`,
   `  - write-serial: ${q("S " + seed + String.fromCharCode(10))}`,
   `  - wait-serial: ${q(`SCRAMBLE seed=${seed} (20): ${C.seqToString(scr)}`)}`,
   `  - wait-serial: "SCRAMBLED"`,

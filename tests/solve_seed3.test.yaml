@@ -4,6 +4,8 @@ version: 1
 author: physical_computing_project
 steps:
   - wait-serial: "READY"
+  - write-serial: "Q 1\n"
+  - wait-serial: "MOTORS OFF"
   - write-serial: "S 3\n"
   - wait-serial: "SCRAMBLE seed=3 (20): D' R2 U2 B F2 B U R B' R' D2 R' F R L' B D F2 B U'"
   - wait-serial: "SCRAMBLED"
