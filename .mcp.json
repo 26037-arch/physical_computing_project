@@ -1,9 +1,9 @@
 {
   "mcpServers": {
     "wokwi": {
-      "command": "C:\Users\junwoo\.wokwi\bin\wokwi-cli.exe",
+      "command": "${USERPROFILE}/.wokwi/bin/wokwi-cli.exe",
       "args": ["mcp"],
-      "env": { "WOKWI_CLI_TOKEN": "WOKWI_CLI_TOKEN" }
+      "env": { "WOKWI_CLI_TOKEN": "${WOKWI_CLI_TOKEN}" }
     },
     "fusion": {
       "command": "node",
