@@ -26,7 +26,7 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
   (V1: fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► models/*.stl)   │
                                                      node tools/embed_models_v4.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
                                                                                    │
-                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 큐브 + 핀 구동 헤드 6개 + 결합/후퇴 전환)
+                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 도넛 큐브 + 측면 2핀 헤드 4 + 아래 D 헤드 + 잠금 막대, 서보 크랭크 결합/후퇴·뒤집기)
 ```
 
 ## 단계별 명령

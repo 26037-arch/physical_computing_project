@@ -140,7 +140,7 @@ FLIP = `ENGAGE RL → RETRACT FB → RETRACT D → RETRACT LOCK → R·L 동시 
 | 비어 있음·D 결합 (큐브 올려놓음) | ENGAGE LOCK → ENGAGE FB → `loaded` | `ENGAGE LOCK` `ENGAGE FB` `LOADED orient=1` |
 | 장착됨 | 배출: (D 결합 확인) → RETRACT LOCK → RETRACT FB·RL → LCD `REMOVE CUBE` (D 핀 위의 큐브를 손으로 꺼낸다) | `EJECT` … `EJECTED` |
 
-실제 모드(`Q 0`)에서 `S`/`V`/`M` 은 `loaded` 가 아니면 `ERR not loaded`. 가상 모드(`Q 1`)는 절차를 **계획·출력만** 하고 서보·센서·스텝은 건너뛴다 (Wokwi 교차검증 시나리오가 flips/regrips 횟수까지 비교).
+실제 모드(`Q 0`)에서 `S`/`V`/`M`/`F` 는 `loaded` 가 아니면 `ERR not loaded`. 가상 모드(`Q 1`)는 절차를 **계획·출력만** 하고 서보·센서·스텝은 건너뛴다 (Wokwi 교차검증 시나리오가 flips/regrips 횟수까지 비교).
 
 ## 4. 핀 배치 (UNO R3/R4 공통, 18핀 전부 사용)
 

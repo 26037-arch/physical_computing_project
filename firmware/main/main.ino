@@ -185,7 +185,9 @@ void handleLine(char* s) {
     }
     case 'L': case 'l': doLoad(); break;
     case 'E': case 'e': doEject(); break;
-    case 'F': case 'f': if (mech.flip()) lcdShowF(F("FLIPPED"), mech.orient ? "white down" : "white up"); else lcdShowF(F("FLIP FAILED"), "check heads"); break;
+    case 'F': case 'f':
+      if (motors.isEnabled() && !mech.isLoaded()) { Serial.println(F("ERR not loaded")); break; }   // 시뮬레이터 FLIP 버튼과 같은 규칙
+      if (mech.flip()) lcdShowF(F("FLIPPED"), mech.orient ? "white down" : "white up"); else lcdShowF(F("FLIP FAILED"), "check heads"); break;
     case 'P': case 'p': printState(); break;
     case 'R': case 'r': cube.reset(); Serial.println(F("RESET")); lcdShowF(F("CUBE ROBOT"), "reset"); break;
     case 'Q': case 'q': motors.setEnabled(*arg != '1'); Serial.print(F("MOTORS ")); Serial.println(motors.isEnabled() ? F("ON") : F("OFF")); break;
