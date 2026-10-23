@@ -1,20 +1,38 @@
-name: 버튼 누르면 LED 토글
+name: 버튼 누르면 LED 토글 (떼어도 상태 유지)
 version: 1
 author: physical_computing_project
 steps:
   - wait-serial: "READY"
+  # 1번째 누름 → LED ON
   - set-control:
       part-id: btn1
       control: pressed
       value: 1
   - wait-serial: "LED ON"
+  - delay: 150ms  # 실제 손가락처럼 잠깐 누르고 있다가 뗀다
+  # 뗐을 때 채터링으로 다시 토글되면 안 된다
   - set-control:
       part-id: btn1
       control: pressed
       value: 0
-  - delay: 100ms
+  - delay: 200ms
+  - expect-pin:
+      part-id: uno
+      pin: 13
+      value: 1
+  # 2번째 누름 → LED OFF
   - set-control:
       part-id: btn1
       control: pressed
       value: 1
   - wait-serial: "LED OFF"
+  - delay: 150ms
+  - set-control:
+      part-id: btn1
+      control: pressed
+      value: 0
+  - delay: 200ms
+  - expect-pin:
+      part-id: uno
+      pin: 13
+      value: 0
