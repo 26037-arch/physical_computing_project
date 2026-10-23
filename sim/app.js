@@ -141,14 +141,14 @@
     bearing_housing_hollow:   { offset: [0, -5, 35],      color: 0xaab3bd },
     bearing_rear_cap_hollow:  { offset: [0, 0, 58],       color: 0xaab3bd },
     carriage_hollow:          { offset: [28, -12.5, 32],  color: 0x7d8898 },
-    rail_support:             { offset: [0, -54, 0],      color: 0x4a525f },
-    servo_mount:              { offset: [-4.75, -41.5, 177], color: 0x4a525f },
+    rail_support:             { offset: [0, -53.25, 0],      color: 0x4a525f },
+    servo_mount:              { offset: [0, -41.5, 166], color: 0x4a525f },
     servo_clamp:              { offset: [20.3, -41.5, 177], color: 0x4a525f },
     crank:                    { offset: [26, -44, 180],   color: 0x8d949c },
     link:                     { offset: [31, -44, 143],   color: 0xc9ced6 },
     lock_guide:               { offset: [-8, 0, 174],     color: 0x4a525f },
     lock_carriage:            { offset: [10, 10, 199],    color: 0x7d8898 },
-    lock_servo_mount:         { offset: [-4.75, 26.5, 237], color: 0x4a525f },
+    lock_servo_mount:         { offset: [-5.925, 26.5, 237], color: 0x4a525f },
     lock_servo_clamp:         { offset: [20.3, 26.5, 237], color: 0x4a525f },
     lock_crank:               { offset: [26, 24, 237],    color: 0x8d949c },
     lock_link:                { offset: [31, 24, 200],    color: 0xc9ced6 },
@@ -222,7 +222,7 @@
     const frame = new THREE.Group(); face.add(frame);
     if (GEO.rail_support) frame.add(new THREE.Mesh(GEO.rail_support, MAT.rail_support));
     else frame.add(boxAt(60, 6, 190, 0, -54, 95, MAT.rail_support));
-    frame.add(boxAt(12, 8, 180, 0, -47, 95, railMat));
+    frame.add(boxAt(12, 8, 180, 0, -47, 94.5, railMat));
     if (GEO.servo_mount) frame.add(new THREE.Mesh(GEO.servo_mount, MAT.servo_mount));
     if (GEO.servo_clamp) frame.add(new THREE.Mesh(GEO.servo_clamp, MAT.servo_clamp));
     frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [22, -47.75, 154.9], servoMat));   // 결합 스위치: 캐리지 러그(z 147)가 결합 위치에서 누른다

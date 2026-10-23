@@ -1,6 +1,7 @@
 {
-  "revision": "V4 assembly Rev A",
+  "revision": "V4 assembly Rev B",
   "source_commit": "b37de3e9",
+  "integration_base_commit": "d8c21f49c8be001da35f6dc10457c168cfa5b99a",
   "units": "mm",
   "physical_validation": false,
   "parts": {
@@ -280,7 +281,7 @@
       "valid": true,
       "size_mm": [
         62.0,
-        35.5,
+        36.5,
         17.0
       ]
     },
@@ -314,6 +315,5 @@
         8.0
       ]
     }
-  },
-  "integration_base_commit": "513647021cccfc23386335948cd5963cadf98bcb"
+  }
 }

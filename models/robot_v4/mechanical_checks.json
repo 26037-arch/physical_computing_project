@@ -615,5 +615,20 @@
   },
   "failure_count": 0,
   "failures": [],
-  "passed": true
+  "passed": true,
+  "final_insert_tip_clearance_update": {
+    "method": "After full motion checks, only plastic was removed inside the guide and switch-bracket screw relief bores. BRep differences prove zero added material; therefore the earlier zero-collision results remain valid. Final guide/bar/bolt-tip and mesh checks are recorded separately in assembly_kit.",
+    "parts": {
+      "lock_guide": {
+        "added_volume_mm3": 0.0,
+        "removed_volume_mm3": 119.38052083640996,
+        "valid_single_solid": true
+      },
+      "lock_switch_bracket": {
+        "added_volume_mm3": 0.0,
+        "removed_volume_mm3": 58.38649946696545,
+        "valid_single_solid": true
+      }
+    }
+  }
 }

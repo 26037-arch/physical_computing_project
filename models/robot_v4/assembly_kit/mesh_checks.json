@@ -38,12 +38,12 @@
       "passed": true
     },
     "print/rail_support.stl": {
-      "triangles": 2296,
+      "triangles": 2588,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 65721.04455273772,
+      "positive_volume_mm3": 65559.51956094148,
       "size_mm": [
         60.0,
-        6.0,
+        7.5,
         190.0
       ],
       "passed": true
@@ -82,13 +82,13 @@
       "passed": true
     },
     "print/servo_mount.stl": {
-      "triangles": 1592,
+      "triangles": 1048,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 32637.88644606486,
+      "positive_volume_mm3": 36757.40956487852,
       "size_mm": [
-        50.5,
+        60.0,
         31.0,
-        57.0
+        82.0
       ],
       "passed": true
     },
@@ -115,11 +115,11 @@
       "passed": true
     },
     "print/lock_servo_mount.stl": {
-      "triangles": 1592,
+      "triangles": 464,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 32637.88644606486,
+      "positive_volume_mm3": 33603.11295771871,
       "size_mm": [
-        50.5,
+        48.15,
         31.0,
         57.0
       ],
@@ -192,9 +192,9 @@
       "passed": true
     },
     "print/lock_servo_clamp.stl": {
-      "triangles": 544,
+      "triangles": 552,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 5518.648337807755,
+      "positive_volume_mm3": 5254.648337807755,
       "size_mm": [
         4.0,
         31.0,
@@ -203,9 +203,9 @@
       "passed": true
     },
     "print/servo_clamp.stl": {
-      "triangles": 544,
+      "triangles": 552,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 5518.648337807755,
+      "positive_volume_mm3": 5254.648337807755,
       "size_mm": [
         4.0,
         31.0,
@@ -280,9 +280,9 @@
       "passed": true
     },
     "print/lock_guide.stl": {
-      "triangles": 720,
+      "triangles": 1376,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 22922.256186901566,
+      "positive_volume_mm3": 24906.448881975914,
       "size_mm": [
         44.0,
         28.0,
@@ -313,12 +313,12 @@
       "passed": true
     },
     "assembly_kit/print/lock_switch_bracket.stl": {
-      "triangles": 1752,
+      "triangles": 2584,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 7555.12185669419,
+      "positive_volume_mm3": 10340.365354700194,
       "size_mm": [
         62.0,
-        35.5,
+        36.5,
         17.0
       ],
       "passed": true
