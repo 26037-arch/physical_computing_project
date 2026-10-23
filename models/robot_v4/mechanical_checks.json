@@ -561,11 +561,19 @@
       "valid": true,
       "solids": 1
     },
+    "lock_servo_clamp": {
+      "valid": true,
+      "solids": 1
+    },
     "lock_servo_mount": {
       "valid": true,
       "solids": 1
     },
     "rail_support": {
+      "valid": true,
+      "solids": 1
+    },
+    "servo_clamp": {
       "valid": true,
       "solids": 1
     },
@@ -590,7 +598,7 @@
   "lock_cube_collisions": [],
   "lock_to_D_edge_clearance_mm": 2.9634761434214716,
   "nominal_lock_to_edge_wall_mm": 6.699999999999999,
-  "lock_to_hollow_diagonal_clearance_mm": 1.7573593128807143,
+  "lock_to_hollow_diagonal_clearance_mm": 2.0073593128807143,
   "lock_axial_clearance_mm": 1.0,
   "lock_axial_samples": [
     {
@@ -607,12 +615,12 @@
   "lock_hollow_samples": [
     {
       "shift_mm": 0,
-      "clearance_mm": 1.7573593128807143,
+      "clearance_mm": 2.0073593128807143,
       "collisions": []
     },
     {
       "shift_mm": 24,
-      "clearance_mm": 1.7573593128807143,
+      "clearance_mm": 2.0073593128807143,
       "collisions": []
     }
   ],

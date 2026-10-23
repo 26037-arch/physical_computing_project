@@ -13,9 +13,10 @@
   const MODELS = (typeof CubeModels !== 'undefined') ? CubeModels : { params: {}, parts: {} };
   // CAD 매개변수 (models/robot_v4/parameters.json). 값이 없으면 docs/HARDWARE_V4.md 의 기본값.
   const P = Object.assign({ cube_mm: 57, piece_mm: 18.8, pitch_mm: 19.1, retract_mm: 24, pin_mm: 3, socket_mm: 3.4,
-    socket_depth_mm: 6, pin_engagement_mm: 4.8, socket_countersink_mm: 7, pin_tip_mm: 1, pin_tip_h_mm: 1, pin_length_mm: 16, plate_thickness_mm: 6, recess_depth_mm: 2, lock_bar_mm: 6, lock_socket_mm: 6.4, lock_socket_depth_mm: 5,
+    socket_depth_mm: 6, pin_engagement_mm: 4.8, socket_countersink_mm: 7, pin_tip_mm: 1, pin_tip_h_mm: 1, pin_length_mm: 16, plate_thickness_mm: 6,
+    recess_depth_mm: 2, lock_bar_mm: 6, lock_socket_mm: 6.4, lock_socket_depth_mm: 5,
     lock_stroke_mm: 30, lock_crank_r_mm: 15, lock_tip_y_mm: -22.5, lock_length_mm: 230, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195],
-    lock_servo_axis: [22, 24, 255], hollow_id_mm: 12, hollow_od_mm: 17, hollow_length_mm: 82, motor_offset_mm: 60,
+    lock_servo_axis: [22, 24, 255], hollow_id_mm: 12.5, hollow_od_mm: 17, hollow_length_mm: 82, motor_offset_mm: 60,
     strip_width_mm: 16, strip_pad_y_mm: 14.5, strip_pad_mm: [8, 4] }, MODELS.params || {});
   const UNIT = P.pitch_mm;                 // 1 단위 = 조각 중심 간격 = 19.1 mm
   const mm = (x) => x / UNIT;
@@ -150,12 +151,14 @@
     bearing_rear_cap_hollow:  { offset: [0, 0, 58],       color: 0xaab3bd },
     carriage_hollow:          { offset: [28, -12.5, 32],  color: 0x7d8898 },
     rail_support:             { offset: [0, -54, 0],      color: 0x4a525f },
-    servo_mount:              { offset: [-4, -44, 184],   color: 0x4a525f },
+    servo_mount:              { offset: [-4.75, -41.5, 177], color: 0x4a525f },
+    servo_clamp:              { offset: [20.3, -41.5, 177], color: 0x4a525f },
     crank:                    { offset: [26, -44, 180],   color: 0x8d949c },
     link:                     { offset: [31, -44, 143],   color: 0xc9ced6 },
-    lock_guide:               { offset: [-8, -5, 174],    color: 0x4a525f },
+    lock_guide:               { offset: [-8, 0, 174],     color: 0x4a525f },
     lock_carriage:            { offset: [10, 10, 199],    color: 0x7d8898 },
-    lock_servo_mount:         { offset: [-4, 24, 244],    color: 0x4a525f },
+    lock_servo_mount:         { offset: [-4.75, 26.5, 237], color: 0x4a525f },
+    lock_servo_clamp:         { offset: [20.3, 26.5, 237], color: 0x4a525f },
     lock_crank:               { offset: [26, 24, 237],    color: 0x8d949c },
     lock_link:                { offset: [31, 24, 200],    color: 0xc9ced6 },
   };
@@ -235,13 +238,14 @@
     else frame.add(boxAt(60, 6, 190, 0, -54, 95, MAT.rail_support));
     frame.add(boxAt(12, 8, 180, 0, -47, 95, railMat));
     if (GEO.servo_mount) frame.add(new THREE.Mesh(GEO.servo_mount, MAT.servo_mount));
+    if (GEO.servo_clamp) frame.add(new THREE.Mesh(GEO.servo_clamp, MAT.servo_clamp));
     frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [22, -47.75, 154.9], servoMat));   // 결합 스위치: 캐리지 러그(z 147)가 결합 위치에서 누른다
     // 이송부(캐리지): 하우징·캡·캐리지·MGN12H 블록·추력 베어링·모터. 크랭크가 국소 +z 로 밀어낸다
     const carriage = new THREE.Group(); face.add(carriage);
     const V = hollow ? '_hollow' : '_direct';
     for (const k of ['bearing_housing', 'bearing_front_cap', 'bearing_rear_cap', 'carriage']) if (GEO[k + V]) carriage.add(new THREE.Mesh(GEO[k + V], MAT[k + V]));
     if (!GEO['carriage' + V]) { carriage.add(boxAt(60, 6, 120, 0, -35, 92, MAT.carriage_direct)); carriage.add(boxAt(hollow ? 116 : 60, 58, 6, hollow ? 28 : 0, -3, 101, MAT.carriage_direct)); carriage.add(boxAt(12, 19, 10, 22, -41.5, 147, MAT.carriage_direct)); }
-    if (!GEO['bearing_housing' + V]) { carriage.add(boxAt(34, 34, hollow ? 19 : 17, 0, 0, hollow ? 44.5 : 43.5, MAT.bearing_housing_direct)); carriage.add(boxAt(60, 6, 17, 0, -29, 43.5, MAT.bearing_housing_direct)); }
+    if (!GEO['bearing_housing' + V]) { carriage.add(boxAt(hollow ? 44 : 34, hollow ? 44 : 34, hollow ? 23 : 17, 0, 0, hollow ? 46.5 : 43.5, MAT.bearing_housing_direct)); carriage.add(boxAt(60, 6, hollow ? 23 : 17, 0, -29, hollow ? 46.5 : 43.5, MAT.bearing_housing_direct)); }
     carriage.add(boxAt(27, 4.9, 45.4, 0, -40.45, 84, alumMat));                 // MGN12H 블록 윗판
     for (const bx of [-9.85, 9.85]) carriage.add(boxAt(7.3, 6.1, 45.4, bx, -45.95, 84, alumMat));
     const motor = new THREE.Group(); carriage.add(motor);
@@ -254,7 +258,7 @@
       motor.add(cylZ(28, 76, 84, alumMat, mx, 0)); motor.add(cylZ(20, 84, 94, alumMat, mx, 0));   // 40T 구동 풀리
       motor.add(boxAt(mx, 2, 6, mx / 2, 13.5, 80, beltMat)); motor.add(boxAt(mx, 2, 6, mx / 2, -13.5, 80, beltMat));   // 벨트 2가닥
     }
-    // 회전부(스핀들): 구동판 + 핀 2 + 패드 + 허브 + 축(측면: Ø8 + 커플링, D: 중공 OD17/ID12 + 40T 종동 풀리)
+    // 회전부(스핀들): 구동판 + 핀 2 + 패드 + 허브 + 축(측면: Ø8 + 커플링, D: 중공 OD17/ID12.5 + 40T 종동 풀리)
     //   측면 판은 적도 띠(국소 x = 월드 위, 폭 16)라 D 층(y ≤ −9.7, 쓸림 반경 38.65)이 측면 쌍을 결합한 채 돌 수 있다. D 판은 50×50 (Ø22 로 막대 통과)
     const spin = new THREE.Group(); carriage.add(spin);
     const plateKey = hollow ? 'drive_plate_2pin' : 'drive_plate_strip';
@@ -270,7 +274,7 @@
     if (GEO[hubKey]) spin.add(new THREE.Mesh(GEO[hubKey], MAT[hubKey]));
     else { spin.add(boxAt(hollow ? 32 : P.strip_width_mm, 32, 5, 0, 0, 13.5, MAT.shaft_hub)); spin.add(cylZ(24, 16, 28, MAT.shaft_hub)); }
     if (hollow) {
-      spin.add(cylZ(P.hollow_od_mm, 16, 16 + P.hollow_length_mm, steelMat));    // 중공 회전축 OD17, 길이 82 (안 Ø12 로 막대 통과)
+      spin.add(cylZ(P.hollow_od_mm, 16, 16 + P.hollow_length_mm, steelMat));    // 중공 회전축 OD17, 길이82 (안 Ø12.5로 막대 통과)
       spin.add(cylZ(28, 76, 84, alumMat)); spin.add(cylZ(20, 84, 94, alumMat)); // 40T 종동 풀리
     } else {
       spin.add(cylZ(8, 16, 83, steelMat));                                      // 8 mm 축
@@ -284,7 +288,7 @@
   }
   for (const p of SIDE) buildHead(p);
   buildHead(DF);
-  // ----- 잠금 막대 유닛: D 모듈 아래, y 축. 막대 8×8 이 중공축을 지나 센터 판 소켓(결합 끝 y −23.5, 후퇴 −53.5)까지. 뒤집기 때 30 mm 내려간다 -----
+  // ----- 잠금 막대 유닛: D 모듈 아래, y 축. 막대 6×6 이 중공축을 지나 센터 판 소켓(결합 끝 y −22.5, 후퇴 −52.5)까지. 소켓 바닥 여유 1.0, 행정 30 -----
   const lock = (() => {
     const n = v3(N[DF]), x = v3([1, 0, 0]), y = n.clone().cross(x);
     const g = new THREE.Group();
@@ -295,6 +299,7 @@
     const LSA = P.lock_servo_axis;
     if (GEO.lock_guide) frame.add(new THREE.Mesh(GEO.lock_guide, MAT.lock_guide)); else frame.add(boxAt(30, 30, 30, 0, 0, 175, MAT.rail_support));   // 출력 가이드 블록 (사각 구멍 8.3)
     if (GEO.lock_servo_mount) frame.add(new THREE.Mesh(GEO.lock_servo_mount, MAT.lock_servo_mount)); else frame.add(boxAt(8, 30, 60, 0, LSA[1], 240, MAT.rail_support));
+    if (GEO.lock_servo_clamp) frame.add(new THREE.Mesh(GEO.lock_servo_clamp, MAT.lock_servo_clamp));
     frame.add(envelope('lock_engage_switch', [12.8, 6.5, 5.8], [22, 14.75, 211.9], servoMat));   // 막대 결합 스위치 (SENS LOCK)
     const carriage = new THREE.Group(); g.add(carriage);
     const tipZ = -(P.cube_mm / 2 + P.lock_tip_y_mm);   // 결합 시 막대 끝 (면 평면 기준 국소 z, 안쪽이 −): y −22.5 → z −6 (소켓 바닥 −21.5 까지 1 mm 축방향 여유)

@@ -21,7 +21,7 @@
   "pin_tip_mm": 1.0,
   "pin_tip_h_mm": 1.0,
   "pin_length_mm": 16.0,
-  "hollow_id_mm": 12.0,
+  "hollow_id_mm": 12.5,
   "hollow_od_mm": 17.0,
   "hollow_length_mm": 82.0,
   "crank_r_mm": 12.0,
@@ -194,9 +194,14 @@
       0.7999999999999998
     ],
     "servo_mount": [
-      -4.0,
-      -44.0,
-      184.0
+      -4.750000050000001,
+      -41.50000000000007,
+      176.9999999
+    ],
+    "servo_clamp": [
+      20.3,
+      -41.5,
+      177.0
     ],
     "crank": [
       26.0,
@@ -240,7 +245,7 @@
     ],
     "lock_guide": [
       -8.0,
-      -5.0,
+      0.0,
       174.0
     ],
     "lock_carriage": [
@@ -249,9 +254,14 @@
       199.0
     ],
     "lock_servo_mount": [
-      -4.0,
-      24.0,
-      244.0
+      -4.750000050000001,
+      26.499999999999922,
+      236.9999999
+    ],
+    "lock_servo_clamp": [
+      20.3,
+      26.5,
+      237.0
     ],
     "lock_crank": [
       26.0,
@@ -489,6 +499,34 @@
       "qty": 5,
       "module": "all"
     },
+    "rear_thrust_F8_16M_direct": {
+      "size": [
+        16.0,
+        16.0,
+        5.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        56.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
+    "shaft_collar_8_direct": {
+      "size": [
+        16.0,
+        16.0,
+        7.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        62.5
+      ],
+      "qty": 4,
+      "module": "FRBL"
+    },
     "axial_pad_0_hollow": {
       "size": [
         8.0,
@@ -681,6 +719,20 @@
         0.0,
         0.0,
         62.5
+      ],
+      "qty": 1,
+      "module": "D"
+    },
+    "shaft_collar_17_hollow": {
+      "size": [
+        28.0,
+        28.0,
+        8.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        69.0
       ],
       "qty": 1,
       "module": "D"
