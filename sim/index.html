@@ -33,7 +33,15 @@
   td.num { text-align:right; font-variant-numeric: tabular-nums; }
   #log { background:#0b0e12; border:1px solid var(--line); border-radius:6px; padding:8px; height:190px; overflow:auto; font: 12px/1.4 Consolas, monospace; white-space:pre-wrap; color:#bfc7d4; }
   .note { color:var(--dim); font-size:12px; }
-  .stat { display:grid; grid-template-columns: repeat(3, 1fr); gap:6px; }
+  .stat { display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { display:inline-flex; flex-direction:column; align-items:center; min-width:44px; padding:4px 6px; border-radius:6px; border:1px solid var(--line); background:#0d1014; font-weight:700; font-size:13px; }
+  .chip small { font-weight:400; font-size:10px; color:var(--dim); }
+  .chip.in { border-color:var(--ok); color:var(--ok); }
+  .chip.out { color:#55607a; }
+  .chip.feed { border-color:var(--warn); color:var(--warn); }
+  .chip.turn { border-color:var(--acc); color:var(--acc); background:#0f2a38; }
+  label.chk { display:inline-flex; gap:4px; align-items:center; color:var(--dim); font-size:12px; }
   .stat div { background:#0d1014; border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
   .stat b { display:block; font-size:16px; }
   .stat span { color:var(--dim); font-size:11px; }
@@ -47,11 +55,17 @@
 <div id="app">
   <div id="left">
     <canvas id="view"></canvas>
-    <div id="hud"><b>큐브 풀이 로봇 — 6모터 직결</b><br>드래그: 회전 · 휠: 확대 · 모터/커플러/캡은 Fusion 360 STL</div>
+    <div id="hud"><b>큐브 풀이 로봇 V2 — 엣지 핀 구동 · 후퇴 헤드 6개</b><br>드래그: 회전 · 휠: 확대 · 구동판/허브/하우징/캐리지/레일은 V2 CAD STL(models/robot_v2/head)</div>
   </div>
   <aside id="panel">
-    <h1>큐브 풀이 로봇 시뮬레이터</h1>
-    <div class="note">펌웨어(firmware/main)와 같은 풀이 알고리즘(sim/solver.js)과 같은 섞기 수열을 쓴다. 아래 시리얼 로그의 회전 수열·단계 이름은 실제 보드 출력과 같고(Wokwi 교차검증: tests/solve_seed*.test.yaml), 시간값(ms)은 PC 기준이다.</div>
+    <h1>큐브 풀이 로봇 시뮬레이터 (V2 기구)</h1>
+    <div class="note">펌웨어(firmware/main)와 같은 풀이 알고리즘(sim/solver.js)과 같은 섞기 수열을 쓴다. 아래 시리얼 로그의 회전 수열·단계 이름은 실제 보드 출력과 같고(Wokwi 교차검증: tests/solve_seed*.test.yaml), 시간값(ms)은 PC 기준이다. 기구는 docs/HARDWARE_V2.md 의 57 mm 출력 큐브와 핀 구동 헤드를 CAD 치수 그대로 그리며, 축이 바뀔 때마다 새 축 두 헤드 결합 → 기존 두 헤드 24 mm 후퇴 순서를 보여 준다.</div>
+
+    <section>
+      <h2>헤드 상태 (결합 = 핀 4개 삽입 3 mm · 후퇴 24 mm)</h2>
+      <div class="chips" id="heads"></div>
+      <div class="note" id="headText" style="margin-top:4px"></div>
+    </section>
 
     <section>
       <h2>LCD1602 (보드 표시와 동일)</h2>
@@ -67,11 +81,20 @@ SCRAMBLE / SOLVE</div>
         <button id="btnSolve" class="primary">SOLVE</button>
         <button id="btnPause">일시정지</button>
         <button id="btnReset">리셋</button>
-        <button id="btnView" title="카메라를 기본 구도로">시점 초기화</button>
+        <button id="btnView" title="6면 모듈 전체가 보이는 구도">전체 보기</button>
+        <button id="btnViewCube" title="큐브와 구동판만 크게">큐브 보기</button>
       </div>
       <div class="row" style="margin-top:6px">
         <label style="white-space:nowrap">90° 회전 시간 <span id="speedVal">150</span> ms</label>
         <input type="range" id="speed" min="40" max="600" step="10" value="150">
+      </div>
+      <div class="row">
+        <label style="white-space:nowrap" title="헤드 24 mm 이송(결합/해제) 한 번에 걸리는 시간. 현재 시제품은 수동 M5 이송이라 자동화 목표값이다">헤드 이송 시간 <span id="feedVal">500</span> ms</label>
+        <input type="range" id="feed" min="0" max="1500" step="50" value="500">
+      </div>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="chkFrame" checked> 레일·캐리지·하우징 표시</label>
+        <label class="chk"><input type="checkbox" id="chkMotor" checked> 모터 표시</label>
       </div>
     </section>
 
@@ -90,6 +113,7 @@ SCRAMBLE / SOLVE</div>
         <div><b id="stMoves">–</b><span>전체 수</span></div>
         <div><b id="stNodes">–</b><span>탐색 노드</span></div>
         <div><b id="stTime">–</b><span>JS 계산 ms</span></div>
+        <div><b id="stRegrip">–</b><span>축 전환</span></div>
       </div>
       <table id="stages"><thead><tr><th>단계</th><th>수</th><th>수열</th><th>노드</th><th>Uno 예상</th></tr></thead><tbody></tbody></table>
       <div class="note" id="estNote"></div>

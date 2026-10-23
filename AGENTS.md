@@ -14,8 +14,8 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 
 ## 폴더 구조
 - `firmware/main/` — 펌웨어 (스케치 폴더명 = 파일명 `main`). `cube.*` 큐브 모델, `solver.*` IDA*+OLL/PLL, `motors.*` A4988 ×6, `tables.h` **자동 생성(수정 금지)**
-- `sim/` — JS 시뮬레이터. `cube.js`/`solver.js` 는 펌웨어와 같은 알고리즘(결과 문자열 동일해야 함), `tables.js`·`models.js` 자동 생성, `index.html`+`app.js` Three.js 3D
-- `tools/` — `gen_tables.js`(표 생성+OLL/PLL 전수 검증), `test_solver.js`(300회 회귀), `gen_wokwi_test.js`(교차검증 시나리오 생성), `embed_models.js`(STL→models.js), `serve.js`(미리보기), `algs.js`(공식 원본)
+- `sim/` — JS 시뮬레이터. `cube.js`/`solver.js` 는 펌웨어와 같은 알고리즘(결과 문자열 동일해야 함), `tables.js`·`models.js` 자동 생성, `index.html`+`app.js` Three.js 3D. `app.js` 는 V2 기구(출력 큐브 + 핀 구동 헤드 6개 + 결합/후퇴 전환)를 `build_robot_v2.py` 의 좌표·치수 그대로 그린다 — `HEAD` 표(STL 조립 오프셋)와 구매 부품 치수는 그 스크립트의 `head_parts()` 와 맞춰야 한다
+- `tools/` — `gen_tables.js`(표 생성+OLL/PLL 전수 검증), `test_solver.js`(300회 회귀), `gen_wokwi_test.js`(교차검증 시나리오 생성), `embed_models.js`(V2 헤드 STL+parameters.json→models.js), `serve.js`(미리보기, `POST /__screenshot?name=x.png` 로 docs/images 저장), `algs.js`(공식 원본), `build_robot_v2.py`/`check_robot_v2.py`/`render_robot_v2.py`(V2 CAD 생성·검사·렌더, CadQuery)
 - `diagram.json`, `wokwi.toml` — Wokwi 회로도(UNO R3: R4 WiFi 와 헤더 핀 배치 동일), `build/main.ino.hex|elf` 를 시뮬레이션
 - `fusion/scripts/cube_robot_parts.py` — Fusion 부품 3종(커플러·센터 캡·모터 브래킷) 생성 + STL/f3d 내보내기 (단위 cm, 상수는 mm). `fusion_exec` 실행 시 `adsk, app, ui, design, root` 가 미리 정의됨, 반환값은 `result` 에 대입. 파일을 통째로 실행하려면 `exec(compile(open(path, encoding='utf-8').read(), path, 'exec'), {...미리 정의된 이름...})`
 - `models/` — 내보낸 STL 3종 + `CubeRobotParts.f3d`
@@ -26,7 +26,7 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 ## 변경 시 지켜야 할 불변 조건
 - `sim/solver.js` 와 `firmware/main/solver.cpp` 는 같은 탐색 순서·같은 규칙이어야 한다. 한쪽을 바꾸면 다른 쪽도 바꾸고 `node tools/gen_wokwi_test.js 1` → `scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000` 으로 재확인
 - `tools/algs.js` 나 거리표 정의를 바꾸면 `node tools/gen_tables.js` 재실행 (커버리지 실패 시 종료코드 1)
-- Fusion 스크립트 상수를 바꾸면 Fusion 에서 재실행 → `node tools/embed_models.js`
+- V2 CAD(`tools/build_robot_v2.py`) 치수를 바꾸면 `python tools/build_robot_v2.py` → `node tools/embed_models.js` 재실행. `head_parts()` 의 부품 위치를 옮기면 `sim/app.js` 의 `HEAD` 오프셋·구매 부품 좌표도 같이 바꾼다. (V1 Fusion 스크립트는 `models/*.stl` 만 갱신하며 시뮬레이터에는 더 이상 쓰이지 않는다)
 - Codex 플러그인은 최적화·설계 검토·리뷰에 꾸준히 쓴다 (결과는 `docs/` 에 기록)
 
 ## 작업 순서

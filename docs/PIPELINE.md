@@ -22,11 +22,11 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
                               (Wokwi: A4988×6 + NEMA17×6 + LCD + 버튼 + 부저, diagram.json)
                               보드 시리얼 출력 == JS 풀이 출력 ⇒ 통과
 
-fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► Fusion 360 ──► models/*.stl
-                                                                            │
-                                                     node tools/embed_models.js ─► sim/models.js
-                                                                            │
-                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터)
+tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|step, parameters.json
+  (V1: fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► models/*.stl)   │
+                                                     node tools/embed_models.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
+                                                                                   │
+                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 큐브 + 핀 구동 헤드 6개 + 결합/후퇴 전환)
 ```
 
 ## 단계별 명령
@@ -40,8 +40,9 @@ fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► Fusion 360 �
 | 4. 교차검증 시나리오 | `node tools/gen_wokwi_test.js 1` | `tests/solve_seed1.test.yaml` |
 | 5. 시뮬레이션 | `powershell -ExecutionPolicy Bypass -File scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000` | `Scenario completed successfully` |
 | 5'. 버튼 시나리오 | `... -Scenario tests/buttons.test.yaml -TimeoutMs 180000` | 무작위 시드로 섞고 풀어 `SOLVED ok=1` |
-| 6. 3D 부품 | Claude Code 에서 `fusion_exec` 로 `fusion/scripts/cube_robot_parts.py` 실행 | `models/center_coupler.stl`, `center_cap.stl`, `motor_mount.stl` |
-| 7. STL 임베드 | `node tools/embed_models.js` | `sim/models.js` |
+| 6. 3D 부품 (V2) | `python tools/build_robot_v2.py` → `check_robot_v2.py` → `render_robot_v2.py` (CadQuery 필요) | `models/robot_v2/**` STL·STEP·GLB, `parameters.json`, `mechanical_checks.json` |
+| 6'. 3D 부품 (V1) | Claude Code 에서 `fusion_exec` 로 `fusion/scripts/cube_robot_parts.py` 실행 | `models/center_coupler.stl`, `center_cap.stl`, `motor_mount.stl` |
+| 7. STL 임베드 | `node tools/embed_models.js` | `sim/models.js` (V2 헤드 STL 7종 + `parameters.json`) |
 | 8. 시뮬레이터 | `node tools/serve.js` → http://localhost:8765/sim/ (또는 `sim/index.html` 더블클릭) | 3D 시연 |
 | 9. 업로드 | `powershell -ExecutionPolicy Bypass -File scripts/upload.ps1 -Port COMx -Fqbn arduino:renesas_uno:unor4wifi` | 실물 보드 |
 
@@ -57,7 +58,7 @@ fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► Fusion 360 �
 ## 자동 생성 파일 (직접 수정하지 않음)
 
 - `firmware/main/tables.h`, `sim/tables.js` ← `tools/gen_tables.js`
-- `sim/models.js` ← `tools/embed_models.js`
+- `sim/models.js` ← `tools/embed_models.js` (입력: `models/robot_v2/head/*.stl`, `models/robot_v2/parameters.json`)
 - `tests/solve_seed*.test.yaml` ← `tools/gen_wokwi_test.js`
 
 핀 배치를 바꾸면 `diagram.json` 과 `firmware/main/motors.h`(STEP/DIR), `main.ino`(버튼·부저) 를 함께 바꾼다.
