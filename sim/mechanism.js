@@ -13,48 +13,52 @@
       this.sensorTimeoutMs = R.sensorTimeoutMs;
       this.reset();
     }
-    reset() { this.engaged = R.initialEngaged.slice(); this.orient = R.initialOrient; this.loaded = R.initialLoaded; this.flips = 0; this.regrips = 0; this.lastError = null; }
+    reset() { this.engaged = R.initialEngaged.slice(); this.commanded = R.initialEngaged.slice(); this.orient = R.initialOrient; this.loaded = R.initialLoaded; this.flips = 0; this.regrips = 0; this.lastError = null; }
+    confirmed(u,w) { return this.commanded[u]===w && this.readSensor(u,w); }
     resetCounters() { this.flips = 0; this.regrips = 0; }
     physFace(f) { return PHYS[this.orient][f]; }
     fail(out, line) { this.lastError = line; out.push({type:'error', line}); return false; }
     engage(out, u) {
-      if (this.engaged[u]) return true;
+      if (this.engaged[u] && (this.virtual || this.confirmed(u,true))) return true;
       this.regrips++;
-      out.push({type:'engage', unit:u, faces:UNIT_FACES[u], line:`ENGAGE ${UNIT_NAME[u]}`});
-      if (!this.virtual && !this.readSensor(u, true)) {
+      out.push({type:'engage', ms:this.commanded[u]?0:R.servoTravelMs, unit:u, faces:UNIT_FACES[u], line:`ENGAGE ${UNIT_NAME[u]}`});
+      if (!this.virtual) this.commanded[u]=true;
+      if (!this.virtual && !this.confirmed(u, true)) {
         out.push({type:'wait', ms:Math.ceil((this.sensorTimeoutMs || R.sensorLongTimeoutMs)/R.sensorPollMs)*R.sensorPollMs});
         const line = `ERR ENGAGE ${UNIT_NAME[u]} timeout`;
         out.push({type:'msg', line});
-        out.push({type:'retract', unit:u, faces:UNIT_FACES[u]}); // firmware recovery, no RETRACT serial line
+        out.push({type:'retract', ms:this.commanded[u]?R.servoTravelMs:0, unit:u, faces:UNIT_FACES[u]}); // firmware recovery, no RETRACT serial line
+        this.commanded[u]=false;
         this.lastError = line; out.push({type:'error'}); return false;
       }
       this.engaged[u] = true; return true;
     }
     retract(out, u) {
-      if (!this.engaged[u]) return true;
-      out.push({type:'retract', unit:u, faces:UNIT_FACES[u], line:`RETRACT ${UNIT_NAME[u]}`});
-      if (!this.virtual && !this.readSensor(u, false)) {
+      if (!this.engaged[u] && (this.virtual || this.confirmed(u,false))) return true;
+      out.push({type:'retract', ms:this.commanded[u]?R.servoTravelMs:0, unit:u, faces:UNIT_FACES[u], line:`RETRACT ${UNIT_NAME[u]}`});
+      if (!this.virtual) this.commanded[u]=false;
+      if (!this.virtual && !this.confirmed(u, false)) {
         out.push({type:'wait', ms:Math.ceil((this.sensorTimeoutMs || R.sensorLongTimeoutMs)/R.sensorPollMs)*R.sensorPollMs});
         return this.fail(out, `ERR RETRACT ${UNIT_NAME[u]} timeout`);
       }
       this.engaged[u] = false; return true;
     }
     flip(out) {
-      out.push({type:'flipStart', line:'FLIP'});
-      if (!this.engage(out, RL) || !this.retract(out, FB) || !this.retract(out, D) || !this.retract(out, LOCK)) return false;
-      this.orient ^= 1; this.flips++;
-      out.push({type:'flip', orient:this.orient, line:`FLIPPED orient=${this.orient}`}); return true;
+      return this.fail(out, 'ERR flip disabled: core not coupled');
     }
     plan(m) {
       const out = []; this.lastError = null;
       if (!this.virtual && !this.loaded) { this.fail(out, 'ERR not loaded'); return out; }
+      if (!this.virtual && this.engaged.some((v,u)=>!this.confirmed(u,v))) { this.fail(out, 'ERR endstop state'); return out; }
       const f = Math.floor(m/3), k = m%3;
+      if (f === R.fixedLogicalFace) { this.fail(out, 'ERR fixed face D'); return out; }
       let p = this.physFace(f);
-      if (p === 0) { if (!this.flip(out)) return out; p = this.physFace(f); }
+      if (p === 0) { this.fail(out, 'ERR fixed face D'); return out; }
       let ok;
       if (p === 2 || p === 5) ok = this.engage(out, FB) && this.retract(out, D) && this.retract(out, RL) && this.engage(out, LOCK);
       else if (p === 1 || p === 4) ok = this.engage(out, RL) && this.retract(out, D) && this.retract(out, FB) && this.engage(out, LOCK);
       else ok = this.engage(out, LOCK) && this.engage(out, D);
+      if (ok && !this.virtual && this.engaged.some((v,u)=>!this.confirmed(u,v))) { this.fail(out, 'ERR endstop state'); return out; }
       if (ok) out.push({type:'turn', m, phys:p*3+k, face:p});
       return out;
     }

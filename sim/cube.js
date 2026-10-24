@@ -158,14 +158,14 @@
   }
 
   // 시드 기반 섞기 (xorshift32). 펌웨어와 같은 수열을 만든다.
-  function scramble(seed, n) {
+  function scramble(seed, n, fixedFace = -1) {
     let s = (seed >>> 0) || 0x9E3779B9;
     const next = () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s; };
     const seq = [];
     let last = -1;
     while (seq.length < n) {
       const f = next() % 6;
-      if (f === last) continue;
+      if (f === last || f === fixedFace) continue;
       const k = next() % 3;
       seq.push(f * 3 + k);
       last = f;

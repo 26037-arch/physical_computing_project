@@ -4,10 +4,13 @@ const fs = require('fs'), path = require('path'), assert = require('assert');
 const root = path.resolve(__dirname, '..');
 const cfg = JSON.parse(fs.readFileSync(path.join(root, 'config/robot_v4.json')));
 const cad = JSON.parse(fs.readFileSync(path.join(root, 'models/robot_v4/parameters.json')));
+assert.equal(cfg.servoTravelMs,(cfg.servoRetractedDeg-cfg.servoEngagedDeg)*cfg.servoStepMs);
 assert.equal(cfg.servoEngagedDeg, 0); assert.equal(cfg.servoRetractedDeg, 180);
 assert.equal(cad.retract_mm, 2 * cad.crank_r_mm);
 assert.equal(cad.lock_stroke_mm, 2 * cad.lock_crank_r_mm);
 assert.equal(cfg.flipWorldDeg, -180);
+assert.equal(cfg.flipEnabled, false); assert.equal(cfg.fixedLogicalFace, 3);
+assert.equal(cfg.faceMap[cfg.initialOrient][cfg.fixedLogicalFace], 0);
 assert.equal(cfg.initialOrient, 1); assert.equal(cfg.initialLoaded, false);
 assert.deepEqual(cfg.initialEngaged, [false,false,false,false]);
 assert(cfg.serialLineBytes >= cfg.maxManualMoves * 3 + 3);
@@ -16,15 +19,17 @@ const geometry = Object.fromEntries(Object.entries(cad).filter(([k]) =>
 const r = {...cfg, geometry};
 const literal = x => Array.isArray(x) ? '{' + x.map(literal).join(', ') + '}' : typeof x === 'string' && /^A\d$/.test(x) ? x : JSON.stringify(x);
 const fields = [
+  ['bool','FLIP_ENABLED',cfg.flipEnabled], ['uint8_t','FIXED_LOGICAL_FACE',cfg.fixedLogicalFace],
   ['uint8_t','INITIAL_ORIENT',cfg.initialOrient], ['bool','INITIAL_LOADED',cfg.initialLoaded],
   ['bool','INITIAL_ENGAGED[4]',cfg.initialEngaged],
   ['uint8_t','PHYS[2][6]',cfg.faceMap], ['char','UNIT_NAME[4][5]',cfg.unitNames],
   ['uint8_t','STEP_PINS[6]',cfg.stepPins], ['uint8_t','DIR_PIN',cfg.dirPin],
-  ['uint8_t','SERVO_PINS[4]',cfg.servoPins], ['uint8_t','SENS_PINS[4]',cfg.sensorPins],
+  ['uint8_t','SERVO_PINS[4]',cfg.servoPins], ['uint8_t','SENSOR_DATA_PIN',cfg.sensorDataPin], ['uint8_t','SENSOR_CLOCK_PIN',cfg.sensorClockPin],
+  ['uint8_t','SENSOR_LOAD_PIN',cfg.sensorLoadPin], ['uint8_t','UNIT_HEAD_MASKS[4]',cfg.unitHeadMasks],
   ['uint8_t','BTN_PIN',cfg.buttonPin], ['uint8_t','BUZZER',cfg.buzzerPin],
   ['uint8_t','SERVO_ENGAGED_DEG',cfg.servoEngagedDeg], ['uint8_t','SERVO_RETRACTED_DEG',cfg.servoRetractedDeg],
   ['uint8_t','SENSOR_POLL_MS',cfg.sensorPollMs],
-  ['uint16_t','SERVO_TRAVEL_MS',cfg.servoTravelMs], ['uint16_t','SENSOR_TIMEOUT_MS',cfg.sensorTimeoutMs],
+  ['uint16_t','SERVO_TRAVEL_MS',cfg.servoTravelMs], ['uint8_t','SERVO_STEP_MS',cfg.servoStepMs], ['uint16_t','SENSOR_TIMEOUT_MS',cfg.sensorTimeoutMs],
   ['uint32_t','SENSOR_LONG_TIMEOUT_MS',cfg.sensorLongTimeoutMs],
   ['uint16_t','STEPS_PER_QUARTER',cfg.stepsPerQuarter], ['uint16_t','START_US',cfg.startUs],
   ['uint16_t','MIN_US',cfg.minUs], ['uint16_t','ACCEL_US',cfg.accelUs], ['uint16_t','FLIP_US',cfg.flipUs],
@@ -61,11 +66,11 @@ const progress=(edges,ms)=>{
   return lo/edges.length;
 };
 R.turnMicros=m=>R.turnProfile(m).us;
-R.flipMicros=()=>2*R.stepsPerQuarter*pairUs+R.settleMs*1000;
+R.flipMicros=()=>R.flipEnabled?2*R.stepsPerQuarter*pairUs+R.settleMs*1000:0;
 R.turnProgress=(m,ms)=>progress(R.turnProfile(m).edges,ms);
-R.flipProgress=ms=>progress(flipEdges,ms);
+R.flipProgress=ms=>R.flipEnabled?progress(flipEdges,ms):0;
 R.actionMs = a => a.type==='turn'?R.turnMicros(a.phys)/1000:a.type==='flip'?R.flipMicros()/1000:
-  a.type==='engage'||a.type==='retract'?R.servoTravelMs:a.type==='wait'?a.ms:0;
+  a.type==='engage'||a.type==='retract'?(a.ms===undefined?R.servoTravelMs:a.ms):a.type==='wait'?a.ms:0;
 global.RobotContract=R;
 if(typeof module!=='undefined'&&module.exports)module.exports=R;
 })(typeof globalThis!=='undefined'?globalThis:this);

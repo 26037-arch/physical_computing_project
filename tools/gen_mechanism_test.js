@@ -19,13 +19,14 @@ const SENS = { FB: ['sensF', 'sensB'], RL: ['sensR', 'sensL'], D: ['sensD'], LOC
 function react(line) {
   wait(line);
   let m;
-  if ((m = /^ENGAGE (FB|RL|D|LOCK)$/.exec(line))) for (const id of SENS[m[1]]) ctl(id, 1);
-  if ((m = /^RETRACT (FB|RL|D|LOCK)$/.exec(line))) for (const id of SENS[m[1]]) ctl(id, 0);
+  if ((m = /^ENGAGE (FB|RL|D|LOCK)$/.exec(line))) for (const id of SENS[m[1]]) { ctl(id.replace('sens','ret'), 0); ctl(id, 1); }
+  if ((m = /^RETRACT (FB|RL|D|LOCK)$/.exec(line))) for (const id of SENS[m[1]]) { ctl(id, 0); ctl(id.replace('sens','ret'), 1); }
 }
 const mech = new Mechanism();
 const asText = (c) => c.toFacelets().map((i) => 'URFDLB'[i]).join('');
 
 wait('READY');
+for(const ids of Object.values(SENS))for(const id of ids)ctl(id.replace('sens','ret'),1);
 write('T 0'); wait('TIMEOUT 0');   // Wokwi CLI 는 set-control 이 수 초 늦을 수 있다 → 결합 확인을 최대 60 s 기다린다 (실물 기본 1500 ms)
 // 1) 버튼 길게(1.2 s 이상 = LOAD): D 헤드를 결합 위치로 → 큐브 올려놓기 대기. 누른 채 기다려야 첫 줄을 놓치지 않는다
 ctl('btnStart', 1);
@@ -35,8 +36,10 @@ ctl('btnStart', 0); steps.push('  - delay: 300ms');   // 뗀 것이 디바운스
 ctl('btnStart', 1);
 for (const a of mech.load()) if (a.line) react(a.line);
 ctl('btnStart', 0);
+write('F'); wait('ERR flip disabled: core not coupled');
+write('M D'); wait('ERR fixed face D');
 // 3) 네 면 + 뒤집기: F(→물리 B), R, U(→아래 D), D(→뒤집기 후 D)
-const seq = C.parseMoves('F R U D');
+const seq = C.parseMoves('F R U R');
 write('M ' + C.seqToString(seq));
 mech.resetCounters();
 for (const a of mech.planSeq(seq)) if (a.line) react(a.line);
@@ -55,8 +58,8 @@ write('P'); wait('STATE ' + asText(cube));
 write('T 0'); wait('TIMEOUT 0');
 write('E');
 for (const a of mech.eject()) if (a.line) react(a.line);
-const yaml = `# 자동 생성: node tools/gen_mechanism_test.js — V4 기구 절차(장착·지지 전환·막대·뒤집기·결합 실패·배출)를 실제 모드로 검사
-name: V4 기구 절차 — LOAD 장착, F R U D (지지 전환·막대·뒤집기), 결합 실패 중단, 배출
+const yaml = `# 자동 생성: node tools/gen_mechanism_test.js — V4 기구 절차(장착·지지 전환·막대·결합 실패·배출)를 실제 모드로 검사
+name: V4 기구 절차 — LOAD 장착, F R U R (지지 전환·막대·개별 후퇴 끝), 결합 실패 중단, 배출
 version: 1
 author: physical_computing_project
 steps:

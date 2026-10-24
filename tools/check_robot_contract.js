@@ -16,13 +16,28 @@ for(let f=1;f<6;f++){wire('uno:'+R.stepPins[f],'drv'+motors[f]+':STEP');wire('un
 const groups=[['srvF','srvB'],['srvR','srvL'],['srvD'],['srvLock']];
 for(let u=0;u<4;u++)for(const id of groups[u])wire('uno:'+R.servoPins[u],id+':PWM');
 assert.equal(diagram.parts.filter(x=>x.type==='wokwi-servo').length,6);
-wire('sensF:1.l','uno:'+R.sensorPins[0]);wire('sensF:2.l','sensB:1.l');wire('sensB:2.l','uno:GND.2');
-wire('sensR:1.l','uno:'+R.sensorPins[1]);wire('sensR:2.l','sensL:1.l');wire('sensL:2.l','uno:GND.2');
-wire('sensD:1.l','uno:'+R.sensorPins[2]);wire('sensLock:1.l','uno:'+R.sensorPins[3]);
+wire('endEng:Q7','uno:'+R.sensorDataPin);wire('endRet:Q7','endEng:DS');wire('endRet:DS','uno:5V');
+for(const chip of ['endEng','endRet']){
+  wire(chip+':PL','uno:'+R.sensorLoadPin);wire(chip+':CP','uno:'+R.sensorClockPin);wire(chip+':CE','uno:GND.2');
+  wire(chip+':VCC','uno:5V');wire(chip+':GND','uno:GND.2');
+  for(const spare of [6,7])wire(chip+':D'+spare,'uno:5V');
+  for(const [i,face]of ['F','B','R','L','D','Lock'].entries()){
+    const prefix=chip==='endEng'?'sens':'ret';
+    wire(chip+':D'+i,prefix+face+':1.l');wire(prefix+face+':2.l','uno:GND.2');
+    wire('pullup'+prefix+face+':1','uno:5V');wire('pullup'+prefix+face+':2',prefix+face+':1.l');
+    assert.equal(diagram.parts.find(p=>p.id==='pullup'+prefix+face)?.attrs.value,'10000');
+  }
+}
+for(const [id,chip] of [['bypass0','endEng'],['bypass1','endRet']]){
+  wire(id+':1',chip+':VCC');wire(id+':2',chip+':GND');
+  assert.equal(diagram.parts.find(p=>p.id===id)?.attrs.value,'0.1µF');
+}
+assert.equal(diagram.parts.filter(x=>x.type==='wokwi-74hc165').length,2);
+assert.equal(R.flipEnabled,false);assert.equal(R.faceMap[R.initialOrient][R.fixedLogicalFace],0);
 wire('btnStart:1.l','uno:'+R.buttonPin);wire('bz1:2','uno:'+R.buzzerPin);
 wire('lcd1:SDA','uno:A4');wire('lcd1:SCL','uno:A5');
 const pin=p=>typeof p==='number'?p:14+ +p.slice(1);
-const signals=[...R.stepPins.slice(1),R.dirPin,...R.servoPins,...R.sensorPins,R.buttonPin,R.buzzerPin,'A4','A5'].map(pin);
+const signals=[...R.stepPins.slice(1),R.dirPin,...R.servoPins,R.sensorDataPin,R.sensorClockPin,R.sensorLoadPin,R.buttonPin,R.buzzerPin,'A4','A5'].map(pin);
 assert.equal(new Set(signals).size,signals.length,'signal pin conflict');
 assert.equal(R.geometry.retract_mm,2*R.geometry.crank_r_mm);assert.equal(R.geometry.lock_stroke_mm,2*R.geometry.lock_crank_r_mm);
 assert.equal(R.geometry.lock_bar_mm,6);assert.equal(R.geometry.strip_width_mm,16);
@@ -30,4 +45,4 @@ const html=fs.readFileSync(path.join(root,'sim/index.html'),'utf8');
 assert(html.indexOf('<script src="robot_contract.js"')<html.indexOf('<script src="mechanism.js"'));
 assert(fs.readFileSync(path.join(root,'scripts/upload.ps1'),'utf8').includes('.physicalBoard'));
 assert(fs.readFileSync(path.join(root,'scripts/build.ps1'),'utf8').includes('.simulationBoard'));
-console.log('Robot V4 contract PASS: config/generated JS + embedded CAD identical; 6 servos / 4 signals, 5 steppers, series switches, button, buzzer, LCD; unique pins and board defaults.');
+console.log('Robot V4 contract PASS: config/generated JS + embedded CAD identical; 6 servos / 4 signals, 5 steppers, 12 individual engaged/retracted endstops via 74HC165×2, button, buzzer, LCD; unique pins and board defaults.');

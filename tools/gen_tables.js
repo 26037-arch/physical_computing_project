@@ -46,7 +46,7 @@ const EDGE1_18 = [], EDGE1_15 = [], CORNER1_15 = [];
 for (let e = 0; e < 12; e++) { EDGE1_18.push(edgeSingle(e, ALL18)); EDGE1_15.push(edgeSingle(e, NO_D15)); }
 for (let c = 0; c < 8; c++) CORNER1_15.push(cornSingle(c, NO_D15));
 const CROSS_PAIRS = [[4, 5], [4, 6], [4, 7], [5, 6], [5, 7], [6, 7]]; // DR DF DL DB 중 2개
-const CROSS_PAIR = CROSS_PAIRS.map(([a, b]) => edgePair(a, b, ALL18));
+const CROSS_PAIR = CROSS_PAIRS.map(([a, b]) => edgePair(a, b, NO_D15));
 const clean = (t) => Array.from(t, (v) => (v === 255 ? 0 : v));
 const problems = [];
 
@@ -108,19 +108,44 @@ const f2lIntact = (c) => { for (let i = 4; i < 8; i++) if (c.cp[i] !== i || c.co
 const llOriented = (c) => c.co.every((v) => !v) && c.eo.every((v) => !v);
 const aufMove = (k) => (k ? [U * 3 + k - 1] : []); // k=0 없음, 1=U, 2=U2, 3=U'
 
+// Build exact LL solutions using only the five available faces. Reverse Dijkstra
+// preserves F2L; orientation transitions do not depend on the LL permutation.
+const noD = seq => seq.every(m => Math.floor(m/3)!==D);
+function llSolutions(keyOf, generators, count) {
+  const solved=new Cube(), start=keyOf(solved);
+  const best=new Map([[start,{cube:solved,moves:[]}]]),todo=[{key:start,cost:0}];
+  const gs=[...generators,...generators.map(inverseSeq),...[1,2,3].map(aufMove)];
+  for(const g of gs)if(!noD(g)||!f2lIntact(new Cube().apply(g)))throw Error('invalid five-face LL generator');
+  while(todo.length){
+    todo.sort((a,b)=>b.cost-a.cost);const item=todo.pop(), cur=best.get(item.key);
+    if(item.cost!==cur.moves.length)continue;
+    for(const g of gs){
+      const c=cur.cube.clone().apply(inverseSeq(g)),key=keyOf(c);
+      const seq=simplifySeq(g.concat(cur.moves));
+      if(!best.has(key)||seq.length<best.get(key).moves.length){best.set(key,{cube:c,moves:seq});todo.push({key,cost:seq.length});}
+    }
+  }
+  if(best.size!==count)throw Error('five-face LL incomplete: '+best.size+'/'+count);
+  return best;
+}
+const pureOLL=ALGS.OLL.map(([,a])=>simplifySeq(expandAlg(a))).filter(noD);
+const purePLL=ALGS.PLL.map(([,a])=>simplifySeq(expandAlg(a))).filter(noD);
+const ollFive=llSolutions(ollKey,pureOLL,216),pllFive=llSolutions(pllKey,purePLL,288);
 const OLL = [], PLL = [];
 for (const [num, alg] of ALGS.OLL) {
-  const seq = simplifySeq(expandAlg(alg));
+  let seq = simplifySeq(expandAlg(alg));
   const probe = new Cube().apply(seq);
   if (!f2lIntact(probe)) { problems.push(`OLL ${num} breaks F2L: ${alg}`); continue; }
   const state = new Cube().apply(inverseSeq(seq)); // 이 공식이 푸는 패턴
   if (llOriented(state)) { problems.push(`OLL ${num} does nothing to orientation: ${alg}`); continue; }
+  if(!noD(seq))seq=ollFive.get(ollKey(state)).moves;
   OLL.push({ name: `OLL ${num}`, key: ollKey(state), moves: seq });
 }
 for (const [name, alg] of ALGS.PLL) {
-  const seq = simplifySeq(expandAlg(alg));
+  let seq = simplifySeq(expandAlg(alg));
   const probe = new Cube().apply(seq);
   if (!f2lIntact(probe) || !llOriented(probe)) { problems.push(`PLL ${name} is not a pure LL permutation: ${alg}`); continue; }
+  if(!noD(seq))seq=pllFive.get(pllKey(new Cube().apply(inverseSeq(seq)))).moves;
   for (let auf = 0; auf < 4; auf++) { // 공식 뒤에 U 조정(auf)이 따라오는 상태의 키도 저장
     const state = new Cube().apply(inverseSeq(aufMove(auf))).apply(inverseSeq(seq));
     PLL.push({ name, key: pllKey(state), moves: seq, auf });
@@ -206,6 +231,9 @@ for (const c of pllStates) {
 for (const e of OLL) if (!ollClasses.has(e.name) && e.name !== 'OLL 2look') problems.push(`${e.name} never used (duplicate case?)`);
 for (const n of new Set(PLL.map((e) => e.name))) if (!pllClasses.has(n) && n !== 'PLL 2look' && n !== 'AUF') problems.push(`PLL ${n} never used (duplicate case?)`);
 
+for(const e of [...OLL,...PLL])if(!noD(e.moves))problems.push('unavailable D in '+e.name);
+console.log('five-face LL graph complete: OLL '+ollFive.size+', PLL '+pllFive.size);
+
 // ---- 출력 ----
 const root = path.join(__dirname, '..');
 const lines = (name, type, arr2d, cols) => {
@@ -223,7 +251,7 @@ let h = `// 자동 생성 파일 — 수정하지 말 것. 생성: node tools/ge
 //  MOVE_*[m]        : 수 M_m = (σ^M, o^M).  적용: σ'(i) = σ(σ^M(i)), o'(i) = o(σ^M(i)) + o^M(i)
 //  EDGE_TO/DO[m][p] : 조각 상태 전이 T_M(p,o) = (q, o + o^M(q)), q = (σ^M)^-1(p)   (코너도 동일)
 //  CROSS_PAIR[..]   : 조각 집합 P 의 사영 그래프에서 목표까지 BFS 거리 d_P(u). 실제 L수 해의 사영 경로도 길이 L
-//                     이므로 d_P(π_P(s)) ≤ d*(s) — 허용적 휴리스틱 (18수 기준).
+//                     이므로 d_P(π_P(s)) ≤ d*(s) — 허용적 휴리스틱 (D 제외 15수 기준).
 //  F2L_PAIR[s][..]  : 슬롯 s 의 코너·엣지 쌍이 매크로 수(U^k 비용 1, 트리거 X U^k X' 비용 3)로 풀리기까지의 최단 겉면 수.
 //                     트리거는 크로스·다른 슬롯을 보존하므로 F2L 탐색은 쌍 2바이트만 추적한다. 255 = 도달 불가(크로스 자리).
 //  F2L_TRIG[s][fam] : 슬롯 s 트리거의 첫 수 X (fam 0: a U^k a', fam 1: b' U^k b). 마지막 수는 X 의 역수.
@@ -244,7 +272,7 @@ h += `\n// 조각 이동표: 위치 p 의 조각은 수 m 뒤 EDGE_TO[m][p] 로 
 h += lines('EDGE_TO', 'uint8_t', edgeTo, 12) + lines('EDGE_DO', 'uint8_t', edgeDo, 12) + lines('CORNER_TO', 'uint8_t', cornTo, 8) + lines('CORNER_DO', 'uint8_t', cornDo, 8);
 h += `\n// 조각 1개 거리표: [조각][위치*방향수+방향]. _18 = 18수, _15 = D 제외 15수(F2L)\n`;
 h += lines('EDGE1_18', 'uint8_t', EDGE1_18.map(clean), 24) + lines('EDGE1_15', 'uint8_t', EDGE1_15.map(clean), 24) + lines('CORNER1_15', 'uint8_t', CORNER1_15.map(clean), 24);
-h += `\n// 크로스 엣지 쌍 거리표 (18수): CROSS_PAIRS 순서, 인덱스 = 상태A*24+상태B\n`;
+h += `\n// 크로스 엣지 쌍 거리표 (D 제외 15수): CROSS_PAIRS 순서, 인덱스 = 상태A*24+상태B\n`;
 h += lines('CROSS_PAIRS', 'uint8_t', CROSS_PAIRS, 2) + lines('CROSS_PAIR', 'uint8_t', CROSS_PAIR.map(clean), 24);
 h += `\n// F2L 쌍 거리표 (매크로 수 기준 겉면 수, 255 = 도달 불가): 슬롯 s = (코너 4+s, 엣지 8+s), 인덱스 = 코너상태*24+엣지상태\n`;
 h += lines('F2L_PAIR', 'uint8_t', F2L_PAIR.map((t) => Array.from(t)), 24);

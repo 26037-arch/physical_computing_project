@@ -38,11 +38,11 @@
       "passed": true
     },
     "print/rail_support.stl": {
-      "triangles": 2588,
+      "triangles": 2964,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 65559.51956094148,
+      "positive_volume_mm3": 73048.15507445628,
       "size_mm": [
-        60.0,
+        81.0,
         7.5,
         190.0
       ],
@@ -324,13 +324,13 @@
       "passed": true
     },
     "assembly_kit/print/lock_switch_bracket.stl": {
-      "triangles": 2584,
+      "triangles": 3484,
       "closed_two_faces_per_edge": true,
-      "positive_volume_mm3": 10340.365354700194,
+      "positive_volume_mm3": 30640.648209076346,
       "size_mm": [
-        62.0,
-        36.5,
-        17.0
+        81.0,
+        45.75,
+        67.0
       ],
       "passed": true
     },

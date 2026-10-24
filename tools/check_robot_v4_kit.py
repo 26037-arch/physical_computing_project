@@ -1,4 +1,4 @@
-"""Check Rev C mounting interfaces, bolt heads and sampled V4 movement."""
+"""Check Rev D mounting interfaces, endstop cases and sampled V4 movement."""
 import json,itertools,math
 from pathlib import Path
 import build_robot_v4 as d
@@ -8,7 +8,7 @@ from check_robot_v4 import hits
 def main():
     panels,metal,prints,jigs=k.design()
     cubes,derived,instances,modules,lock=d.make_design()
-    report={'revision':'Rev C','physical_load_test':False,'checks':{},'limitations':'Discrete rigid geometry only; includes P14 M5 head/washer envelopes. Other fasteners, vendor slots, horn details and switch levers are omitted.'}
+    report={'revision':'Rev D','physical_load_test':False,'checks':{},'limitations':'Discrete rigid geometry only; includes P14 M5 head/washer envelopes. Other fasteners, vendor slots, horn details and switch levers are omitted.'}
     failures=[]
     def record(n,left,right,same=False):
         h=hits(left,right,same);report['checks'][n]=h
@@ -65,6 +65,23 @@ def main():
     lock_fixed=[(n,lock[0][n]) for n in ('lock_guide','lock_servo_mount','lock_servo_clamp')]
     record('lock_fixed_interfaces',lock_fixed,lock_fixed,True)
     record('lock_servo_capture',lock_fixed,[('servo',lock[1]['lock_servo_MG996R'])])
+    lock_sensors=[(n,lock[1][n]) for n in ('lock_engage_switch','lock_retract_switch')]
+    record('lock_endstops_vs_fixed',lock_sensors,lock_fixed+[('servo',lock[1]['lock_servo_MG996R'])])
+    record('lock_endstops_vs_bracket',lock_sensors,[('bracket',bracket)])
+    for hollow in (False,True):
+        heads,hw=modules[hollow]
+        sensors=[(n,hw[n]) for n in ('engage_switch','retract_switch')]
+        record(f'head_{hollow}_endstops_vs_fixed',sensors,[(n,heads[n]) for n in ('rail_support','servo_mount','servo_clamp')]+[('servo',hw['servo_MG996R'])])
+        for theta in range(0,181,15):
+            shift=d.slider_z(theta)-147
+            crank,link=d.crank_link(theta)
+            moving=[('crank',crank),('link',link),('carriage',heads['carriage'].translate((0,0,shift)))]
+            record(f'head_{hollow}_endstops_moving_{theta}',sensors,moving)
+    for theta in range(0,181,15):
+        shift=d.slider_z(theta,15,255)-204
+        crank,link=d.crank_link(theta,True)
+        moving=[('crank',crank),('link',link),('carriage',lock[0]['lock_carriage'].translate((0,0,shift)))]
+        record(f'lock_endstops_moving_{theta}',lock_sensors,moving)
     # Mechanical sanity checks with actual generated solids.
     for n,(s,q) in prints.items():
         assert s.isValid() and len(s.Solids())==1,n

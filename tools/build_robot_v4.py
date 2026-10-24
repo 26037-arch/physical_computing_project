@@ -284,8 +284,10 @@ def module_design(hollow=False):
         support = support.cut(cyl(5.4, -58, -50, (0, 1, 0), (x, 0, z)))
     support=support.cut(cyl(5.4,-58,-47,(0,1,0),(-20,0,171)))
     support=support.cut(box(16.4,1,4.4,(-20,-51.4,181)))
-    for x in (18.75,25.25):
-        slot=cq.Workplane('XZ',origin=(x,-50,154.9)).slot2D(8,2.4,90).extrude(8).val()
+    # Switch cases sit OUTSIDE both the carriage and link sweeps. Long leaves reach inward.
+    support=support.fuse(box(22,6,62,(40,-54,159)))
+    for x,z in itertools.product((37.75,44.25),(137.1,180.9)):
+        slot=cq.Workplane('XZ',origin=(x,-50,z)).slot2D(8,2.4,90).extrude(8).val()
         support=support.cut(slot)
     support=support.cut(box(10,8,10,(27,-54,186)))
     heads['rail_support'] = support.clean()
@@ -295,7 +297,8 @@ def module_design(hollow=False):
     hardware['servo_MG996R'] = box(42.9, 19.7, 40.7, (-3.5, -44, 205.3))
     hardware['rail_MGN12']=hardware['rail_MGN12'].translate((0,0,-.5))
     hardware['servo_output'] = cyl(6, 17.95, 24, (1, 0, 0), (0, -44, 195))
-    hardware['engage_switch'] = box(12.8, 6.5, 5.8, (22, -47.75, 154.9))
+    hardware['engage_switch'] = box(12.8, 6.5, 5.8, (41, -47.75, 137.1))
+    hardware['retract_switch'] = box(12.8, 6.5, 5.8, (41, -47.75, 180.9))
     if not hollow:
         hardware['rear_thrust_F8_16M']=cyl(16,54,59).cut(cyl(8.05,53,60))
         hardware['shaft_collar_8']=cyl(16,59,66).cut(cyl(8.05,58,67))
@@ -357,12 +360,13 @@ def lock_design():
                  lock_servo_clamp=servo_clamp().translate((0,68,60)),
                  lock_crank=crank, lock_link=link)
     hardware = dict(lock_bar=bar, lock_servo_MG996R=box(42.9, 19.7, 40.7, (-3.5, 24, 265.3)),
-                    lock_engage_switch=box(12.8, 6.5, 5.8, (22, 14.75, 211.9)))
+                    lock_engage_switch=box(12.8, 6.5, 5.8, (41, 24, 194.1)),
+                    lock_retract_switch=box(12.8, 6.5, 5.8, (41, 24, 243.9)))
     return heads, hardware
 
 
-FIXED = {'rail_support', 'servo_mount', 'servo_clamp', 'rail_MGN12', 'servo_MG996R', 'servo_output', 'engage_switch'}
-LOCK_FIXED = {'lock_guide', 'lock_servo_mount', 'lock_servo_clamp', 'lock_servo_MG996R', 'lock_engage_switch'}
+FIXED = {'rail_support', 'servo_mount', 'servo_clamp', 'rail_MGN12', 'servo_MG996R', 'servo_output', 'engage_switch', 'retract_switch'}
+LOCK_FIXED = {'lock_guide', 'lock_servo_mount', 'lock_servo_clamp', 'lock_servo_MG996R', 'lock_engage_switch', 'lock_retract_switch'}
 
 
 def module_pose(module, shift):

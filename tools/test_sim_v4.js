@@ -71,7 +71,8 @@ run('doLoad()');drain();assert(!mech.loaded && mech.engaged[2]);
 run('doLoad()');drain();assert(mech.loaded);
 for(const rate of [1,4]){
   element('speed').value=String(rate);
-  const seq=Array.from({length:180},(_,i)=>(i*7)%18),expected=cube.clone().apply(seq);
+  const allowed=Array.from({length:18},(_,m)=>m).filter(m=>Math.floor(m/3)!==R.fixedLogicalFace);
+  const seq=Array.from({length:180},(_,i)=>allowed[(i*7)%15]),expected=cube.clone().apply(seq);
   ctx.seq=seq;run('doMoves(C.seqToString(seq.slice(0,60)))');drain();
   run('doMoves(C.seqToString(seq.slice(60,120)))');drain();run('doMoves(C.seqToString(seq.slice(120)))');drain();assert(cube.equals(expected));
 }
@@ -80,8 +81,8 @@ const before=cube.clone();ctx.long='R '.repeat(65);run('doMoves(long)');assert(!
 run('doMoves("Rubbish")');assert(!run('busy()'));
 // Compare a real solver-driven queue and then a failed second move.
 run('doScramble(42)');drain();run('doSolve()');drain();assert(cube.isSolved());
-if(mech.orient===1){run('doFlip()');drain();}
-assert.equal(mech.orient,0);
+run('doFlip()');drain();assert.equal(mech.orient,1);assert(element('log').textContent.includes('ERR flip disabled'));
+const fixedBefore=cube.clone();run('doMoves("F D R")');assert(cube.equals(fixedBefore));assert(!run('busy()'));
 run('doLoad()');drain();assert(!mech.loaded);run('doLoad()');drain();assert(mech.loaded);
 assert.equal(ctx.cubeGroup.rotation.x,R.initialOrient*Math.PI,'reload white down must restore visual/physical mapping');
 run('doMoves("U")');drain();
@@ -90,4 +91,4 @@ const expected=cube.clone().apply(C.parseMoves('F'));run('doMoves("F R U")');dra
 assert(cube.equals(expected));assert(element('log').textContent.includes('ABORTED completed=1'));
 assert(!run('busy()'));assert.equal(element('btnMoves').disabled,false);
 assert(element('lcd').textContent.includes('ABORTED'));assert(heads[1].crank.theta>3,'failed engage must recover to retracted');
-console.log(`V4 simulator PASS: initial unloaded / LOAD×2 / eject / 360 moves at 1×+4× / solver queue / failure retention; ${frames} frames (${flipSamples} flip, ${moveSamples} turn); signed axes, pulse-derived durations, CAD crank strokes 24/30.`);
+console.log(`V4 simulator PASS: fixed top / forbidden D and flip rejected / LOAD×2 / eject / 360 moves at 1×+4× / solver queue / failure retention; ${frames} frames (${flipSamples} flip, ${moveSamples} turn); signed axes, pulse-derived durations, CAD crank strokes 24/30.`);

@@ -9,7 +9,13 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 | 컴파일·라이브러리·업로드 | Arduino CLI | `.\scripts\build.ps1`, `.\scripts\upload.ps1 -Port COM3` |
 | 3D 하우징 설계 | Fusion 360 API (MCP `fusion`) | `fusion_exec` 도구로 Python 실행, 스크립트는 `fusion/scripts/` |
 
-## 프로젝트: 3×3 큐브 풀이 로봇 (V4: 측면 2핀 헤드 4 + 아래 D 헤드 + 승강 잠금 막대, 서보 크랭크 이송, 뒤집기, 보드 내 CFOP 풀이)
+## 현재 기준: Rev D 물리 보완
+
+`docs/PHYSICS_V4.md`가 이전 뒤집기 운전 설명보다 우선한다. 흰색 U를 아래로 두고 논리 D(물리 상단)를 고정한다. 크로스 탐색·OLL/PLL·로봇 섞기는 D를 제외한15수를 쓰고 실제/가상 모두 FLIP을 거부한다. 큐브 모델의 일반18수 섞기는 회귀 입력용으로 유지한다.
+입력은74HC165 두 개와 개별 결합/후퇴 스위치12개이며 DATA=D12,CLK=D13,PL=A0이다. P13/P29의 긴 레버용 바깥 받침을 사용한다. 서보는1도/4ms, 전체720ms 지령이다. 힘 제한 기능은 아니다.
+변경 검증에 `node tools/check_five_face_solver.js`와 `python tools/check_robot_v4_physics.py`를 포함하고, 후자는 해석 계산과 실물 합격을 분리한다.
+
+## 프로젝트: 3×3 큐브 풀이 로봇 (V4: 측면 2핀 헤드 4 + 아래 D 헤드 + 승강 잠금 막대, 서보 크랭크 이송, 상단 고정 5면 운전, 보드 내 CFOP 풀이)
 전체 흐름은 `docs/PIPELINE.md`, 보고서는 `docs/REPORT.md`, **현재 기구 기준은 `docs/HARDWARE_V4.md`** (장치 목록·좌표·치수·절차·핀 배치. 펌웨어·시뮬레이터·CAD 가 공유하는 계약).
 
 ## 폴더 구조
@@ -27,7 +33,7 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 - V4 제어 설정의 원본은 `config/robot_v4.json`, 형상 치수의 원본은 `models/robot_v4/parameters.json`이다. `node tools/gen_robot_contract.js`로 `firmware/main/robot_contract.h`와 `sim/robot_contract.js`를 생성한다. 생성 파일을 직접 수정하지 말고 `--check`와 `node tools/check_robot_contract.js`로 신선도·핀·6서보/4신호 회로를 검사한다.
 - 기구·모터·명령 수신 변경은 `node tools/host_mechanism_check.js`(실제 스케치 C++ + 결정적 GPIO/센서/시간 어댑터)와 `node tools/test_sim_v4.js`(실제 웹 동작 큐·패널·회전축·스텝 시간)를 실행한다. 두 테스트는 Wokwi 전기 시뮬레이션이나 실물 강도/마찰 시험을 대신하지 않는다.
 
-- `sim/solver.js` 와 `firmware/main/solver.cpp` 는 같은 탐색 순서·같은 규칙(크로스 18수 IDA*, F2L 은 U 회전 + 트리거 `X U^k X'` 매크로 27개를 같은 번호 순서로 전개)이어야 한다. 한쪽을 바꾸면 다른 쪽도 바꾸고 `node tools/host_check.js 1 300`(g++ 호스트 비교) → `node tools/gen_wokwi_test.js 1` → `scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000` 으로 재확인
+- `sim/solver.js` 와 `firmware/main/solver.cpp` 는 같은 탐색 순서·같은 규칙(크로스 D제외15수 IDA*, F2L 은 U 회전 + 트리거 `X U^k X'` 매크로 27개를 같은 번호 순서로 전개)이어야 한다. 한쪽을 바꾸면 다른 쪽도 바꾸고 `node tools/host_check.js 1 300`(g++ 호스트 비교) → `node tools/gen_wokwi_test.js 1` → `scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml -TimeoutMs 180000` 으로 재확인
 - `sim/mechanism.js` 와 `firmware/main/mechanism.cpp` 는 같은 절차(지지 전환 순서·뒤집기 조건·장착/배출)와 같은 시리얼 줄이어야 한다. 한쪽을 바꾸면 다른 쪽도 바꾸고 `node tools/gen_mechanism_test.js` → `simulate.ps1 -Scenario tests/mechanism_v4.test.yaml -TimeoutMs 120000`(실제 모드, 센서 버튼 시나리오) 과 시드 시나리오(flips/regrips 비교)를 재실행
 - `tools/algs.js` 나 거리표 정의를 바꾸면 `node tools/gen_tables.js` 재실행 (커버리지 실패 시 종료코드 1)
 - V4 CAD(`tools/build_robot_v4.py`) 치수를 바꾸면 `docs/HARDWARE_V4.md` 2절을 먼저 고치고 `sim/app.js`(기본값·HEAD 오프셋)·`firmware/main/mechanism.h`(이송량·서보 각)·CAD 를 맞춘 뒤 `.venv-cad/Scripts/python.exe tools/build_robot_v4.py` → `check_robot_v4.py` → `node tools/embed_models_v4.js` 재실행

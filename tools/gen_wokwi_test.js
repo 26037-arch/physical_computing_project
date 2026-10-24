@@ -10,7 +10,7 @@ const R = require('../sim/robot_contract.js');
 const { Solver } = require('../sim/solver.js');
 const { Mechanism } = require('../sim/mechanism.js');
 const seed = parseInt(process.argv[2] || '1', 10);
-const scr = C.scramble(seed, R.scrambleLength);
+const scr = C.scramble(seed, R.scrambleLength, R.fixedLogicalFace);
 const r = new Solver().solve(new C.Cube().apply(scr));
 const mech = new Mechanism({ virtual: true });                 // 가상 모드 시작 상태: 모두 후퇴, orient 1
 mech.planSeq(scr);

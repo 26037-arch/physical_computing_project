@@ -13,7 +13,7 @@ class Motors {
  public:
   void begin();
   void turn(uint8_t physMove);          // 물리 수 번호 = face*3 + (회전수-1), face ∈ {R F D L B}
-  void flip();                          // R·L 을 같은 월드 방향으로 동시에 180° (큐브 x축 뒤집기)
+  void flip();                          // Rev D: 펄스를 내지 않는 비활성 호환 API
   void setEnabled(bool on) { enabled = on; }  // false 면 모터 신호 없이 즉시 반환 (가상 모드)
   bool isEnabled() const { return enabled; }
   uint16_t lastMoveMs = 0;              // 마지막 수 실행 시간(ms)

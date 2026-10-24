@@ -34,9 +34,9 @@ def main():
     assert len(toc) == len(doc), 'Each page needs a bookmark'
     assert found == expected, ('Catalog IDs', found ^ expected)
     assert embedded and not clipped, ('Fonts/bounds', embedded, clipped)
-    assert 'Rev C' in doc.metadata['title']
+    assert 'Rev D' in doc.metadata['title']
     assert '전산봉' in ''.join(p.get_text() for p in doc)
-    report = dict(passed=True, revision='Rev C', pages=len(doc), first_page_part_ids=sorted(found),
+    report = dict(passed=True, revision='Rev D', pages=len(doc), first_page_part_ids=sorted(found),
                   bookmarks=len(toc), clipped_text_spans=clipped, fonts_embedded=embedded,
                   pdf_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
                   integration_base_commit='83ade39d35a54d3a644a2fec932033650a53e135')

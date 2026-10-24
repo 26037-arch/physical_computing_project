@@ -16,7 +16,7 @@
   const C = global.CubeLib || require('./cube.js');
   const T = global.CubeTables || require('./tables.js');
   const { Cube, U, oppositeFace, simplifySeq } = C;
-  const MAX_DEPTH = 14;       // 크로스 안전 한계 (크로스는 항상 8수 이내)
+  const MAX_DEPTH = 14;       // 크로스 안전 한계 (상단 고정 15수 크로스, 전수 BFS로 한계 검증)
   const F2L_MAX_BOUND = 20;   // F2L 한 쌍 안전 한계 (생성기 전수 검사: 최장 11수)
   const SLOT_NAMES = ['FR', 'FL', 'BL', 'BR'];
 
@@ -59,7 +59,7 @@
       if (hv === 0) return true;
       for (let m = 0; m < 18; m++) {
         const f = (m / 3) | 0;
-        if (f === lastFace) continue;
+        if (f === C.D || f === lastFace) continue;
         if (lastFace >= 0 && f === oppositeFace(lastFace) && f < lastFace) continue;
         this.nodes++;
         const es2 = new Array(4);

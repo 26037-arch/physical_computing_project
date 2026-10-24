@@ -36,13 +36,5 @@ void Motors::turn(uint8_t m) {
   lastMoveMs = millis() - t0;
 }
 
-// 큐브 x축 180° 뒤집기: R 면 시계(= −x 회전) + L 면 반시계(= −x 회전) 를 번갈아 한 스텝씩.
-// 두 층이 같은 월드 방향으로 돌아 큐브 전체가 돈다 (M 슬라이스는 마찰로 따라온다 — 실물 시험 항목).
-void Motors::flip() {
-  if (!enabled) return;
-  for (uint16_t i = 0; i < 2 * STEPS_PER_QUARTER; i++) {
-    setDir(true);  pulse(MOT_R, FLIP_PAIR_GAP_US);
-    setDir(false); pulse(MOT_L, FLIP_US);
-  }
-  delay(SETTLE_MS);
-}
+// Rev D: no positive coupling to the core, so the low-level path is disabled too.
+void Motors::flip() { lastMoveMs = 0; }

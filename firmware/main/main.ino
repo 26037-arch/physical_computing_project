@@ -2,24 +2,25 @@
 //
 // 보드: Arduino UNO R4 WiFi (실물) / UNO R3 (Wokwi 시뮬레이션, 헤더 핀 배치 동일)
 // 기구 (docs/HARDWARE_V4.md): 측면 헤드 4개(F R B L, 적도 엣지 2핀 구동) + 아래 D 헤드(중공축·비킨 모터·벨트, DF/DB 2핀)
-//       + 잠금 막대(6 mm 각재, 중공 D 축을 지나 큐브 중심 센터 판 소켓까지 올라와 코어 고정 — V3 중앙축 대신, 뒤집기 때만 내림).
+//       + 잠금 막대(6 mm 강재, 중공 D 축을 지나 코어 고정. 장착 중 유지, 배출 때 후퇴).
 //       이송 유닛 4개(F/B 쌍·R/L 쌍·D·막대)는 서보 크랭크로 결합/후퇴하고 스위치로 확인한다. 위 헤드는 없다.
-//       U 면은 큐브를 뒤집어(R/L 180°) 아래 D 헤드로 돌린다.
+//       Rev D: 논리U는 아래 D헤드로 돌리며 논리D(상단)는 고정한다. 뒤집기는 사용하지 않는다.
 // 회로: A4988 ×5 (STEP F D2, R D3, B D4, L D5, D D6; DIR 공용 D7), 서보 F/B D8, R/L D9, D D10, 막대 D11,
-//       결합 스위치 F/B D12, R/L D13, D A0, 막대 A1, 버튼 1개 A2 (풀업; 짧게 = START, 1.2 s 이상 = LOAD), 부저(A3), LCD1602 I2C(A4/A5)
+//       결합/후퇴 스위치12개→74HC165×2(DATA D12,CLOCK D13,PL A0), A1미사용, 버튼 1개 A2 (풀업; 짧게 = START, 1.2 s 이상 = LOAD), 부저(A3), LCD1602 I2C(A4/A5)
 //
 // 동작: [LOAD 길게]  D 헤드를 결합 위치로 올려 큐브를 핀 위에 받고(흰색 면 아래, 손으로 올려놓음), 다시 길게 누르면 막대·F/B 로 잡는다. 장착된 상태에서 길게 누르면 배출.
 //       [START 짧게] 모델이 풀린 상태면 섞기, 아니면 풀기 (한 버튼으로 섞기 → 풀기 → 섞기 … 반복).
 //       [SCRAMBLE] 로봇이 20수 무작위 섞기를 직접 돌리며 그 수열을 기록한다 → 큐브 상태를 센서 없이 정확히 안다.
 //       [SOLVE]    보드 안에서 CFOP(크로스·F2L IDA*, OLL·PLL 표 조회)로 풀이를 계산하고 모터로 실행한다.
-//       매 수 앞에서 Mechanism 이 지지 헤드를 바꾸고(새 쌍 결합 → 센서 확인 → 기존 쌍 해제) 필요하면 뒤집는다.
+//       매 수 앞에서 Mechanism 이 지지 헤드를 바꾸고(새 쌍 결합 → 센서 확인 → 기존 쌍 해제) 목표 끝과 반대 끝을 각각 확인한다.
 //       결합이 확인되지 않으면 그 수를 돌리지 않고 중단한다 (완료한 수까지의 모델은 보존).
 // 시리얼(115200) 접점 규칙 — 모든 명령은 한 줄, 수열은 "R U R' U2" 표기:
 //   S [seed]   섞기 (seed 생략 시 micros 기반). 출력: SCRAMBLE seed=<n> (20): <수열>
 //   V          풀기. 단계마다 "<이름> (<수>): <수열> | nodes=.. ms=.." 출력 후 TOTAL, 실행, SOLVED ok=1
 //   M <수열>   임의 수열 실행 (PC 시뮬레이터·스마트큐브 입력용)
-//   L / E / F  장착 한 단계(LOAD 버튼과 같음) / 배출 / 뒤집기(시연용)
+//   L / E / F  장착 한 단계 / 배출 / 비활성(코어 직접 결합 없는 뒤집기 거부)
 //   P          현재 상태 54 스티커 출력 (STATE URRF...) + MECH 상태      R  모델을 풀린 상태로 리셋
+//   I          실제 결합/후퇴 접점 12개와 입력 프레임 확인
 //   Q 0|1      가상 모드(1=모터·서보·센서 생략, 절차는 출력)
 //   T <ms>     결합/해제 센서 확인 대기 시간 (기본 1500; 시운전·시뮬레이션 지연용)
 #include <Wire.h>
@@ -55,7 +56,7 @@ void lcdShowF(const __FlashStringHelper* row0, const char* row1) {
 
 void beep(uint16_t hz, uint16_t ms) { tone(BUZZER, hz, ms); delay(ms); }
 
-// ---- 수열 실행: 지지 전환(+뒤집기) → 물리 수 회전 → 모델 갱신 ----
+// ---- 수열 실행: 끝 센서 확인·지지 전환 → 물리 수 회전 → 모델 갱신 ----
 bool execute(const uint8_t* seq, uint8_t n, const __FlashStringHelper* label) {
   char row1[17];
   for (uint8_t i = 0; i < n; i++) {
@@ -84,7 +85,7 @@ void printMechStats() {
 void doScramble(uint32_t seed) {
   uint8_t seq[SCRAMBLE_LEN];
   lastSeed = seed;
-  scrambleSeq(seed, seq, SCRAMBLE_LEN);
+  scrambleSeq(seed, seq, SCRAMBLE_LEN, FIXED_LOGICAL_FACE);
   Serial.print(F("SCRAMBLE seed=")); Serial.print(seed);
   Serial.print(F(" (")); Serial.print(SCRAMBLE_LEN); Serial.print(F("): "));
   printSeq(Serial, seq, SCRAMBLE_LEN); Serial.println();
@@ -164,19 +165,38 @@ void doEject() {
 }
 
 // ---- 시리얼 명령 ----
+// Strict unsigned decimal input: reject signs, overflow and suffixes before changing state.
+bool parseNumber(const char* s, uint32_t maximum, uint32_t& value) {
+  if (*s < '0' || *s > '9') return false;
+  value = 0;
+  do {
+    uint8_t digit = *s++ - '0';
+    if (digit > maximum || value > (maximum - digit) / 10) return false;
+    value = value * 10 + digit;
+  } while (*s >= '0' && *s <= '9');
+  while (*s == ' ' || *s == '\t') s++;
+  return !*s;
+}
+
 void handleLine(char* s) {
   while (*s == ' ' || *s == '\t') s++;
   if (!*s) return;
   char cmd = s[0];
   char* arg = s + 1;
   while (*arg == ' ' || *arg == '\t') arg++;
+  uint32_t number;
   switch (cmd) {
-    case 'S': case 's': doScramble(*arg ? strtoul(arg, nullptr, 10) : (micros() ^ millis())); break;
+    case 'S': case 's':
+      if (*arg && !parseNumber(arg, UINT32_MAX, number)) { Serial.println(F("ERR bad argument")); break; }
+      doScramble(*arg ? number : (micros() ^ millis())); break;
     case 'V': case 'v': doSolve(); break;
     case 'M': case 'm': {
       uint8_t seq[MAX_MANUAL_MOVES];
       uint8_t n = parseSeq(arg, seq, sizeof(seq));
       if (!n) { Serial.println(F("ERR bad moves")); break; }
+      bool available = true;
+      for (uint8_t i = 0; i < n; i++) if (seq[i] / 3 == FIXED_LOGICAL_FACE) available = false;
+      if (!available) { Serial.println(F("ERR fixed face D")); break; }
       mech.resetCounters();
       if (!execute(seq, n, F("MOVING"))) break;
       Serial.print(F("MOVED ")); Serial.print(n); printMechStats(); Serial.println();
@@ -188,11 +208,16 @@ void handleLine(char* s) {
       if (motors.isEnabled() && !mech.isLoaded()) { Serial.println(F("ERR not loaded")); break; }   // 시뮬레이터 FLIP 버튼과 같은 규칙
       if (mech.flip()) lcdShowF(F("FLIPPED"), mech.orient ? "white down" : "white up"); else lcdShowF(F("FLIP FAILED"), "check heads"); break;
     case 'P': case 'p': printState(); break;
+    case 'I': case 'i': mech.printInputs(Serial); break;
     case 'R': case 'r': cube.reset(); Serial.println(F("RESET")); lcdShowF(F("CUBE ROBOT"), "reset"); break;
-    case 'Q': case 'q': motors.setEnabled(*arg != '1'); Serial.print(F("MOTORS ")); Serial.println(motors.isEnabled() ? F("ON") : F("OFF")); break;
-    case 'T': case 't': mech.sensorTimeoutMs = strtoul(arg, nullptr, 10); Serial.print(F("TIMEOUT ")); Serial.println(mech.sensorTimeoutMs); break;
+    case 'Q': case 'q':
+      if (!parseNumber(arg, 1, number)) { Serial.println(F("ERR bad argument")); break; }
+      motors.setEnabled(number == 0); Serial.print(F("MOTORS ")); Serial.println(motors.isEnabled() ? F("ON") : F("OFF")); break;
+    case 'T': case 't':
+      if (!parseNumber(arg, SENSOR_LONG_TIMEOUT_MS, number)) { Serial.println(F("ERR bad argument")); break; }
+      mech.sensorTimeoutMs = number; Serial.print(F("TIMEOUT ")); Serial.println(mech.sensorTimeoutMs); break;
     case 0: break;
-    default: Serial.println(F("ERR unknown command (S V M L E F P R Q T)"));
+    default: Serial.println(F("ERR unknown command (S V M L E F P I R Q T)"));
   }
 }
 

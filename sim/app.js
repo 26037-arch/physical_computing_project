@@ -5,7 +5,7 @@
 //  - 회전: 물리 면 p 의 헤드 스핀들(판·핀 2·허브·축)이 엣지 2개를 핀으로 밀어 그 층을 돌린다 (측면: 적도 엣지, D: DF/DB).
 //  - 지지: 회전할 면의 쌍(F/B 또는 R/L)만 결합(핀 삽입 4.8 mm). 다른 쌍과 D 헤드는 24 mm 후퇴. D 회전은 D 헤드 결합.
 //  - 잠금 막대: 아래에서 중공 D 축을 지나 큐브 중심 센터 판 소켓까지 올라와 코어를 잡는다(V3 중앙축 대신). 뒤집기 때만 30 mm 내려간다.
-//  - 뒤집기: 위(U)에는 헤드가 없다. 논리 면이 위에 오면 R/L 만 결합한 채 두 헤드가 같은 방향으로 180° 돌아 큐브를 뒤집는다.
+//  - Rev D: 상단 고정5면. R/L 바깥층으로 중앙층을 끄는 뒤집기는 사용하지 않는다.
 //  - 장착: 위가 열려 있다. D 헤드가 결합 위치로 올라오면 큐브를 손으로 핀 위에 올려놓고(흰색 아래) LOAD → 막대·F/B 가 잡는다.
 (function () {
   'use strict';
@@ -232,7 +232,8 @@
     frame.add(boxAt(12, 8, 180, 0, -47, 94.5, railMat));
     if (GEO.servo_mount) frame.add(new THREE.Mesh(GEO.servo_mount, MAT.servo_mount));
     if (GEO.servo_clamp) frame.add(new THREE.Mesh(GEO.servo_clamp, MAT.servo_clamp));
-    frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [22, -47.75, 154.9], servoMat));   // 결합 스위치: 캐리지 러그(z 147)가 결합 위치에서 누른다
+    frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [41, -47.75, 137.1], servoMat));
+    frame.add(envelope('retract_switch', [12.8, 6.5, 5.8], [41, -47.75, 180.9], servoMat));   // 결합 스위치: 캐리지 러그(z 147)가 결합 위치에서 누른다
     // 이송부(캐리지): 하우징·캡·캐리지·MGN12H 블록·추력 베어링·모터. 크랭크가 국소 +z 로 밀어낸다
     const carriage = new THREE.Group(); face.add(carriage);
     const V = hollow ? '_hollow' : '_direct';
@@ -293,7 +294,8 @@
     if (GEO.lock_guide) frame.add(new THREE.Mesh(GEO.lock_guide, MAT.lock_guide)); else frame.add(boxAt(44, 28, 22, -8, 0, 185, MAT.rail_support));   // 출력 가이드 블록 (사각 구멍 6.3)
     if (GEO.lock_servo_mount) frame.add(new THREE.Mesh(GEO.lock_servo_mount, MAT.lock_servo_mount)); else frame.add(boxAt(8, 30, 60, 0, LSA[1], 240, MAT.rail_support));
     if (GEO.lock_servo_clamp) frame.add(new THREE.Mesh(GEO.lock_servo_clamp, MAT.lock_servo_clamp));
-    frame.add(envelope('lock_engage_switch', [12.8, 6.5, 5.8], [22, 14.75, 211.9], servoMat));   // 막대 결합 스위치 (SENS LOCK)
+    frame.add(envelope('lock_engage_switch', [12.8, 6.5, 5.8], [41, 24, 194.1], servoMat));
+    frame.add(envelope('lock_retract_switch', [12.8,6.5,5.8], [41,24,243.9], servoMat));   // 막대 결합 스위치 (SENS LOCK)
     const carriage = new THREE.Group(); g.add(carriage);
     const tipZ = -(P.cube_mm / 2 + P.lock_tip_y_mm);   // 결합 시 막대 끝 (면 평면 기준 국소 z, 안쪽이 −): y −22.5 → z −6 (소켓 바닥 −21.5 까지 1 mm 축방향 여유)
     const barLen = P.lock_length_mm;
@@ -346,7 +348,6 @@
   for (let u = 0; u < 4; u++) for (const c of UNIT_CRANKS[u]) c.set(mech.engaged[u] ? 0 : Math.PI);
   cubeGroup.rotation.x = R.initialOrient * Math.PI;        // orient 1: 논리 U(흰색)가 아래
 
-  const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
   function startAction(a) {
     if (a.line && a.type !== 'flip') log(a.line);
     if (a.type === 'loaded') { displayedOrient = R.initialOrient; cubeGroup.rotation.x = displayedOrient * Math.PI; }
@@ -414,7 +415,7 @@
     if (current && !paused) {
       const t = current.dur > 0 ? Math.min(1, (now - current.start) / current.dur) : 1;
       const c = current;
-      let e = ease(t); // servo travel is an ideal interpolation; no feedback position is available
+      let e = t; // commanded servo angle slew; actual position still has no feedback
       if (c.type === 'move') e = R.turnProgress(c.p * 3 + c.m % 3, t * R.turnMicros(c.p * 3 + c.m % 3) / 1000);
       else if (c.type === 'flip') e = R.flipProgress(t * R.flipMicros() / 1000);
       if (c.type === 'move') {
@@ -468,18 +469,18 @@
     else text = mech.loaded ? '장착됨 · 대기' : mech.engaged[MECH.D] ? 'D 헤드 결합 — 큐브를 핀 위에 올려놓고 LOAD' : '대기';
     document.getElementById('headText').textContent = `${text} · 뒤집기 ${mech.flips}회 · 결합 ${mech.regrips}회`;
   }
-  function setBusy(b) { for (const id of ['btnScramble', 'btnSolve', 'btnMoves', 'btnReset', 'btnLoad', 'btnFlip']) document.getElementById(id).disabled = b; }
+  function setBusy(b) { for (const id of ['btnScramble', 'btnSolve', 'btnMoves', 'btnReset', 'btnLoad']) document.getElementById(id).disabled = b; }
   const busy = () => !!current || queue.length > 0 || actions.length > 0;
   function finishLog(prefix) { log(`${prefix} flips=${mech.flips} regrips=${mech.regrips}`); }
   // 수열의 기구 비용 미리 계산 (상태를 바꾸지 않도록 복제본으로)
   function planStats(moves) {
-    const m2 = new MECH.Mechanism(); Object.assign(m2, { engaged: mech.engaged.slice(), orient: mech.orient, loaded: mech.loaded });
+    const m2 = new MECH.Mechanism(); Object.assign(m2, { engaged: mech.engaged.slice(), commanded: mech.commanded.slice(), orient: mech.orient, loaded: mech.loaded });
     const list = m2.planSeq(moves); return { flips: m2.flips, regrips: m2.regrips, ms: list.reduce((sum,a) => sum + R.actionMs(a), 0) };
   }
 
   function doScramble(seed) {
     if (!mech.loaded) { log('ERR not loaded'); return; }
-    const seq = C.scramble(seed, SCRAMBLE_LEN);
+    const seq = C.scramble(seed, SCRAMBLE_LEN, R.fixedLogicalFace);
     log(`SCRAMBLE seed=${seed} (${SCRAMBLE_LEN}): ${C.seqToString(seq)}`);
     enqueue(seq, 'SCRAMBLING', () => {
       finishLog(`SCRAMBLED exec=${Math.round(performance.now() - execStart)}ms`);
@@ -520,6 +521,7 @@
     let seq;
     try { seq = C.parseMoves(str); } catch (e) { log('ERR bad moves'); return; }
     if (!seq.length || seq.length > R.maxManualMoves) { log('ERR bad moves'); return; }
+    if (seq.some(m => Math.floor(m / 3) === R.fixedLogicalFace)) { log('ERR fixed face D'); return; }
     enqueue(seq, 'MOVING', () => { finishLog(`MOVED ${seq.length}`); lcd('CUBE ROBOT V4', cube.isSolved() ? 'solved' : 'scrambled'); setBusy(false); });
   }
   // LOAD 버튼: 장착됨 → 배출(막대·F/B·R/L 해제, D 핀이 받침, 손으로 꺼냄) / D 결합 상태 → 막대·F/B 결합 / 그 외 → D 결합
@@ -542,7 +544,6 @@
   document.getElementById('btnSolve').onclick = () => { if (!busy()) doSolve(); };
   document.getElementById('btnMoves').onclick = () => { if (!busy()) doMoves(document.getElementById('moves').value); };
   document.getElementById('btnLoad').onclick = () => { if (!busy()) doLoad(); };
-  document.getElementById('btnFlip').onclick = () => { if (!busy()) doFlip(); };
   document.getElementById('moves').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !busy()) doMoves(e.target.value); });
   document.getElementById('btnReset').onclick = () => { if (busy()) return; cube.reset(); paint(cube); log('RESET'); lcd('CUBE ROBOT V4', 'reset'); allMoves = []; renderQueue(); };
   document.getElementById('btnPause').onclick = (e) => {

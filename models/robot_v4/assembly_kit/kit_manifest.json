@@ -1,6 +1,6 @@
 {
-  "revision": "V4 assembly Rev C",
-  "source_commit": "b37de3e9",
+  "revision": "V4 assembly Rev D",
+  "source_commit": "ab8c454",
   "integration_base_commit": "83ade39d35a54d3a644a2fec932033650a53e135",
   "units": "mm",
   "physical_validation": false,
@@ -280,9 +280,9 @@
       "group": "print",
       "valid": true,
       "size_mm": [
-        62.0,
-        36.5,
-        17.0
+        81.0,
+        45.75,
+        67.0
       ]
     },
     "alignment_cube": {

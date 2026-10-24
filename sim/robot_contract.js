@@ -2,7 +2,7 @@
 (function(global) {
 'use strict';
 const R = {
-  "revision": "V4 Rev C",
+  "revision": "V4 Rev D fixed top",
   "physicalBoard": "arduino:renesas_uno:unor4wifi",
   "simulationBoard": "arduino:avr:uno",
   "faceMap": [
@@ -58,17 +58,11 @@ const R = {
     10,
     11
   ],
-  "sensorPins": [
-    12,
-    13,
-    "A0",
-    "A1"
-  ],
   "buttonPin": "A2",
   "buzzerPin": "A3",
   "servoEngagedDeg": 0,
   "servoRetractedDeg": 180,
-  "servoTravelMs": 400,
+  "servoTravelMs": 720,
   "sensorTimeoutMs": 1500,
   "sensorLongTimeoutMs": 60000,
   "stepsPerQuarter": 50,
@@ -95,6 +89,18 @@ const R = {
     false
   ],
   "sensorPollMs": 2,
+  "flipEnabled": false,
+  "fixedLogicalFace": 3,
+  "sensorDataPin": 12,
+  "sensorClockPin": 13,
+  "sensorLoadPin": "A0",
+  "unitHeadMasks": [
+    3,
+    12,
+    16,
+    32
+  ],
+  "servoStepMs": 4,
   "geometry": {
     "cube_mm": 57,
     "piece_gap_mm": 0.3,
@@ -189,11 +195,11 @@ const progress=(edges,ms)=>{
   return lo/edges.length;
 };
 R.turnMicros=m=>R.turnProfile(m).us;
-R.flipMicros=()=>2*R.stepsPerQuarter*pairUs+R.settleMs*1000;
+R.flipMicros=()=>R.flipEnabled?2*R.stepsPerQuarter*pairUs+R.settleMs*1000:0;
 R.turnProgress=(m,ms)=>progress(R.turnProfile(m).edges,ms);
-R.flipProgress=ms=>progress(flipEdges,ms);
+R.flipProgress=ms=>R.flipEnabled?progress(flipEdges,ms):0;
 R.actionMs = a => a.type==='turn'?R.turnMicros(a.phys)/1000:a.type==='flip'?R.flipMicros()/1000:
-  a.type==='engage'||a.type==='retract'?R.servoTravelMs:a.type==='wait'?a.ms:0;
+  a.type==='engage'||a.type==='retract'?(a.ms===undefined?R.servoTravelMs:a.ms):a.type==='wait'?a.ms:0;
 global.RobotContract=R;
 if(typeof module!=='undefined'&&module.exports)module.exports=R;
 })(typeof globalThis!=='undefined'?globalThis:this);

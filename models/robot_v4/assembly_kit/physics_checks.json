@@ -1,0 +1,95 @@
+{
+  "analytical_checks_passed": true,
+  "physical_load_test_passed": null,
+  "assumptions": {
+    "proof_torque_Nm": 0.1,
+    "steel_E_Pa": 200000000000.0,
+    "steel_G_Pa": 79000000000.0,
+    "aluminum_E_Pa": 69000000000.0,
+    "aluminum_G_Pa": 26000000000.0,
+    "print_material_strength_assumed": false,
+    "casting_clearance_total_mm": [
+      0.02,
+      0.04
+    ]
+  },
+  "pin": {
+    "balanced_load_N": 2.6178010471204187,
+    "one_pin_load_N": 5.2356020942408374,
+    "worst_bending_stress_MPa": 19.356598857327278,
+    "worst_tip_deflection_mm": 0.0020655641713974576,
+    "straight_engagement_mm": 1.9999999999999998,
+    "average_bore_pressure_one_pin_MPa": 0.8726003490401397,
+    "nominal_oneway_clearance_deg": 0.59995580641971
+  },
+  "lock": {
+    "original_oneway_socket_play_deg": 3.9596380797353943,
+    "steel_twist_deg_at_proof_load": 0.09154466819701763,
+    "aluminum_twist_deg_at_proof_load": 0.2781549533678612,
+    "steel_bending_tip_mm_at_0p1Nm": 0.075,
+    "cast_socket_oneway_play_max_deg": 0.3832565351253493,
+    "cast_plus_steel_twist_max_deg": 0.4748012033223669,
+    "scope": "Square-socket play + steel shaft elasticity only; cradle, inserts, epoxy and core key compliance excluded."
+  },
+  "servo": {
+    "near_dead_center_samples": [
+      {
+        "theta_deg": 5,
+        "dz_dtheta_mm_per_rad": 1.3933119225906345,
+        "force_N_at_1Nm_servo": 717.7143780846031
+      },
+      {
+        "theta_deg": 10,
+        "dz_dtheta_mm_per_rad": 2.7689672138564525,
+        "force_N_at_1Nm_servo": 361.14548232850314
+      },
+      {
+        "theta_deg": 30,
+        "dz_dtheta_mm_per_rad": 7.7566201313073595,
+        "force_N_at_1Nm_servo": 128.92213142729375
+      },
+      {
+        "theta_deg": 90,
+        "dz_dtheta_mm_per_rad": 12.0,
+        "force_N_at_1Nm_servo": 83.33333333333333
+      }
+    ],
+    "dead_center_force_bound_N": null,
+    "finding": "Position/limit switches do not measure force. Rigid slider-crank mechanical advantage diverges at dead centre."
+  },
+  "gravity_inertia": {
+    "solid_cube_volume_mm3": 155612.1821,
+    "cube_mass_upper_assumption_kg": 0.227627471267,
+    "cube_weight_N": 2.2330254931292703,
+    "ramp_acceleration_bound_rad_s2": 6.135923151542565,
+    "one_layer_inertial_torque_Nm": 0.00025210519309280664,
+    "scope": "Solid PETG density1.27 plus30g hardware; not measured. Acceleration estimate excludes step ripple/start impulse."
+  },
+  "torque_sweep": [
+    {
+      "torque_Nm": 0.05,
+      "one_pin_pressure_MPa": 0.43630017452006986,
+      "socket_fit_plus_steel_twist_deg": 0.42902886922385813
+    },
+    {
+      "torque_Nm": 0.1,
+      "one_pin_pressure_MPa": 0.8726003490401397,
+      "socket_fit_plus_steel_twist_deg": 0.4748012033223669
+    },
+    {
+      "torque_Nm": 0.2,
+      "one_pin_pressure_MPa": 1.7452006980802794,
+      "socket_fit_plus_steel_twist_deg": 0.5663458715193845
+    },
+    {
+      "torque_Nm": 0.4,
+      "one_pin_pressure_MPa": 3.490401396160559,
+      "socket_fit_plus_steel_twist_deg": 0.7494352079134199
+    }
+  ],
+  "residuals": [
+    "Cast fit and core bedding need measurement after cure; no strength certificate for printed parts.",
+    "Servo insertion/jam force is not physically limited; use low-force commissioning and a verified series-elastic/force-limited link before unattended operation.",
+    "No encoder detects step loss. Motor dynamic torque, belt tension, creep and wear require bench tests."
+  ]
+}

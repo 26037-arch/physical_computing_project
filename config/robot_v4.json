@@ -1,5 +1,5 @@
 {
-  "revision": "V4 Rev C",
+  "revision": "V4 Rev D fixed top",
   "physicalBoard": "arduino:renesas_uno:unor4wifi",
   "simulationBoard": "arduino:avr:uno",
   "faceMap": [
@@ -55,17 +55,11 @@
     10,
     11
   ],
-  "sensorPins": [
-    12,
-    13,
-    "A0",
-    "A1"
-  ],
   "buttonPin": "A2",
   "buzzerPin": "A3",
   "servoEngagedDeg": 0,
   "servoRetractedDeg": 180,
-  "servoTravelMs": 400,
+  "servoTravelMs": 720,
   "sensorTimeoutMs": 1500,
   "sensorLongTimeoutMs": 60000,
   "stepsPerQuarter": 50,
@@ -91,5 +85,17 @@
     false,
     false
   ],
-  "sensorPollMs": 2
+  "sensorPollMs": 2,
+  "flipEnabled": false,
+  "fixedLogicalFace": 3,
+  "sensorDataPin": 12,
+  "sensorClockPin": 13,
+  "sensorLoadPin": "A0",
+  "unitHeadMasks": [
+    3,
+    12,
+    16,
+    32
+  ],
+  "servoStepMs": 4
 }

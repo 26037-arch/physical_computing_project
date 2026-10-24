@@ -2,6 +2,8 @@
 #pragma once
 #include <Arduino.h>
 namespace RobotContract {
+static const bool FLIP_ENABLED = false;
+static const uint8_t FIXED_LOGICAL_FACE = 3;
 static const uint8_t INITIAL_ORIENT = 1;
 static const bool INITIAL_LOADED = false;
 static const bool INITIAL_ENGAGED[4] = {false, false, false, false};
@@ -10,13 +12,17 @@ static const char UNIT_NAME[4][5] = {"FB", "RL", "D", "LOCK"};
 static const uint8_t STEP_PINS[6] = {255, 3, 2, 6, 5, 4};
 static const uint8_t DIR_PIN = 7;
 static const uint8_t SERVO_PINS[4] = {8, 9, 10, 11};
-static const uint8_t SENS_PINS[4] = {12, 13, A0, A1};
+static const uint8_t SENSOR_DATA_PIN = 12;
+static const uint8_t SENSOR_CLOCK_PIN = 13;
+static const uint8_t SENSOR_LOAD_PIN = A0;
+static const uint8_t UNIT_HEAD_MASKS[4] = {3, 12, 16, 32};
 static const uint8_t BTN_PIN = A2;
 static const uint8_t BUZZER = A3;
 static const uint8_t SERVO_ENGAGED_DEG = 0;
 static const uint8_t SERVO_RETRACTED_DEG = 180;
 static const uint8_t SENSOR_POLL_MS = 2;
-static const uint16_t SERVO_TRAVEL_MS = 400;
+static const uint16_t SERVO_TRAVEL_MS = 720;
+static const uint8_t SERVO_STEP_MS = 4;
 static const uint16_t SENSOR_TIMEOUT_MS = 1500;
 static const uint32_t SENSOR_LONG_TIMEOUT_MS = 60000;
 static const uint16_t STEPS_PER_QUARTER = 50;

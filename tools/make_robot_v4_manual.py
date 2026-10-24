@@ -85,8 +85,10 @@ def assets():
       'B12':h['thrust_F8_16M'],'B13':hh['front_thrust_17x30'],'B14':h['shaft_collar_8'],
       'B15':hh['shaft_collar_17'],'B16':h['coupling_5x8'],
       'B17':F(hh['pulley_40T_driver'],hh['pulley_40T_driven'],hh['belt_200_2GT_6_pitch_envelope']),
-      'B18':F(h['engage_switch'],B(16,2,1,(22,-45,159))),
+      'B18':F(h['engage_switch'],B(22,2,1,(36,-47.75,140.5))),
       'B19':F(B(70,36,26,(-40,0,13)),B(70,36,26,(40,0,13))),
+      'B21':F(B(50,30,2,(0,0,1)),B(19,8,4,(-12,0,4)),B(19,8,4,(12,0,4))),
+      'B22':F(C(8,0,50,origin=(-9,0,0)),C(8,0,50,origin=(9,0,0)),C(20,0,8,origin=(30,0,0))),
       'B20':F(C(3,0,16),C(6,16,19),C(10,-2,0).cut(C(3.5,-3,1))),
       'K01':F(B(80,36,2,(0,0,1)),B(72,25,7,(0,0,5.5)),B(64,16,1,(0,0,9.5))),
       'K02':F(B(6,6,3,(0,0,1.5)),C(3,3,6)),
@@ -147,7 +149,7 @@ def assets():
     close=[('',s,d.color(kind)) for _,kind,s in robot if s.BoundingBox().ymax>-70 and s.BoundingBox().ymin<60]
     # The alignment gauge is shown separately, not pretending to be a driven cube.
     render('alignment',[(ident,s,c) for ident,s,c in robotitems if s.BoundingBox().xlen<120 and s.BoundingBox().ymin>-100 and s.BoundingBox().ymax<100],world=True)
-    render('switch',[('P13',heads['rail_support'],BLUE),('B18',hw['engage_switch'],RED),('P12',heads['carriage'], '#8ba6bf')],labels=True,elev=12,azim=-70)
+    render('switch',[('P13',heads['rail_support'],BLUE),('B18 ENG',hw['engage_switch'],RED),('B18 RET',hw['retract_switch'],RED),('P12',heads['carriage'], '#8ba6bf')],labels=True,elev=12,azim=-70)
     # Flip poses use actual cube solids; R/L end layers stay on their heads.
     flip=[]
     for angle,dx in ((0,-95),(90,0),(180,95)):
@@ -162,7 +164,7 @@ class Writer:
         pdfmetrics.registerFont(TTFont('NGB',str(DOC/'assets/fonts/NanumGothic-Bold.ttf')))
         pdfmetrics.registerFontFamily('NG',normal='NG',bold='NGB',italic='NG',boldItalic='NGB')
         self.c=Canvas(str(PDF),pagesize=A4,pageCompression=1)
-        self.c.setTitle('robot_v4 상세 제작 설명서 · 부품 지도 · 조립 도면 · Rev C')
+        self.c.setTitle('robot_v4 상세 제작 설명서 · 부품 지도 · 조립 도면 · Rev D')
         self.c.setAuthor('physical_computing_project')
         self.i=0;self.toc=[]
     def para(self,text,size=9.4,leading=14,color=INK,bold=False,width=None,x=None):
@@ -178,7 +180,7 @@ class Writer:
         self.c.setFillColor(colors.HexColor(BLUE));self.c.rect(0,self.h-5*mm,self.w,5*mm,fill=1,stroke=0)
         self.para(title,23 if wide else 19,28 if wide else 25,bold=True,width=self.w-30*mm)
         self.c.setFillColor(colors.HexColor('#697b8b'));self.c.setFont('NG',7.4)
-        self.c.drawString(16*mm,10*mm,'ROBOT V4 / Rev C / 치수 mm · 실물 시험 전')
+        self.c.drawString(16*mm,10*mm,'ROBOT V4 / Rev D / 치수 mm · 실물 시험 전')
         self.c.drawRightString(self.w-16*mm,10*mm,f'{self.i:02d}')
     def image(self,name,height=75):
         f=IMG/(name+'.png')
@@ -258,7 +260,7 @@ def flat_drawing(w,name,height=88,swap=False):
 
 def write_outputs(cards,pmap):
     w=Writer();catalog(w,cards)
-    md=['# robot_v4 상세 제작 설명서 · Rev C','병합 기준: 83ade39 · 기구 원형: b37de3e9 · 조립 단순화: 전산봉/간격관 제거, 위치 결정 턱, 한쪽 체결','']
+    md=['# robot_v4 상세 제작 설명서 · Rev D','Rev D: 상단 고정 5면 운전, 12개 개별 끝 센서, P13/P29 후퇴 센서 장착, 사각 키 맞춤층','']
     # Intro and kit page before bills.
     for title,img,sections in PAGES[:2]:
         w.start(title)
@@ -335,12 +337,12 @@ def write_outputs(cards,pmap):
         md.extend(['|'+'|'.join(str(v) for v in row)+'|' for row in rows]);md.append('')
     (DOC/'BUILD_V4.md').write_text('\n'.join(md),encoding='utf-8')
     with (k.OUT/'parts_BOM.csv').open('w',newline='',encoding='utf-8-sig') as f:
-        cw=csv.writer(f);cw.writerow(['ID','품명','수량','조달','파일/설명'])
+        cw=csv.writer(f,lineterminator='\n');cw.writerow(['ID','품명','수량','조달','파일/설명'])
         for i,n,l,q in PRINTS+JIGS:cw.writerow([i,l,q,'3D 출력',n+'.stl'])
         for g,mode in ((BUY,'구매'),(KIT,'사진 키트'),(MATERIAL,'구매 후 가공')):
             for i,l,q,n in g:cw.writerow([i,l,q,mode,n])
     with (k.OUT/'fastener_BOM.csv').open('w',newline='',encoding='utf-8-sig') as f:
-        cw=csv.writer(f);cw.writerow(['ID','규격','수량','사용처']);cw.writerows(FASTENERS)
+        cw=csv.writer(f,lineterminator='\n');cw.writerow(['ID','규격','수량','사용처']);cw.writerows(FASTENERS)
     (k.OUT/'manual_page_index.json').write_text(json.dumps(w.toc,ensure_ascii=False,indent=2),encoding='utf-8')
     print('PDF',PDF,'pages',w.i,flush=True)
 

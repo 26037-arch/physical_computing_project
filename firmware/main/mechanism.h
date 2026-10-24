@@ -1,11 +1,9 @@
-// mechanism.h — V4 기구 절차: 이송 유닛 4개(F/B 쌍, R/L 쌍, 아래 D 헤드, 잠금 막대)의 서보 크랭크 결합·후퇴, 뒤집기, 장착/배출
+// mechanism.h — V4 Rev D: 이송 유닛 4개의 결합·후퇴, 상단 고정 운전, 장착/배출
 //   규칙은 docs/HARDWARE_V4.md 3절과 같고 sim/mechanism.js 와 동작 순서·출력 줄·횟수(flips/regrips)가 같다.
 //   논리 면(풀이기) → 물리 면: orient 0 = 항등, orient 1 = x축 180° 뒤집힘 (U↔D, F↔B). 회전 방향은 그대로.
-//   위(U)에는 모터가 없으므로 물리 U 가 필요한 수 앞에는 FLIP 을 끼워 넣어 그 면을 아래 D 헤드로 가져온다.
-//   잠금 막대(LOCK)는 아래에서 중공 D 축을 지나 큐브 중심의 센터 판 소켓에 들어가 코어를 고정한다(V3 중앙축 대신).
-//   면을 돌리는 동안 항상 올라가 있고 뒤집기 때만 내린다.
-//   결합은 유닛마다 마이크로스위치로 확인하며, 확인되지 않으면 그 수를 실행하지 않고 false 를 돌려준다.
-//   가상 모드(Motors::isEnabled()==false)에서는 절차를 계획·출력만 하고 서보·센서·스텝은 건너뛴다.
+//   Rev D는 흰색 U가 아래인 orient=1에서 논리D(물리상단)를 고정한다. 뒤집기는 거부한다.
+//   각 모듈의 결합/후퇴 끝을74HC165 두 개로 독립 확인하며 센서12개를 사용한다.
+//   1도/4ms 서보 지령은 접근 속도를 낮추지만 힘 피드백/과부하 제한 기능이 아니다.
 #pragma once
 #include <Arduino.h>
 #include <Servo.h>
@@ -16,14 +14,16 @@ enum Unit : uint8_t { UNIT_FB = 0, UNIT_RL = 1, UNIT_D = 2, UNIT_LOCK = 3 };
 class Mechanism {
  public:
   void begin(Motors* m);
-  bool prepare(uint8_t logicalMove, uint8_t& physMove);   // 지지 전환(+뒤집기) 후 돌릴 물리 수 번호
-  bool flip();                                             // 큐브 x축 180° (R/L 결합, 나머지 해제, 막대 내림)
+  bool prepare(uint8_t logicalMove, uint8_t& physMove);   // 끝 상태 확인·지지 전환 후 물리 수 번호
+  bool flip();                                         // Rev D에서는 항상 거부, 펄스 없음
   bool load();                                             // LOAD 버튼 한 단계 (비어 있음→D 결합·큐브 대기 / 올려놓음→막대·F/B 결합 / 장착됨→배출)
   bool eject();
   bool isLoaded() const { return loaded; }
   bool waitingForCube() const { return !loaded && engaged[UNIT_D]; }
   void resetCounters() { flips = 0; regrips = 0; }
   void printStatus(Print& p);
+  void printInputs(Print& p);
+  bool atEnd(uint8_t unit, bool engaged) { return unit < 4 && confirmed(unit, engaged); } // diagnostic, reads both ends
   uint8_t orient = RobotContract::INITIAL_ORIENT;          // 장착은 흰색(U) 면을 아래로 → 논리 U 가 아래 D 헤드
   uint16_t flips = 0, regrips = 0;
   uint16_t sensorTimeoutMs = RobotContract::SENSOR_TIMEOUT_MS;   // 결합/해제 확인 대기 ms (시리얼 T 명령으로 조정; 0 = 최대 60 s 대기, 시운전·Wokwi 시나리오 지연용)
@@ -31,12 +31,17 @@ class Mechanism {
  private:
   Motors* motors = nullptr;
   Servo servo[4];
+  uint8_t servoAngle[4] = {SERVO_RETRACTED_DEG,SERVO_RETRACTED_DEG,SERVO_RETRACTED_DEG,SERVO_RETRACTED_DEG};
+  void moveServo(uint8_t unit, uint8_t target);
   bool engaged[4] = {INITIAL_ENGAGED[0], INITIAL_ENGAGED[1], INITIAL_ENGAGED[2], INITIAL_ENGAGED[3]};
   bool loaded = RobotContract::INITIAL_LOADED;
   bool virt() const { return !motors->isEnabled(); }
   bool engage(uint8_t unit);
   bool retract(uint8_t unit);
-  bool waitSensor(uint8_t pin, bool wantLow);
+  bool waitSensor(uint8_t unit, bool wantEngaged);
+  uint16_t readEndstops();
+  bool confirmed(uint8_t unit, bool engaged);
+  bool allConfirmed();
 };
 
 // Rev C: 6 mm 막대 끝−22.5, 핀 삽입4.8. 행정24/30과 서보각은 공통 계약을 쓴다.

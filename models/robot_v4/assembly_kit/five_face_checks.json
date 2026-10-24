@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "physical_validation": false,
+  "cross_states": 190080,
+  "cross_max_distance": 10,
+  "last_layer_states": 62208,
+  "last_layer_max_moves": 40,
+  "last_layer_max_stage": 25,
+  "generic_scramble_seeds": 1000,
+  "random_max_moves": 75,
+  "forbidden_logical_face": "D",
+  "flips_required": 0
+}
