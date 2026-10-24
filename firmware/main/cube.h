@@ -37,4 +37,4 @@ void printSeq(Print& p, const uint8_t* seq, uint8_t n);
 int8_t parseMove(const char* tok);                   // "R'" → 수 번호, 실패 -1
 uint8_t parseSeq(const char* str, uint8_t* out, uint8_t maxN);
 uint8_t simplifySeq(uint8_t* seq, uint8_t n);        // 같은 면 연속 합치기, 새 길이 반환
-void scrambleSeq(uint32_t seed, uint8_t* out, uint8_t n); // xorshift32 섞기 (sim/cube.js 와 동일 수열)
+void scrambleSeq(uint32_t seed, uint8_t* out, uint8_t n, int8_t fixedFace = -1); // xorshift32 섞기 (sim/cube.js 와 동일 수열)

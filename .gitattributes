@@ -1,0 +1,7 @@
+# Generated CAD and publication artifacts are reviewed with geometry/PDF checks.
+*.step -diff
+*.stl binary
+*.glb binary
+*.pdf binary
+*.png binary
+*.zip binary

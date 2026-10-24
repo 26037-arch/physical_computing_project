@@ -182,7 +182,7 @@ A4988: MS1~3 비연결(풀스텝), RESET–SLEEP 묶음, VMOT 12 V + 100 µF, Vr
 .venv-cad\Scripts\python.exe tools\check_robot_v5_cad.py      # 3D 간섭 검사 → mechanical_checks.json
 node tools\embed_models_v5.js                                 # → v5/sim/models.js
 node v5	ools\gen_wokwi_test.js 1 && node v5	ools\gen_mechanism_test.js
-powershell -ExecutionPolicy Bypass -File v5\scripts\simulate.ps1 -Scenario v5	ests\solve_seed1.test.yaml -TimeoutMs 180000
+powershell -ExecutionPolicy Bypass -File v5\scripts\simulate.ps1 -Scenario tests\solve_seed1.test.yaml -TimeoutMs 180000   # 시나리오 경로는 v5 기준
 ```
 
 ## 8. CAD 결과 (build_robot_v5.py) — Rev B

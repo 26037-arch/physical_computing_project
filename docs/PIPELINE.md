@@ -20,18 +20,21 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
                                                        node tools/gen_wokwi_test.js <seed>
                  │                                     │  → tests/solve_seed<seed>.test.yaml
                  └──────────► scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml
-                              (Wokwi: A4988×1 + NEMA17×1 + 서보 2 + LCD + 버튼 + 부저, diagram.json; 기구 줄 flips/spins 도 비교)
+                              (V4 Rev D: 최상위 diagram.json / V5: v5/scripts/simulate.ps1 -Scenario tests/… (v5 기준), v5/diagram.json; 기구 줄 flips/spins 도 비교)
                               보드 시리얼 출력 == JS 풀이 출력 ⇒ 통과
 
 tools/robot_v5_params.py (치수 P) ──► tools/check_robot_v5.py (2D 운동학·힘 평형) ──► models/robot_v5/kinematic_checks.json
                                    └──► tools/build_robot_v5.py (CadQuery) ──► models/robot_v5/print/*.stl|step, robot_assembly.step/glb, parameters.json
                                         tools/check_robot_v5_cad.py (3D 간섭) ──► mechanical_checks.json
-                                        node tools/embed_models_v5.js ─► sim/models.js (출력 6종 STL + 매개변수)
+                                        node tools/embed_models_v5.js ─► v5/sim/models.js (출력 7종 STL + 매개변수)
                                         fusion/scripts/import_robot_v5.py ──(Fusion MCP script)──► models/robot_v5/CubeRobotV5.f3d
                                                                                    │
-                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 시중 큐브 + 20° 컵 + 후드 + 리프터, sim/mechanism.js 동작 목록 재생)
+                                            v5/sim/index.html + v5/sim/app.js (Three.js 3D 시뮬레이터: 시중 큐브 + 20° 컵 + 후드 + 리프터, v5/sim/mechanism.js 동작 목록 재생; 최상위 sim/ 은 V4 Rev D)
   (이력: V1 fusion/scripts/cube_robot_parts.py, V2/V3/V4 tools/build_robot_v*.py, models/robot_v2~v4)
 ```
+
+## 두 버전
+V4 Rev D 는 최상위(`firmware/main`, `sim/`, `tests/`, `scripts/`), V5 는 `v5/` 아래 같은 구조다. 아래 표의 경로 앞에 `v5/` 를 붙이면 V5 명령이 된다 (`node v5/tools/gen_wokwi_test.js 1`, `v5/scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml` (시나리오 경로는 v5 기준)).
 
 ## 단계별 명령
 

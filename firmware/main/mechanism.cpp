@@ -1,130 +1,156 @@
 #include "mechanism.h"
 
-static const char HOOD_NAME[3][6] = {"CLOSE", "OPEN", "LOAD"};
-static const char SPIN_NAME[4][3] = {"", "y", "y2", "y'"};
-static const char TURN_NAME[3][3] = {"D", "D2", "D'"};
-static const uint8_t ORI_START[6] = {3, 4, 2, 0, 1, 5};   // 장착 = z2: 흰색(논리 U) 아래, 초록(논리 F) 앞
-// 물리 위치별 재배향: 0 = 끝, 1..3 = SPIN y^k, 9 = FLIP (sim/mechanism.js REORIENT 와 같은 순서)
-static const uint8_t REORIENT[6][3] = {
-  {9, 9, 0},   // U: FLIP FLIP
-  {1, 9, 0},   // R: SPIN y, FLIP
-  {9, 0, 0},   // F: FLIP
-  {0, 0, 0},   // D: 없음
-  {3, 9, 0},   // L: SPIN y', FLIP
-  {2, 9, 0},   // B: SPIN y2, FLIP
-};
-
-void Mechanism::resetOri() { for (uint8_t i = 0; i < 6; i++) ori[i] = ORI_START[i]; }
-
 void Mechanism::begin(Motors* m) {
   motors = m;
-  resetOri();
-  hood.attach(HOOD_SERVO_PIN);
-  lift.attach(LIFT_SERVO_PIN);
-  hood.write(hoodDeg[HOOD_OPEN]);
-  lift.write(LIFT_DOWN_DEG);
-  hoodPos = HOOD_OPEN;
-}
-
-// 서보를 20 ms 간격으로 조금씩 옮겨 준정적으로 움직인다 (리프터가 큐브를 천천히 끌어올리도록)
-void Mechanism::sweep(Servo& s, uint8_t from, uint8_t to, uint16_t ms) {
-  uint8_t n = ms / 20; if (n == 0) n = 1;
-  for (uint8_t i = 1; i <= n; i++) {
-    s.write(from + ((int16_t)to - from) * i / n);
-    delay(20);
+  pinMode(SENSOR_DATA_PIN, INPUT);
+  pinMode(SENSOR_CLOCK_PIN, OUTPUT); digitalWrite(SENSOR_CLOCK_PIN, LOW);
+  pinMode(SENSOR_LOAD_PIN, OUTPUT); digitalWrite(SENSOR_LOAD_PIN, HIGH);
+  for (uint8_t i = 0; i < 4; i++) {
+    servo[i].attach(SERVO_PINS[i]);
+    servo[i].write(SERVO_RETRACTED_DEG);
+    servoAngle[i] = SERVO_RETRACTED_DEG;
   }
 }
 
-void Mechanism::setHood(uint8_t pos) {
-  if (hoodPos == pos) return;
-  Serial.print(F("HOOD ")); Serial.println(HOOD_NAME[pos]);
-  hoods++;
-  if (!virt()) { hood.write(hoodDeg[pos]); delay(HOOD_MS); }
-  hoodPos = pos;
+// Near 74HC165: engaged D0..D5. Far chip: retracted D0..D5.
+// Read Q7 BEFORE its rising clock. /CE low, DS of far chip high, /PL shared.
+uint16_t Mechanism::readEndstops() {
+  digitalWrite(SENSOR_LOAD_PIN, LOW); digitalWrite(SENSOR_LOAD_PIN, HIGH);
+  uint16_t bits = 0;
+  for (uint8_t i = 0; i < 16; i++) {
+    bits = (bits << 1) | (digitalRead(SENSOR_DATA_PIN) == HIGH);
+    digitalWrite(SENSOR_CLOCK_PIN, HIGH); digitalWrite(SENSOR_CLOCK_PIN, LOW);
+  }
+  return bits;
 }
 
-// 큐브 전체 y^k: 후드를 열고 컵을 위에서 봐서 시계 방향으로 k×90° (y' 는 반시계 1회)
-bool Mechanism::spin(uint8_t k) {
-  if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
-  setHood(HOOD_OPEN);
-  for (uint8_t i = 0; i < k; i++) {                      // y: F←R, L←F, B←L, R←B
-    uint8_t r = ori[1], f = ori[2], l = ori[4], b = ori[5];
-    ori[2] = r; ori[4] = f; ori[5] = l; ori[1] = b;
+// Slew commanded angle at 250 deg/s. This reduces approach speed; it is NOT a force limiter.
+void Mechanism::moveServo(uint8_t u, uint8_t target) {
+  if (servoAngle[u] == target) { servo[u].write(target); return; }
+  while (servoAngle[u] != target) {
+    servoAngle[u] += servoAngle[u] < target ? 1 : -1;
+    servo[u].write(servoAngle[u]);
+    delay(SERVO_STEP_MS);
   }
-  spins++;
-  Serial.print(F("SPIN ")); Serial.println(SPIN_NAME[k]);
-  if (k == 3) motors->rotate(STEPS_PER_QUARTER, false);
-  else motors->rotate(STEPS_PER_QUARTER * k, true);
+}
+
+bool Mechanism::confirmed(uint8_t unit, bool wantEngaged) {
+  uint16_t bits = readEndstops();
+  if ((bits & 0xC0C0) != 0xC0C0) return false; // unused parallel inputs must stay pulled HIGH
+  uint8_t mask = UNIT_HEAD_MASKS[unit];
+  uint8_t en = bits >> 8, rt = bits;
+  return wantEngaged ? (!(en & mask) && (rt & mask) == mask)
+                     : (!(rt & mask) && (en & mask) == mask);
+}
+
+bool Mechanism::allConfirmed() {
+  if (virt()) return true;
+  for (uint8_t u=0; u<4; u++) if (!confirmed(u, engaged[u])) {
+    Serial.println(F("ERR endstop state")); return false;
+  }
   return true;
 }
 
-// 뒤집기 x': 후드 70° → 리프터가 뒤쪽 아래 모서리를 끌어올려 큐브가 앞으로 넘어진다 → 리프터 내림 → 후드 60°
+bool Mechanism::waitSensor(uint8_t unit, bool wantEngaged) {
+  uint32_t t0 = millis();
+  uint32_t limit = sensorTimeoutMs ? sensorTimeoutMs : SENSOR_LONG_TIMEOUT_MS;   // T 0 = 시운전용 긴 대기 (최대 60 s)
+  while (millis() - t0 < limit) {
+    if (confirmed(unit, wantEngaged)) return true;
+    delay(SENSOR_POLL_MS);
+  }
+  return false;
+}
+
+// 결합: 서보 크랭크 0° → 캐리지 전진 → 스위치가 눌려야 성공. 핀/막대가 소켓에 안 들어가면 스위치가 안 눌린다.
+bool Mechanism::engage(uint8_t u) {
+  if (engaged[u] && (virt() || confirmed(u, true))) return true;
+  Serial.print(F("ENGAGE ")); Serial.println(UNIT_NAME[u]);
+  regrips++;
+  if (!virt()) {
+    moveServo(u, SERVO_ENGAGED_DEG);
+    if (!waitSensor(u, true)) {
+      Serial.print(F("ERR ENGAGE ")); Serial.print(UNIT_NAME[u]); Serial.println(F(" timeout"));
+      moveServo(u, SERVO_RETRACTED_DEG);               // 안 들어갔다 → 물러나서 상태(후퇴)와 맞춘다
+      return false;
+    }
+  }
+  engaged[u] = true;
+  return true;
+}
+
+bool Mechanism::retract(uint8_t u) {
+  if (!engaged[u] && (virt() || confirmed(u, false))) return true;
+  Serial.print(F("RETRACT ")); Serial.println(UNIT_NAME[u]);
+  if (!virt()) {
+    moveServo(u, SERVO_RETRACTED_DEG);
+    if (!waitSensor(u, false)) {
+      Serial.print(F("ERR RETRACT ")); Serial.print(UNIT_NAME[u]); Serial.println(F(" timeout"));
+      return false;
+    }
+  }
+  engaged[u] = false;
+  return true;
+}
+
+// Rev D는 코어를 직접 구동하지 못하는 뒤집기를 금지한다.
 bool Mechanism::flip() {
-  if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
-  setHood(HOOD_OPEN);
-  uint8_t u = ori[0], f = ori[2], d = ori[3], b = ori[5];
-  ori[3] = f; ori[5] = d; ori[0] = b; ori[2] = u;
-  flips++;
-  Serial.println(F("FLIP"));
-  if (!virt()) {
-    hood.write(hoodFlipDeg); delay(HOOD_MS / 2);
-    sweep(lift, LIFT_DOWN_DEG, liftUpDeg, LIFT_UP_MS);
-    delay(FLIP_SETTLE_MS);                                 // 큐브가 자리에 떨어질 시간
-    sweep(lift, liftUpDeg, LIFT_DOWN_DEG, LIFT_DOWN_MS);
-    hood.write(hoodDeg[HOOD_OPEN]); delay(HOOD_MS / 2);
-  }
-  return true;
+  // R/L drive layers, not the core. Never certify a friction-only whole-cube flip.
+  Serial.println(F("ERR flip disabled: core not coupled"));
+  return false;
 }
 
-bool Mechanism::doMove(uint8_t m) {
+bool Mechanism::prepare(uint8_t m, uint8_t& physMove) {
   if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
+  if (!allConfirmed()) return false;
   uint8_t f = m / 3, k = m % 3;
-  uint8_t p = 0;
-  while (p < 6 && ori[p] != f) p++;
-  for (uint8_t i = 0; i < 3 && REORIENT[p][i]; i++) {
-    uint8_t op = REORIENT[p][i];
-    if (op == 9) { if (!flip()) return false; }
-    else if (!spin(op)) return false;
-  }
-  setHood(HOOD_CLOSE);
-  Serial.print(F("TURN ")); Serial.println(TURN_NAME[k]);
-  // D = 아래에서 봐서 시계 = 컵을 위에서 봐서 반시계. k 0: 1/4 반시계, 1: 1/2, 2: 1/4 시계
-  bool cw = (k == 2);
-  uint16_t steps = (k == 1) ? 2 * STEPS_PER_QUARTER : STEPS_PER_QUARTER;
-  if (!virt()) {
-    motors->rotate(steps + overshootSteps, cw);
-    if (overshootSteps) motors->rotate(overshootSteps, !cw);
-  }
+  if (f == FIXED_LOGICAL_FACE) { Serial.println(F("ERR fixed face D")); return false; }
+  uint8_t p = PHYS[orient][f];
+  if (p == 0) { Serial.println(F("ERR fixed face D")); return false; }   // 헤드 없는 상단
+  bool ok;
+  if (p == 2 || p == 5) ok = engage(UNIT_FB) && retract(UNIT_D) && retract(UNIT_RL) && engage(UNIT_LOCK);   // 새 지지 먼저, 그다음 해제, 막대는 항상 위
+  else if (p == 1 || p == 4) ok = engage(UNIT_RL) && retract(UNIT_D) && retract(UNIT_FB) && engage(UNIT_LOCK);
+  else ok = engage(UNIT_LOCK) && engage(UNIT_D);                     // 막대가 코어를 잡고, 적도 핀은 D 층을 막지 않는다
+  if (!ok) return false;
+  if (!allConfirmed()) return false;
+  physMove = p * 3 + k;
   return true;
 }
 
-// LOAD 버튼 한 단계. 후드를 뒤로 젖힌 LOAD 자세에서 큐브를 위에서 내려놓는다(흰색 아래, 초록 앞).
+// LOAD 버튼 한 단계. 위가 열려 있으므로 큐브는 손으로 D 헤드의 핀 2개 위에 올려놓는다(흰색 아래).
 bool Mechanism::load() {
   if (loaded) return eject();
-  if (hoodPos != HOOD_LOAD) {
-    setHood(HOOD_LOAD);
-    if (!virt()) lift.write(LIFT_DOWN_DEG);
+  if (!engaged[UNIT_D] || engaged[UNIT_FB] || engaged[UNIT_RL] || engaged[UNIT_LOCK]) {   // D 헤드만 결합 위치로
+    if (!retract(UNIT_FB) || !retract(UNIT_RL) || !retract(UNIT_LOCK) || !engage(UNIT_D)) return false;
     Serial.println(F("READY TO LOAD"));
     return true;
   }
-  setHood(HOOD_OPEN);
-  loaded = true; resetOri();
-  Serial.println(F("LOADED"));
+  if (!engage(UNIT_LOCK) || !engage(UNIT_FB)) return false;          // 막대로 코어를 잡고 F/B 로 층을 잡는다
+  loaded = true; orient = INITIAL_ORIENT;
+  Serial.print(F("LOADED orient=")); Serial.println(orient);
   return true;
 }
 
 bool Mechanism::eject() {
   Serial.println(F("EJECT"));
-  setHood(HOOD_LOAD);
+  if (!engage(UNIT_D) || !retract(UNIT_LOCK) || !retract(UNIT_FB) || !retract(UNIT_RL)) return false;   // 큐브는 D 핀 위에 남는다
   loaded = false;
   Serial.println(F("EJECTED"));
   return true;
 }
 
 void Mechanism::printStatus(Print& p) {
-  static const char FACE[6] = {'U', 'R', 'F', 'D', 'L', 'B'};
-  p.print(F("MECH hood=")); p.print(HOOD_NAME[hoodPos]); p.print(F(" ori="));
-  for (uint8_t i = 0; i < 6; i++) p.print(FACE[ori[i]]);
-  p.print(F(" loaded=")); p.print(loaded);
-  p.print(F(" flips=")); p.print(flips); p.print(F(" spins=")); p.print(spins); p.print(F(" hoods=")); p.println(hoods);
+  p.print(F("MECH fb=")); p.print(engaged[0]); p.print(F(" rl=")); p.print(engaged[1]);
+  p.print(F(" d=")); p.print(engaged[2]); p.print(F(" lock=")); p.print(engaged[3]);
+  p.print(F(" orient=")); p.print(orient); p.print(F(" loaded=")); p.print(loaded);
+  p.print(F(" flips=")); p.print(flips); p.print(F(" regrips=")); p.println(regrips);
+}
+
+// Commissioning: physical closed contacts, independent of cached mechanism state.
+void Mechanism::printInputs(Print& p) {
+  uint16_t bits=readEndstops();
+  p.print(F("SENS order=FBRLDK en="));
+  for(uint8_t h=0;h<6;h++)p.print((bits&(uint16_t(1)<<(8+h)))?'0':'1');
+  p.print(F(" rt="));
+  for(uint8_t h=0;h<6;h++)p.print((bits&(uint16_t(1)<<h))?'0':'1');
+  p.print(F(" frame="));p.println((bits&0xC0C0)==0xC0C0?1:0);
 }

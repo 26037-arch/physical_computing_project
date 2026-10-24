@@ -1,0 +1,11 @@
+{
+  "test": "D-layer corners at 45 degrees vs engaged F plate; same corner geometry, only plate differs",
+  "old_commit": "d8c21f4",
+  "old_overlap_mm3": 589.9639344997001,
+  "integrated_overlap_mm3": 0.0,
+  "bar_torsional_stiffness_ratio": 0.31640625,
+  "square_8_8.4_one_way_deg": 2.9415749364922186,
+  "square_6_6.4_one_way_deg": 3.9596380797353943,
+  "passed": true,
+  "revision": "Rev C"
+}

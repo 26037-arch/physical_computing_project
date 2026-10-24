@@ -1,95 +1,87 @@
-// sim/mechanism.js — V5 기구 절차. 펌웨어 firmware/main/mechanism.cpp 와 같은 규칙·같은 순서·같은 출력 줄 (docs/HARDWARE_V5.md 3절).
-//   구동기 3개: 컵(홀더) 스텝모터 1 (층 회전 TURN / 큐브 전체 스핀 SPIN), 후드 서보 (CLOSE/OPEN/LOAD), 리프터 서보 (FLIP).
-//   물리 위치: U(0) R(1) F(2) D(3) L(4) B(5). ori[p] = 그 물리 위치에 지금 있는 논리 면.
-//   모든 층 회전은 아래(D 위치)에서만 한다. 논리 면 f 를 아래로 가져오는 재배향:
-//     D: 없음 / F: FLIP / R: SPIN y → FLIP / L: SPIN y' → FLIP / B: SPIN y2 → FLIP / U: FLIP → FLIP
-//   SPIN y = 큐브 전체가 위에서 봐서 시계 방향(U 와 같은 방향), FLIP = x' (F→D, D→B, B→U, U→F: 앞으로 넘어감).
-//   스핀·뒤집기 앞에는 HOOD OPEN, 층 회전 앞에는 HOOD CLOSE 가 자동으로 들어간다(상태가 바뀔 때만 줄을 낸다).
-//   plan(m) 은 한 논리 수에 필요한 동작 목록을 돌려주고 상태를 갱신한다. 시뮬레이터는 목록을 애니메이션하고,
-//   tools/gen_wokwi_test.js 는 flips/spins 횟수를, tools/gen_mechanism_test.js 는 출력 줄을 기대값으로 쓴다.
+// V4 procedure mirrors firmware/main/mechanism.cpp, including short-circuit failures.
 (function (global) {
   'use strict';
-  const HOOD_NAME = ['CLOSE', 'OPEN', 'LOAD'];
-  const CLOSE = 0, OPEN = 1, LOAD = 2;
-  const ORI_START = [3, 4, 2, 0, 1, 5];        // 장착 = z2: 흰색(논리 U) 아래, 초록(논리 F) 앞 → 물리 U←D, R←L, F←F, D←U, L←R, B←B
-  const SPIN_NAME = ['', 'y', 'y2', "y'"];
-  const TURN_NAME = ['D', 'D2', "D'"];
-  // 논리 면이 있는 물리 위치 → 재배향 동작 (spin k 는 90° 시계 횟수, 1..3)
-  const REORIENT = { 3: [], 2: ['flip'], 1: ['spin1', 'flip'], 4: ['spin3', 'flip'], 5: ['spin2', 'flip'], 0: ['flip', 'flip'] };
-
+  const R = typeof module !== 'undefined' && module.exports ? require('./robot_contract.js') : global.RobotContract;
+  const PHYS = R.faceMap, UNIT_NAME = R.unitNames, UNIT_FACES = R.unitFaces;
+  const FB = 0, RL = 1, D = 2, LOCK = 3;
   class Mechanism {
-    constructor() { this.reset(); }
-    reset() { this.hood = OPEN; this.loaded = false; this.ori = ORI_START.slice(); this.flips = 0; this.spins = 0; this.hoods = 0; }
-    resetCounters() { this.flips = 0; this.spins = 0; this.hoods = 0; }
-    physPos(f) { return this.ori.indexOf(f); }
-    // ---- 기본 동작: 각각 {type, ...} 하나를 목록에 넣고 상태를 바꾼다. line 은 펌웨어 시리얼 출력과 같다 ----
-    setHood(out, pos) {
-      if (this.hood === pos) return;
-      this.hood = pos; this.hoods++;
-      out.push({ type: 'hood', pos, line: `HOOD ${HOOD_NAME[pos]}` });
+    // readSensor(unit, wantEngaged): false simulates an end-switch timeout.
+    // The browser's default ideal switches are a kinematic assumption, not measured hardware.
+    constructor(options = {}) {
+      this.virtual = !!options.virtual;
+      this.readSensor = options.readSensor || (() => true);
+      this.sensorTimeoutMs = R.sensorTimeoutMs;
+      this.reset();
     }
-    spin(out, k) {                                   // 큐브 전체 y^k (후드 OPEN)
-      this.setHood(out, OPEN);
-      for (let i = 0; i < k; i++) {                  // y: F←R, L←F, B←L, R←B
-        const o = this.ori, r = o[1], f = o[2], l = o[4], b = o[5];
-        o[2] = r; o[4] = f; o[5] = l; o[1] = b;
+    reset() { this.engaged = R.initialEngaged.slice(); this.commanded = R.initialEngaged.slice(); this.orient = R.initialOrient; this.loaded = R.initialLoaded; this.flips = 0; this.regrips = 0; this.lastError = null; }
+    confirmed(u,w) { return this.commanded[u]===w && this.readSensor(u,w); }
+    resetCounters() { this.flips = 0; this.regrips = 0; }
+    physFace(f) { return PHYS[this.orient][f]; }
+    fail(out, line) { this.lastError = line; out.push({type:'error', line}); return false; }
+    engage(out, u) {
+      if (this.engaged[u] && (this.virtual || this.confirmed(u,true))) return true;
+      this.regrips++;
+      out.push({type:'engage', ms:this.commanded[u]?0:R.servoTravelMs, unit:u, faces:UNIT_FACES[u], line:`ENGAGE ${UNIT_NAME[u]}`});
+      if (!this.virtual) this.commanded[u]=true;
+      if (!this.virtual && !this.confirmed(u, true)) {
+        out.push({type:'wait', ms:Math.ceil((this.sensorTimeoutMs || R.sensorLongTimeoutMs)/R.sensorPollMs)*R.sensorPollMs});
+        const line = `ERR ENGAGE ${UNIT_NAME[u]} timeout`;
+        out.push({type:'msg', line});
+        out.push({type:'retract', ms:this.commanded[u]?R.servoTravelMs:0, unit:u, faces:UNIT_FACES[u]}); // firmware recovery, no RETRACT serial line
+        this.commanded[u]=false;
+        this.lastError = line; out.push({type:'error'}); return false;
       }
-      this.spins++;
-      out.push({ type: 'spin', k, line: `SPIN ${SPIN_NAME[k]}` });
+      this.engaged[u] = true; return true;
     }
-    flip(out) {                                      // x': F→D, D→B, B→U, U→F
-      this.setHood(out, OPEN);
-      const o = this.ori, u = o[0], f = o[2], d = o[3], b = o[5];
-      o[3] = f; o[5] = d; o[0] = b; o[2] = u;
-      this.flips++;
-      out.push({ type: 'flip', line: 'FLIP' });
+    retract(out, u) {
+      if (!this.engaged[u] && (this.virtual || this.confirmed(u,false))) return true;
+      out.push({type:'retract', ms:this.commanded[u]?R.servoTravelMs:0, unit:u, faces:UNIT_FACES[u], line:`RETRACT ${UNIT_NAME[u]}`});
+      if (!this.virtual) this.commanded[u]=false;
+      if (!this.virtual && !this.confirmed(u, false)) {
+        out.push({type:'wait', ms:Math.ceil((this.sensorTimeoutMs || R.sensorLongTimeoutMs)/R.sensorPollMs)*R.sensorPollMs});
+        return this.fail(out, `ERR RETRACT ${UNIT_NAME[u]} timeout`);
+      }
+      this.engaged[u] = false; return true;
     }
-    // ---- 한 논리 수: 재배향 동작들 + HOOD CLOSE + {type:'turn', m, k} ----
+    flip(out) {
+      return this.fail(out, 'ERR flip disabled: core not coupled');
+    }
     plan(m) {
-      const out = [];
-      const f = (m / 3) | 0, k = m % 3;
-      for (const op of REORIENT[this.physPos(f)]) {
-        if (op === 'flip') this.flip(out); else this.spin(out, +op[4]);
-      }
-      this.setHood(out, CLOSE);
-      out.push({ type: 'turn', m, k, line: `TURN ${TURN_NAME[k]}` });
+      const out = []; this.lastError = null;
+      if (!this.virtual && !this.loaded) { this.fail(out, 'ERR not loaded'); return out; }
+      if (!this.virtual && this.engaged.some((v,u)=>!this.confirmed(u,v))) { this.fail(out, 'ERR endstop state'); return out; }
+      const f = Math.floor(m/3), k = m%3;
+      if (f === R.fixedLogicalFace) { this.fail(out, 'ERR fixed face D'); return out; }
+      let p = this.physFace(f);
+      if (p === 0) { this.fail(out, 'ERR fixed face D'); return out; }
+      let ok;
+      if (p === 2 || p === 5) ok = this.engage(out, FB) && this.retract(out, D) && this.retract(out, RL) && this.engage(out, LOCK);
+      else if (p === 1 || p === 4) ok = this.engage(out, RL) && this.retract(out, D) && this.retract(out, FB) && this.engage(out, LOCK);
+      else ok = this.engage(out, LOCK) && this.engage(out, D);
+      if (ok && !this.virtual && this.engaged.some((v,u)=>!this.confirmed(u,v))) { this.fail(out, 'ERR endstop state'); return out; }
+      if (ok) out.push({type:'turn', m, phys:p*3+k, face:p});
       return out;
     }
-    planSeq(seq) { const out = []; for (const m of seq) out.push(...this.plan(m)); return out; }
-    // ---- 장착/배출 (LOAD 버튼 한 단계). 후드를 뒤로 젖힌 LOAD 자세에서 큐브를 위에서 내려놓는다 ----
+    planSeq(seq) { const out=[]; for(const m of seq) { out.push(...this.plan(m)); if(this.lastError)break; } return out; }
     load() {
-      const out = [];
-      if (this.loaded) return this.eject();
-      if (this.hood !== LOAD) {
-        this.setHood(out, LOAD);
-        out.push({ type: 'msg', line: 'READY TO LOAD' });
+      const out=[]; this.lastError = null;
+      if(this.loaded)return this.eject();
+      if(!this.engaged[D] || this.engaged[FB] || this.engaged[RL] || this.engaged[LOCK]) {
+        if(this.retract(out,FB) && this.retract(out,RL) && this.retract(out,LOCK) && this.engage(out,D))out.push({type:'msg',line:'READY TO LOAD'});
         return out;
       }
-      this.setHood(out, OPEN);
-      this.loaded = true; this.ori = ORI_START.slice();
-      out.push({ type: 'loaded', line: 'LOADED' });
-      return out;
+      if(!this.engage(out,LOCK) || !this.engage(out,FB))return out;
+      this.loaded=true; this.orient=R.initialOrient;
+      out.push({type:'loaded',line:`LOADED orient=${this.orient}`}); return out;
     }
     eject() {
-      const out = [{ type: 'msg', line: 'EJECT' }];
-      this.setHood(out, LOAD);
-      this.loaded = false;
-      out.push({ type: 'ejected', line: 'EJECTED' });
-      return out;
+      const out=[{type:'msg',line:'EJECT'}]; this.lastError=null;
+      if(!this.engage(out,D) || !this.retract(out,LOCK) || !this.retract(out,FB) || !this.retract(out,RL))return out;
+      this.loaded=false; out.push({type:'ejected',line:'EJECTED'}); return out;
     }
-    manualFlip() { const out = []; this.flip(out); return out; }
-    manualSpin(k) { const out = []; this.spin(out, ((k % 4) + 4) % 4 || 1); return out; }
-    // 시간 추정(ms, HARDWARE_V5.md 5절 상수) — 시뮬레이터 표시·보고서용
-    static durationMs(a) {
-      if (a.type === 'hood') return 300;
-      if (a.type === 'spin') return a.k === 2 ? 500 : 300;
-      if (a.type === 'turn') return a.k === 1 ? 600 : 400;
-      if (a.type === 'flip') return 1650;
-      return 0;
-    }
+    manualFlip() { const out=[]; this.lastError=null; this.flip(out); return out; }
   }
-
-  const api = { Mechanism, HOOD_NAME, CLOSE, OPEN, LOAD, ORI_START, SPIN_NAME, TURN_NAME, REORIENT };
-  global.CubeMechanism = api;
-  if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+  const api={Mechanism,PHYS,UNIT_NAME,UNIT_FACES,FB,RL,D,LOCK};
+  global.CubeMechanism=api;
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;
+})(typeof globalThis!=='undefined'?globalThis:this);

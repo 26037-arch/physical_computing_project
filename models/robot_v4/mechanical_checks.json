@@ -370,51 +370,51 @@
       "collisions": []
     },
     {
-      "angle_deg": 15,
+      "angle_deg": -15,
       "collisions": []
     },
     {
-      "angle_deg": 30,
+      "angle_deg": -30,
       "collisions": []
     },
     {
-      "angle_deg": 45,
+      "angle_deg": -45,
       "collisions": []
     },
     {
-      "angle_deg": 60,
+      "angle_deg": -60,
       "collisions": []
     },
     {
-      "angle_deg": 75,
+      "angle_deg": -75,
       "collisions": []
     },
     {
-      "angle_deg": 90,
+      "angle_deg": -90,
       "collisions": []
     },
     {
-      "angle_deg": 105,
+      "angle_deg": -105,
       "collisions": []
     },
     {
-      "angle_deg": 120,
+      "angle_deg": -120,
       "collisions": []
     },
     {
-      "angle_deg": 135,
+      "angle_deg": -135,
       "collisions": []
     },
     {
-      "angle_deg": 150,
+      "angle_deg": -150,
       "collisions": []
     },
     {
-      "angle_deg": 165,
+      "angle_deg": -165,
       "collisions": []
     },
     {
-      "angle_deg": 180,
+      "angle_deg": -180,
       "collisions": []
     }
   ],
@@ -477,103 +477,7 @@
     }
   ],
   "print_parts": {
-    "bearing_front_cap_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_front_cap_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_housing_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_housing_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_rear_cap_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "bearing_rear_cap_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "carriage_direct": {
-      "valid": true,
-      "solids": 1
-    },
-    "carriage_hollow": {
-      "valid": true,
-      "solids": 1
-    },
-    "center_recessed": {
-      "valid": true,
-      "solids": 1
-    },
-    "crank": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_center": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_core": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_corner": {
-      "valid": true,
-      "solids": 1
-    },
-    "cube_edge": {
-      "valid": true,
-      "solids": 1
-    },
-    "drive_plate_2pin": {
-      "valid": true,
-      "solids": 1
-    },
-    "drive_plate_strip": {
-      "valid": true,
-      "solids": 1
-    },
     "link": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_carriage": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_crank": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_guide": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_link": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_servo_clamp": {
-      "valid": true,
-      "solids": 1
-    },
-    "lock_servo_mount": {
-      "valid": true,
-      "solids": 1
-    },
-    "rail_support": {
-      "valid": true,
-      "solids": 1
-    },
-    "servo_clamp": {
       "valid": true,
       "solids": 1
     },
@@ -585,11 +489,107 @@
       "valid": true,
       "solids": 1
     },
-    "shaft_hub_hollow": {
+    "cube_edge": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_link": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_servo_clamp": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_center": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_housing_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_rear_cap_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "rail_support": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_housing_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_front_cap_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_rear_cap_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_guide": {
+      "valid": true,
+      "solids": 1
+    },
+    "carriage_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "center_recessed": {
       "valid": true,
       "solids": 1
     },
     "socket_coupon": {
+      "valid": true,
+      "solids": 1
+    },
+    "servo_clamp": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_corner": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_crank": {
+      "valid": true,
+      "solids": 1
+    },
+    "carriage_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_servo_mount": {
+      "valid": true,
+      "solids": 1
+    },
+    "crank": {
+      "valid": true,
+      "solids": 1
+    },
+    "cube_core": {
+      "valid": true,
+      "solids": 1
+    },
+    "bearing_front_cap_direct": {
+      "valid": true,
+      "solids": 1
+    },
+    "lock_carriage": {
+      "valid": true,
+      "solids": 1
+    },
+    "drive_plate_strip": {
+      "valid": true,
+      "solids": 1
+    },
+    "shaft_hub_hollow": {
+      "valid": true,
+      "solids": 1
+    },
+    "drive_plate_2pin": {
       "valid": true,
       "solids": 1
     }

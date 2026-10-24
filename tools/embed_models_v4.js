@@ -27,7 +27,8 @@ function bundle(headOnly = false) {
 let result = bundle();
 if (Buffer.byteLength(result.js) > limit) {
   console.log('Over 6 MB: rebuild STL at 0.1 mm / 0.3 rad, then recheck.');
-  const python = path.join(root, '.venv-cad/Scripts/python.exe');
+  const local = path.join(root, process.platform === 'win32' ? '.venv-cad/Scripts/python.exe' : '.venv-cad/bin/python');
+  const python = process.env.CAD_PYTHON || (fs.existsSync(local) ? local : 'python3');
   for (const args of [['tools/build_robot_v4.py', '--stl-tolerance', '0.1', '--stl-angular', '0.3'], ['tools/check_robot_v4.py']]) {
     const run = spawnSync(python, args, { cwd: root, stdio: 'inherit' });
     if (run.error) throw run.error;

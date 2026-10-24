@@ -1,51 +1,47 @@
-// mechanism.h — V5 기구 절차 (docs/HARDWARE_V5.md 3절): 컵 스텝모터 1 + 후드 서보 + 리프터 서보.
-//   규칙·동작 순서·출력 줄은 sim/mechanism.js 와 같다 (flips/spins 횟수까지 Wokwi 로 교차검증).
-//   물리 위치: U(0) R(1) F(2) D(3) L(4) B(5). ori[p] = 그 물리 위치에 지금 있는 논리 면.
-//   모든 층 회전은 아래(D 위치)에서만 한다. 논리 면 f 를 아래로 가져오는 재배향:
-//     D: 없음 / F: FLIP / R: SPIN y → FLIP / L: SPIN y' → FLIP / B: SPIN y2 → FLIP / U: FLIP → FLIP
-//   SPIN y = 큐브 전체가 위에서 봐서 시계 방향(U 와 같은 방향) = 컵 시계. FLIP = x' (F→D, D→B, B→U, U→F).
-//   TURN D = 아래 층을 아래에서 봐서 시계 = 컵을 위에서 봐서 반시계 (+ 오버슈트 2 스텝 후 복귀).
-//   스핀·뒤집기 앞에는 HOOD OPEN, 층 회전 앞에는 HOOD CLOSE 가 자동으로 들어간다(상태가 바뀔 때만 줄을 낸다).
-//   가상 모드(Motors::isEnabled()==false)에서는 줄만 내고 서보·스텝은 생략한다.
+// mechanism.h — V4 Rev D: 이송 유닛 4개의 결합·후퇴, 상단 고정 운전, 장착/배출
+//   규칙은 docs/HARDWARE_V4.md 3절과 같고 sim/mechanism.js 와 동작 순서·출력 줄·횟수(flips/regrips)가 같다.
+//   논리 면(풀이기) → 물리 면: orient 0 = 항등, orient 1 = x축 180° 뒤집힘 (U↔D, F↔B). 회전 방향은 그대로.
+//   Rev D는 흰색 U가 아래인 orient=1에서 논리D(물리상단)를 고정한다. 뒤집기는 거부한다.
+//   각 모듈의 결합/후퇴 끝을74HC165 두 개로 독립 확인하며 센서12개를 사용한다.
+//   1도/4ms 서보 지령은 접근 속도를 낮추지만 힘 피드백/과부하 제한 기능이 아니다.
 #pragma once
 #include <Arduino.h>
 #include <Servo.h>
 #include "motors.h"
 
-enum HoodPos : uint8_t { HOOD_CLOSE = 0, HOOD_OPEN = 1, HOOD_LOAD = 2 };
+enum Unit : uint8_t { UNIT_FB = 0, UNIT_RL = 1, UNIT_D = 2, UNIT_LOCK = 3 };
 
 class Mechanism {
  public:
   void begin(Motors* m);
-  bool doMove(uint8_t logicalMove);     // 재배향(+HOOD CLOSE) → TURN. 실패(장착 안 됨)면 false
-  bool flip();                          // 큐브 x' (후드 OPEN → 70° → 리프터 올렸다 내림 → 60°)
-  bool spin(uint8_t k);                 // 큐브 전체 y^k (k 1..3), 후드 OPEN
-  bool load();                          // LOAD 버튼 한 단계 (비어 있음→후드 LOAD·큐브 대기 / 넣음→후드 OPEN·장착 / 장착됨→배출)
+  bool prepare(uint8_t logicalMove, uint8_t& physMove);   // 끝 상태 확인·지지 전환 후 물리 수 번호
+  bool flip();                                         // Rev D에서는 항상 거부, 펄스 없음
+  bool load();                                             // LOAD 버튼 한 단계 (비어 있음→D 결합·큐브 대기 / 올려놓음→막대·F/B 결합 / 장착됨→배출)
   bool eject();
   bool isLoaded() const { return loaded; }
-  bool waitingForCube() const { return !loaded && hoodPos == HOOD_LOAD; }
-  void resetCounters() { flips = 0; spins = 0; hoods = 0; }
+  bool waitingForCube() const { return !loaded && engaged[UNIT_D]; }
+  void resetCounters() { flips = 0; regrips = 0; }
   void printStatus(Print& p);
-  uint8_t ori[6];
-  uint16_t flips = 0, spins = 0, hoods = 0;
-  // 조정값 (시리얼 H/K/O 명령으로 바꾸고 맞으면 아래 기본값을 고친다)
-  uint8_t hoodDeg[3] = {15, 75, 135};   // CLOSE / OPEN / LOAD (후드 각 0/60/120 + 15)
-  uint8_t hoodFlipDeg = 105;            // 뒤집는 동안 후드 (90 + 15: 팔이 리프터 크로스바 뒤로 비킨다)
-  uint8_t liftUpDeg = 180;              // 리프터 최상 (크랭크 사점)
-  uint8_t overshootSteps = 2;           // 층 회전 오버슈트 (2 스텝 = 3.6°)
+  void printInputs(Print& p);
+  bool atEnd(uint8_t unit, bool engaged) { return unit < 4 && confirmed(unit, engaged); } // diagnostic, reads both ends
+  uint8_t orient = RobotContract::INITIAL_ORIENT;          // 장착은 흰색(U) 면을 아래로 → 논리 U 가 아래 D 헤드
+  uint16_t flips = 0, regrips = 0;
+  uint16_t sensorTimeoutMs = RobotContract::SENSOR_TIMEOUT_MS;   // 결합/해제 확인 대기 ms (시리얼 T 명령으로 조정; 0 = 최대 60 s 대기, 시운전·Wokwi 시나리오 지연용)
 
  private:
   Motors* motors = nullptr;
-  Servo hood, lift;
-  uint8_t hoodPos = HOOD_OPEN;
-  bool loaded = false;
+  Servo servo[4];
+  uint8_t servoAngle[4] = {SERVO_RETRACTED_DEG,SERVO_RETRACTED_DEG,SERVO_RETRACTED_DEG,SERVO_RETRACTED_DEG};
+  void moveServo(uint8_t unit, uint8_t target);
+  bool engaged[4] = {INITIAL_ENGAGED[0], INITIAL_ENGAGED[1], INITIAL_ENGAGED[2], INITIAL_ENGAGED[3]};
+  bool loaded = RobotContract::INITIAL_LOADED;
   bool virt() const { return !motors->isEnabled(); }
-  void setHood(uint8_t pos);
-  void sweep(Servo& s, uint8_t from, uint8_t to, uint16_t ms);
-  void resetOri();
+  bool engage(uint8_t unit);
+  bool retract(uint8_t unit);
+  bool waitSensor(uint8_t unit, bool wantEngaged);
+  uint16_t readEndstops();
+  bool confirmed(uint8_t unit, bool engaged);
+  bool allConfirmed();
 };
 
-// 핀 배치 (diagram.json, docs/HARDWARE_V5.md 4절) — UNO R3/R4 공통 헤더
-static const uint8_t HOOD_SERVO_PIN = 8, LIFT_SERVO_PIN = 9;
-static const uint8_t LIFT_DOWN_DEG = 0;
-static const uint16_t HOOD_MS = 300, LIFT_UP_MS = 700, LIFT_DOWN_MS = 400, FLIP_SETTLE_MS = 250;   // 뒤집기 합계 약 1.65 s
+// Rev C: 6 mm 막대 끝−22.5, 핀 삽입4.8. 행정24/30과 서보각은 공통 계약을 쓴다.

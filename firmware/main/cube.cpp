@@ -89,13 +89,16 @@ int8_t parseMove(const char* tok) {
 uint8_t parseSeq(const char* str, uint8_t* out, uint8_t maxN) {
   uint8_t n = 0;
   char tok[4];
-  while (*str && n < maxN) {
-    while (*str == ' ') str++;
+  while (*str) {
+    while (*str == ' ' || *str == '\t' || *str == '\r' || *str == '\n') str++;
     if (!*str) break;
+    if (n == maxN) return 0;  // 전체 수열을 거부하며 유효한 앞부분만 실행하지 않는다.
     uint8_t len = 0;
-    while (*str && *str != ' ' && len < 3) tok[len++] = *str++;
+    while (*str && *str != ' ' && *str != '\t' && *str != '\r' && *str != '\n') {
+      if (len == 3) return 0;
+      tok[len++] = *str++;
+    }
     tok[len] = 0;
-    while (*str && *str != ' ') str++;  // 너무 긴 토큰 버림
     int8_t m = parseMove(tok);
     if (m < 0) return 0;
     out[n++] = m;
@@ -121,14 +124,14 @@ uint8_t simplifySeq(uint8_t* seq, uint8_t n) {
 // xorshift32: x ^= x<<13; x ^= x>>17; x ^= x<<5 (주기 2^32-1, 시드 0 은 0x9E3779B9 로 대체).
 // 면 f = x mod 6 (직전 면과 같으면 버림), 회전 k = x' mod 3. JS(sim/cube.js) 와 같은 32비트 산술이라
 // 같은 시드 → 같은 수열. 이것이 "JS 기대 출력 = 보드 출력" 교차검증의 전제다 (docs/MATH.md 9절).
-void scrambleSeq(uint32_t seed, uint8_t* out, uint8_t n) {
+void scrambleSeq(uint32_t seed, uint8_t* out, uint8_t n, int8_t fixedFace) {
   uint32_t s = seed ? seed : 0x9E3779B9UL;
   int8_t last = -1;
   uint8_t i = 0;
   while (i < n) {
     s ^= s << 13; s ^= s >> 17; s ^= s << 5;
     uint8_t f = s % 6;
-    if ((int8_t)f == last) continue;
+    if ((int8_t)f == last || (int8_t)f == fixedFace) continue;
     s ^= s << 13; s ^= s >> 17; s ^= s << 5;
     out[i++] = f * 3 + s % 3;
     last = f;

@@ -1,9 +1,9 @@
-"""Rev A assembly kit. World Y is up. Purchased panels/metal are NOT prints.
+"""Rev C assembly kit. World Y is up. Purchased panels/metal are NOT prints.
 
 Run AFTER build_robot_v4.py. Exports fabrication STEP/DXF, printable fixtures,
 the complete framed STEP and a machine-readable bill of parts. Millimetres.
 """
-import csv, json, math
+import csv, json, math, itertools
 from pathlib import Path
 import cadquery as cq
 import ezdxf
@@ -23,9 +23,6 @@ def design():
     # D profile end cores.
     for x in (-20,20):
         base=base.cut(C(6.6,-352,-330,(0,1,0),(x,0,-67)))
-    for x in (-20,12):
-        for z in (-55.5,-32.5):
-            base=base.cut(C(3.6,-352,-330,(0,1,0),(x,0,z)))
     panels['panel_base']=base
     for face in ('F','R','B','L'):
         loc=d.face_location_v4(face)
@@ -33,9 +30,6 @@ def design():
         for x in (-20,20): s=s.cut(C(6.6,269,283,origin=(x,-67,0)))
         for x,y in [(h,k) for h in (-250,60) for k in (-278.5,278.5)]+[(-312,-200),(-312,200)]:
             s=s.cut(C(4.5,269,283,origin=(x,y,0)))
-        # Four long rods anchor the servo cradle; metal sleeves set its Z.
-        for x in (-20,12):
-            for y in (-55.5,-32.5): s=s.cut(C(3.6,269,283,origin=(x,y,0)))
         panels['panel_'+face]=s.moved(loc)
     # Profile envelopes include three cores only, NOT a vendor slot drawing.
     for face in d.FACES_V4:
@@ -65,11 +59,15 @@ def design():
                     (-21,208,3.4),(-21,216,3.4)]:
         s=s.cut(C(dd,-37,-29,(1,0,0),(0,y,z)))
     metal['lock_spine']=s.clean().moved(d.face_location_v4('D'))
-    # A replaceable switch bracket. Its cross-arm clears the sliding bar clamp.
-    s=F(B(62,6,16,(1,-21,212)),B(4,35.5,16,(30,-6.25,212)),B(20,3.5,17,(22,9.75,211.5)))
-    for z in (208,216):s=s.cut(C(3.4,-31,33,(1,0,0),(0,-21,z)))
-    for x in (18.75,25.25):
-        slot=cq.Workplane('XZ',origin=(x,12,211.9)).slot2D(8,2.4,90).extrude(5).val()
+    # An outboard flange keeps both switch CASES out of the carriage/link sweep.
+    # Long leaves face the approaching lug; no switch body is a travel stop.
+    s=F(B(62,8,16,(1,-21,212)),B(19,8,67,(40.5,-21,219.5)),
+        B(4,41.75,67,(36,-.125,219.5)),B(17,3.5,67,(42.5,19,219.5)))
+    for z in (208,216):
+        s=s.cut(C(3.4,-31,-19,(1,0,0),(0,-21,z)))
+        s=s.cut(C(4.6,-30.1,-26,(1,0,0),(0,-21,z)))
+    for x,z in itertools.product((37.75,44.25),(194.1,243.9)):
+        slot=cq.Workplane('XZ',origin=(x,22,z)).slot2D(8,2.4,90).extrude(5).val()
         s=s.cut(slot)
     prints['lock_switch_bracket']=(s.clean(),1)
     # Rail alignment gauge: end faces reference the actual cube centre plane.
@@ -120,7 +118,7 @@ def flat_dxf(name,shape,axis):
 def build():
     panels,metal,prints,fixtures=design()
     for sub in ('cut','print','jigs'):(OUT/sub).mkdir(parents=True,exist_ok=True)
-    info={'revision':'V4 assembly Rev A','source_commit':'b37de3e9','integration_base_commit':'513647021cccfc23386335948cd5963cadf98bcb','units':'mm','physical_validation':False,'parts':{}}
+    info={'revision':'V4 assembly Rev D','source_commit':'ab8c454','integration_base_commit':'83ade39d35a54d3a644a2fec932033650a53e135','units':'mm','physical_validation':False,'parts':{}}
     for group,parts in [('cut',{**panels,**metal}),('print',prints),('jigs',fixtures)]:
         for name,value in parts.items():
             shape,qty=value if isinstance(value,tuple) else (value,1)
@@ -134,7 +132,7 @@ def build():
                 flat_dxf(name,shape,axis)
     # Profiles are envelopes: unmodelled T slots must be selected from a drawing.
     cubes,derived,instances,modules,lock=d.make_design()
-    asm=cq.Assembly(name='RobotV4_build_RevA')
+    asm=cq.Assembly(name='RobotV4_build_RevD')
     for name,kind,shape in d.assembly_items(instances,modules,lock):
         asm.add(shape,name=name.replace('/','__'),color=cq.Color(d.color(kind)))
     for name,shape in {**panels,**metal}.items():

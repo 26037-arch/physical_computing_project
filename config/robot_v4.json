@@ -1,0 +1,101 @@
+{
+  "revision": "V4 Rev D fixed top",
+  "physicalBoard": "arduino:renesas_uno:unor4wifi",
+  "simulationBoard": "arduino:avr:uno",
+  "faceMap": [
+    [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    [
+      3,
+      1,
+      5,
+      0,
+      4,
+      2
+    ]
+  ],
+  "unitNames": [
+    "FB",
+    "RL",
+    "D",
+    "LOCK"
+  ],
+  "unitFaces": [
+    [
+      2,
+      5
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      3
+    ],
+    []
+  ],
+  "stepPins": [
+    255,
+    3,
+    2,
+    6,
+    5,
+    4
+  ],
+  "dirPin": 7,
+  "servoPins": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "buttonPin": "A2",
+  "buzzerPin": "A3",
+  "servoEngagedDeg": 0,
+  "servoRetractedDeg": 180,
+  "servoTravelMs": 720,
+  "sensorTimeoutMs": 1500,
+  "sensorLongTimeoutMs": 60000,
+  "stepsPerQuarter": 50,
+  "startUs": 12000,
+  "minUs": 8000,
+  "accelUs": 100,
+  "flipUs": 9000,
+  "settleMs": 250,
+  "dirSetupUs": 5,
+  "pulseUs": 3,
+  "flipPairGapUs": 20,
+  "flipWorldDeg": -180,
+  "scrambleLength": 20,
+  "maxManualMoves": 64,
+  "serialLineBytes": 256,
+  "longPressMs": 1200,
+  "debounceMs": 30,
+  "initialOrient": 1,
+  "initialLoaded": false,
+  "initialEngaged": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "sensorPollMs": 2,
+  "flipEnabled": false,
+  "fixedLogicalFace": 3,
+  "sensorDataPin": 12,
+  "sensorClockPin": 13,
+  "sensorLoadPin": "A0",
+  "unitHeadMasks": [
+    3,
+    12,
+    16,
+    32
+  ],
+  "servoStepMs": 4
+}

@@ -1,6 +1,6 @@
 #include "solver.h"
 
-static const uint8_t MAX_DEPTH = 14;       // 크로스 안전 한계 (크로스는 항상 8수 이내)
+static const uint8_t MAX_DEPTH = 14;       // 크로스 안전 한계 (상단 고정 15수 크로스, 전수 BFS로 한계 검증)
 static const uint8_t F2L_MAX_BOUND = 20;   // F2L 한 쌍 안전 한계 (생성기 전수 검사: 최장 11수)
 static const uint8_t N_MACROS = 27;
 static const char SLOT_NAMES[4][3] = {"FR", "FL", "BL", "BR"};
@@ -72,7 +72,7 @@ bool Solver::searchCross(const uint8_t* es, uint8_t g, uint8_t remaining, int8_t
   uint8_t es2[4];
   uint8_t limit = remaining - 1;
   for (int8_t f = 0; f < 6; f++) {
-    if (f == lastFace) continue;
+    if (f == FACE_D || f == lastFace) continue;
     if (lastFace >= 3 && f == lastFace - 3) continue;
     // f*3, f*3+1, f*3+2 순서이므로 원래 m=0..17 순서와 같다.
     uint8_t end = f * 3 + 3;

@@ -85,8 +85,10 @@ def assets():
       'B12':h['thrust_F8_16M'],'B13':hh['front_thrust_17x30'],'B14':h['shaft_collar_8'],
       'B15':hh['shaft_collar_17'],'B16':h['coupling_5x8'],
       'B17':F(hh['pulley_40T_driver'],hh['pulley_40T_driven'],hh['belt_200_2GT_6_pitch_envelope']),
-      'B18':F(h['engage_switch'],B(16,2,1,(22,-45,159))),
+      'B18':F(h['engage_switch'],B(22,2,1,(36,-47.75,140.5))),
       'B19':F(B(70,36,26,(-40,0,13)),B(70,36,26,(40,0,13))),
+      'B21':F(B(50,30,2,(0,0,1)),B(19,8,4,(-12,0,4)),B(19,8,4,(12,0,4))),
+      'B22':F(C(8,0,50,origin=(-9,0,0)),C(8,0,50,origin=(9,0,0)),C(20,0,8,origin=(30,0,0))),
       'B20':F(C(3,0,16),C(6,16,19),C(10,-2,0).cut(C(3.5,-3,1))),
       'K01':F(B(80,36,2,(0,0,1)),B(72,25,7,(0,0,5.5)),B(64,16,1,(0,0,9.5))),
       'K02':F(B(6,6,3,(0,0,1.5)),C(3,3,6)),
@@ -122,6 +124,17 @@ def assets():
     rail=[('P13',heads['rail_support'],BLUE),('B05',hw['rail_MGN12'],RED),('',hw['block_MGN12H'],RED),('P12',heads['carriage'].translate((0,15,0)), '#8296ad')]
     render('rail',rail,labels=True,elev=15,azim=-65)
     render('servo',[('P14',heads['servo_mount'],BLUE),('B02',hw['servo_MG996R'].translate((0,0,-20)),RED),('P15',heads['servo_clamp'].translate((20,0,0)), '#82a7cf')],labels=True,elev=16)
+    profile=metal['profile_F'].moved(d.face_location_v4('F').inverse)
+    crop=B(80,70,100,(0,-45,205))
+    detail=[('2060',profile.intersect(crop),'#b6bfc8'),
+            ('P13',heads['rail_support'].intersect(crop),BLUE),
+            ('B05',hw['rail_MGN12'].intersect(crop),'#8394a1'),
+            ('P14',heads['servo_mount'],'#57a69c')]
+    for label,x,z,front in [('F11-a',-20,239,-51),('F11-b',20,239,-51),('F25',-20,171,-48)]:
+        washer=C(10,front,front+1,(0,1,0),(x,0,z))
+        head=C(8.5,front+1,front+4.5,(0,1,0),(x,0,z))
+        detail.append((label,F(washer,head),RED))
+    render('mount_detail',detail,labels=True,elev=17,azim=35)
     cr=[]
     for theta,color in ((0,'#346baf'),(90,'#8babc9'),(180,'#d09b64')):
         crank,link=d.crank_link(theta)
@@ -136,7 +149,7 @@ def assets():
     close=[('',s,d.color(kind)) for _,kind,s in robot if s.BoundingBox().ymax>-70 and s.BoundingBox().ymin<60]
     # The alignment gauge is shown separately, not pretending to be a driven cube.
     render('alignment',[(ident,s,c) for ident,s,c in robotitems if s.BoundingBox().xlen<120 and s.BoundingBox().ymin>-100 and s.BoundingBox().ymax<100],world=True)
-    render('switch',[('P13',heads['rail_support'],BLUE),('B18',hw['engage_switch'],RED),('P12',heads['carriage'], '#8ba6bf')],labels=True,elev=12,azim=-70)
+    render('switch',[('P13',heads['rail_support'],BLUE),('B18 ENG',hw['engage_switch'],RED),('B18 RET',hw['retract_switch'],RED),('P12',heads['carriage'], '#8ba6bf')],labels=True,elev=12,azim=-70)
     # Flip poses use actual cube solids; R/L end layers stay on their heads.
     flip=[]
     for angle,dx in ((0,-95),(90,0),(180,95)):
@@ -151,7 +164,7 @@ class Writer:
         pdfmetrics.registerFont(TTFont('NGB',str(DOC/'assets/fonts/NanumGothic-Bold.ttf')))
         pdfmetrics.registerFontFamily('NG',normal='NG',bold='NGB',italic='NG',boldItalic='NGB')
         self.c=Canvas(str(PDF),pagesize=A4,pageCompression=1)
-        self.c.setTitle('robot_v4 상세 제작 설명서 · 부품 지도 · 조립 도면 · Rev A')
+        self.c.setTitle('robot_v4 상세 제작 설명서 · 부품 지도 · 조립 도면 · Rev D')
         self.c.setAuthor('physical_computing_project')
         self.i=0;self.toc=[]
     def para(self,text,size=9.4,leading=14,color=INK,bold=False,width=None,x=None):
@@ -167,7 +180,7 @@ class Writer:
         self.c.setFillColor(colors.HexColor(BLUE));self.c.rect(0,self.h-5*mm,self.w,5*mm,fill=1,stroke=0)
         self.para(title,23 if wide else 19,28 if wide else 25,bold=True,width=self.w-30*mm)
         self.c.setFillColor(colors.HexColor('#697b8b'));self.c.setFont('NG',7.4)
-        self.c.drawString(16*mm,10*mm,'ROBOT V4 / Rev A / 2026-10-24 / 치수 mm · 실물 시험 전')
+        self.c.drawString(16*mm,10*mm,'ROBOT V4 / Rev D / 치수 mm · 실물 시험 전')
         self.c.drawRightString(self.w-16*mm,10*mm,f'{self.i:02d}')
     def image(self,name,height=75):
         f=IMG/(name+'.png')
@@ -188,9 +201,9 @@ class Writer:
 def catalog(w,cards):
     w.start('ROBOT V4  |  무엇을 출력하고, 사고, 키트에서 꺼내는가',True)
     w.para('번호는 조립 순서와 연결됩니다. 파랑 P/J = 3D 출력 · 주황 B = 구매 · 초록 K = 사진 속 키트 · 갈색 M = 재료 구매 후 절단/가공',12,18,width=w.w-32*mm)
-    top=w.y;cw=(w.w-32*mm)/10;ch=(top-25*mm)/6
+    top=w.y;columns=11; rows=math.ceil(len(cards)/columns);cw=(w.w-32*mm)/columns;ch=(top-25*mm)/rows
     for i,(ident,label,qty,kind,path,col) in enumerate(cards):
-        row,colidx=divmod(i,10);x=16*mm+cw*colidx;y=top-ch*(row+1)
+        row,colidx=divmod(i,columns);x=16*mm+cw*colidx;y=top-ch*(row+1)
         w.c.setStrokeColor(colors.HexColor('#dce4ec'));w.c.setFillColor(colors.white)
         w.c.roundRect(x+1*mm,y+1*mm,cw-2*mm,ch-2*mm,2*mm,fill=1,stroke=1)
         w.c.setFillColor(colors.HexColor(col));w.c.roundRect(x+2*mm,y+ch-9*mm,cw-4*mm,7*mm,1*mm,fill=1,stroke=0)
@@ -200,7 +213,7 @@ def catalog(w,cards):
         sty=ParagraphStyle('cat',fontName='NG',fontSize=8.3,leading=11,wordWrap='CJK',alignment=1)
         p=Paragraph(label,sty);pw,ph=p.wrap(cw-6*mm,12*mm);p.drawOn(w.c,x+3*mm,y+5*mm)
     w.c.setFont('NG',9);w.c.setFillColor(colors.HexColor(INK))
-    w.c.drawString(16*mm,18*mm,'출력32종·93개(지그/시험편 포함) / 구매품은 외형 참고도 · 실측 우선 / 키트의 소형 서보·28BYJ-48·ULN2003은 대체품 아님')
+    w.c.drawString(16*mm,18*mm,'출력33종·93개(지그/시험편 포함) / 구매품은 외형 참고도 · 실측 우선 / 키트의 소형 서보·28BYJ-48·ULN2003은 대체품 아님')
 
 def wiring(w):
     c=w.c;top=w.y;left=20*mm
@@ -247,7 +260,7 @@ def flat_drawing(w,name,height=88,swap=False):
 
 def write_outputs(cards,pmap):
     w=Writer();catalog(w,cards)
-    md=['# robot_v4 상세 제작 설명서 · Rev A','최신 통합 기준: 5136470 · 기구 원형: b37de3e9 · 작성일: 2026-10-24 (한국 시간)','']
+    md=['# robot_v4 상세 제작 설명서 · Rev D','Rev D: 상단 고정 5면 운전, 12개 개별 끝 센서, P13/P29 후퇴 센서 장착, 사각 키 맞춤층','']
     # Intro and kit page before bills.
     for title,img,sections in PAGES[:2]:
         w.start(title)
@@ -276,10 +289,12 @@ def write_outputs(cards,pmap):
     w.table([['연결','나사 방향 / 쌓임','남겨 둘 조건'],
       ['집-캐리지','Y방향 M3×20: 머리·와셔·6T·6T·와셔·너트','두 면 밀착, 축 비틀림 없음'],
       ['지지대-2060','Y방향 M5×12: 머리·와셔1·P13 6T·T너트','나사 물림 약5, 너트 회전 잠금'],
-      ['가이드-금속판','X방향 M4×60: 머리·와셔·6T·44T·와셔·너트','가이드 사각 구멍 변형 없음'],
+      ['가이드-금속판','X방향 M4×12: 머리·와셔1·M04 6T·M4 인서트','물림약4, 나사끝 바닥 여유'],
       ['혼-크랭크','X방향 M2×8: 머리·금속 혼·4T 크랭크·너트','혼 실측 두께, 출력축 중심 나사 별도'],
       ['링크 조인트','X방향 평활 Ø3 축+얇은 와셔+잠금 너트','0.1~0.2 옆 유격, 손으로 자유 회전'],
-      ['서보-프레임','Z방향 전산봉: 앞 너트·크래들·간격관·합판·너트','네 간격관 같은 길이, 판 휨 없음']],[35,93,50],8.5)
+      ['서보-2060 위','Y방향 M5×12 두 개: 머리·와셔1·P14 6T·T너트','돌기/포켓 삽입, 면 밀착'],
+      ['서보-2060 아래','Y방향 M5×16 한 개: 와셔1·P14 3T·P13 6T·T너트','물림약6, 슬롯 바닥 여유'],
+      ['스위치 받침-판','X방향 M3×12: 와셔1·M04 6T·P29 인서트','P29 인서트2개, 과열 금지']],[35,93,50],8.5)
     w.section('접착층 두께도 치수다','실리콘 패드에는 재료에 맞는 얇은 접착층만 사용한다. 패드와 접착층을 합친 작동 두께를0.8 기준으로 맞춘다. 출력물의 금속 인서트는 열삽입하며, 떨어지는 인서트를 순간접착제로 고정해 하중 부품으로 사용하지 않는다.')
     w.section('나사를 조이면 안 되는 조인트','프레임·베어링 집·서보 캡은 고정 체결이다. 링크 양끝은 회전 조인트다. 같은 힘으로 끝까지 조이면 서보가 움직이지 못한다. 평활 축의 어깨 또는 금속 간격 부시가 조임력을 받고 링크는 자유 회전하도록 실제 조인트 길이를 정한다.')
     w.start('잠금 지지판 M04 · 홀 좌표표')
@@ -291,11 +306,11 @@ def write_outputs(cards,pmap):
     w.para('외곽과 홀은 실제 절단 DXF에서 직접 그렸다. 각 형상에 별도 축척을 적용했으므로 종이를 재지 말고 표시 치수와 DXF를 사용한다. F/B는597×450×12, R/L은621×450×12다.',9.2,14)
     flat_drawing(w,'panel_F',87)
     flat_drawing(w,'panel_R',87,True)
-    w.para('모서리/바닥 앵글 홀 Ø4.5, 프로파일 끝 홀 Ø6.6, 서보 전산봉 홀 Ø3.6. 뒤판은 앞판과 같은 규격이며 앞/뒤 방향 표시는 조립 전에 한다. 좌/우판은 앞/뒤판의 절단면을 덮는다.',9.2,14)
+    w.para('모서리/바닥 앵글 홀 Ø4.5 여섯 개, 프로파일 끝 홀 Ø6.6 두 개다. Rev C는 서보 전산봉 홀 네 개를 제거했다. 뒤판은 앞판과 같은 규격이며 앞/뒤 방향 표시는 조립 전에 한다. 좌/우판은 앞/뒤판의 절단면을 덮는다.',9.2,14)
     w.start('M01 바닥 가공도 · 하부 모듈 기준')
     w.para('621×621×18. 바닥 윗면 A가 world y=-332다. 중앙은 큐브 중심선 B/C의 교점이며 D프로파일은 z=-67 중심으로 아래에 고정된다.',9.2,14)
     flat_drawing(w,'panel_base',168)
-    w.section('작업대 검수','외곽 두 대각선 차이, 평탄도, Ø6.6 두 개와 Ø3.6 네 개의 중심 위치를 확인한다. Ø4.5 여덟 개는 바닥 앵글용이다. 뒤틀린 판을 볼트로 강제 평탄화하면 모듈 정렬이 달라진다.')
+    w.section('작업대 검수','외곽 두 대각선 차이, 평탄도, Ø6.6 두 개의 중심 위치를 확인한다. Ø4.5 여덟 개는 바닥 앵글용이다. Rev C는 Ø3.6 전산봉 홀 네 개를 제거했다. 뒤틀린 판을 볼트로 강제 평탄화하면 모듈 정렬이 달라진다.')
     w.start('파일·검증 결과·다음 재생성')
     w.section('함께 제공하는 파일','상세 PDF, BUILD_V4.md 원문, assembly_kit/부품표 CSV, 컷용DXF/STEP, 추가 출력물과지그STL, 전체프레임조립STEP를제공한다. ZIP은다운로드한뒤폴더구조그대로푼다. STL은실제크기mm로슬라이서에넣고 STEP는CAD에서편집한다.')
     for f,title in [(d.OUT/'mechanical_checks.json','V4 본체 검사'),(k.OUT/'kit_checks.json','프레임·이송 보강 검사')]:
@@ -305,7 +320,7 @@ def write_outputs(cards,pmap):
     w.section('검증의 범위','기하 검사는 명목강체와 구매외형의 이산자세 검사다. 모든나사머리·스위치레버·혼의실제형상·케이블·탄성변형·마찰·출력수축은 포함되지 않는다. 계산상의안전계수나반복정밀도를증명하지않는다. 본문의실물확인표로제작품별합격을기록한다.')
     w.start('설계 출처와 사용 조건')
     for h,t in [
-      ('최신 통합 기준과 기구 원형','최신 통합 기준5136470: https://github.com/26037-arch/physical_computing_project/commit/513647021cccfc23386335948cd5963cadf98bcb<br/>기구 원형b37de3e9: https://github.com/26037-arch/physical_computing_project/commit/b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9<br/>최신 시뮬레이터의 CAD 좌표 반영과 F2L 풀이기를 유지하고 제작 보강 구조를 병합했다.'),
+      ('최신 통합 기준과 기구 원형','병합 기준83ade39: https://github.com/26037-arch/physical_computing_project/commit/83ade39d35a54d3a644a2fec932033650a53e135<br/>기구 원형b37de3e9: https://github.com/26037-arch/physical_computing_project/commit/b37de3e9ccd96e308c293c7b97e6c1e72bd0dcf9<br/>원격의 띠 판·6 mm 막대·원뿔 핀에 a7f8bcd의 프로파일 직결·정렬 턱·인서트를 결합했다.'),
       ('큐브 유지 트랙','Jared Deckard의 MIT 3×3×3 cube puzzle을 재구성한 V2 형상을 계승한다. models/robot_v4/THIRD_PARTY_LICENSE.md에 원본·라이선스를 보존했다. 공개 CAD가 실물 성능을 보증하지는 않는다.'),
       ('전기 참고','Pololu A4988 제품1182의 전류제한·VMOT 콘덴서 설명: https://www.pololu.com/product/1182<br/>실제 복제품의 감지저항·방열·회로는 구매 도면을 우선한다.'),
       ('D 추력 유닛 치수 확인','JTEKT/Koyo AXK1730TN 자료는17×30×2 케이지와 AS1730 1T 와셔를 명시한다. 케이지2+와셔1×2+정밀 시임1=총5T로 맞추는 예다.<br/>https://koyo.jtekt.co.jp/en/products/detail/?pno=AXK1730TN'),
@@ -322,12 +337,12 @@ def write_outputs(cards,pmap):
         md.extend(['|'+'|'.join(str(v) for v in row)+'|' for row in rows]);md.append('')
     (DOC/'BUILD_V4.md').write_text('\n'.join(md),encoding='utf-8')
     with (k.OUT/'parts_BOM.csv').open('w',newline='',encoding='utf-8-sig') as f:
-        cw=csv.writer(f);cw.writerow(['ID','품명','수량','조달','파일/설명'])
+        cw=csv.writer(f,lineterminator='\n');cw.writerow(['ID','품명','수량','조달','파일/설명'])
         for i,n,l,q in PRINTS+JIGS:cw.writerow([i,l,q,'3D 출력',n+'.stl'])
         for g,mode in ((BUY,'구매'),(KIT,'사진 키트'),(MATERIAL,'구매 후 가공')):
             for i,l,q,n in g:cw.writerow([i,l,q,mode,n])
     with (k.OUT/'fastener_BOM.csv').open('w',newline='',encoding='utf-8-sig') as f:
-        cw=csv.writer(f);cw.writerow(['ID','규격','수량','사용처']);cw.writerows(FASTENERS)
+        cw=csv.writer(f,lineterminator='\n');cw.writerow(['ID','규격','수량','사용처']);cw.writerows(FASTENERS)
     (k.OUT/'manual_page_index.json').write_text(json.dumps(w.toc,ensure_ascii=False,indent=2),encoding='utf-8')
     print('PDF',PDF,'pages',w.i,flush=True)
 

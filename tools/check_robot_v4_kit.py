@@ -1,4 +1,4 @@
-"""Check Rev A additions against stationary and moving V4 components."""
+"""Check Rev D mounting interfaces, endstop cases and sampled V4 movement."""
 import json,itertools,math
 from pathlib import Path
 import build_robot_v4 as d
@@ -8,29 +8,80 @@ from check_robot_v4 import hits
 def main():
     panels,metal,prints,jigs=k.design()
     cubes,derived,instances,modules,lock=d.make_design()
-    report={'physical_load_test':False,'checks':{},'limitations':'Discrete rigid geometry only; purchased envelopes omit slots, screw heads and levers.'}
+    report={'revision':'Rev D','physical_load_test':False,'checks':{},'limitations':'Discrete rigid geometry only; includes P14 M5 head/washer envelopes. Other fasteners, vendor slots, horn details and switch levers are omitted.'}
     failures=[]
     def record(n,left,right,same=False):
         h=hits(left,right,same);report['checks'][n]=h
         print(n,len(h),h,flush=True);failures.extend([[n,*x] for x in h])
     frame=list({**panels,**metal}.items())
+    # The deeper 6.4 socket moves the M3 head two millimetres inward.
+    # Use standard M3x10 (2.5 mm metal-insert engagement), not old M3x14.
+    report['UD_center_screw_lengths']={}
+    for sign in (-1,1):
+        axis=(0,sign,0)
+        center=next(s for _,kind,s,pos in instances if kind=='center_recessed' and pos[1]==sign)
+        fixed=[('core',cubes['cube_core']),('center',center)]
+        screw=d.cyl(3,8.5,18.5,axis).fuse(d.cyl(5.5,18.5,21.5,axis))
+        record(f'UD_center_M3x10_{sign}',fixed,[('M3x10',screw)])
+        old=d.cyl(3,4.5,18.5,axis)
+        clashes=hits(fixed,[('old_M3x14',old)])
+        report['UD_center_screw_lengths'][str(sign)]={'selected_mm':10,'insert_engagement_mm':2.5,'rejected_M3x14_collisions':clashes}
+        if not clashes:failures.append(['missing_expected_old_screw_contact',sign])
     record('frame_internal',frame,frame,True)
     for pose in ('FB','RL','retracted'):
         old=[(n,s) for n,_,s in d.assembly_items(instances,modules,lock,pose)]
         record('frame_vs_robot_'+pose,frame,old)
     bracket=prints['lock_switch_bracket'][0]
+    # With a 6T spine and approximately 1T washer, a 12 mm screw enters
+    # 5 mm from x=-30. Its last millimetre must clear the insert's plastic root.
+    guide_tips=[(f'M4_tip_{y}_{z}',d.cyl(4,-30,-25,(1,0,0),(0,y,z)))
+                for y,z in itertools.product((-9,9),(180,190))]
+    bracket_tips=[(f'M3_tip_{z}',d.cyl(3,-30,-25,(1,0,0),(0,-21,z))) for z in (208,216)]
+    record('guide_screw_tip_clearance',[('guide',lock[0]['lock_guide'])],guide_tips)
+    record('switch_bracket_screw_tip_clearance',[('bracket',bracket)],bracket_tips)
     for shift in (0,15,30):
         unit=d.lock_pose(lock,shift)
         record('lock_bracket_'+str(shift),[('bracket',bracket)],list(unit.items()))
     # New static cap must not catch the full crank/link sweep or moving carriage.
     for hollow in (False,True):
         heads,hw=modules[hollow]
+        fixed=[(n,heads[n]) for n in ('servo_mount','servo_clamp','rail_support')]
+        record(f'head_{hollow}_fixed_interfaces',fixed,fixed,True)
+        record(f'head_{hollow}_servo_and_rail',fixed,
+               [(n,hw[n]) for n in ('servo_MG996R','rail_MGN12')])
+        record(f'head_{hollow}_rail_vs_servo',[('rail',hw['rail_MGN12'])],[('servo',hw['servo_MG996R'])])
+        bolt_heads=[]
+        for x,z,front in ((-20,239,-51),(20,239,-51),(-20,171,-48)):
+            washer=d.cyl(10,front,front+1,(0,1,0),(x,0,z))
+            head=d.cyl(8.5,front+1,front+4.5,(0,1,0),(x,0,z))
+            bolt_heads.append((f'M5_{x}_{z}',washer.fuse(head)))
+        record(f'head_{hollow}_bolt_heads_static',bolt_heads,fixed+[(n,hw[n]) for n in ('servo_MG996R','rail_MGN12')])
         for theta in range(0,181,15):
             z=d.slider_z(theta)-147
             crank,link=d.crank_link(theta)
-            fixed=[(n,heads[n]) for n in ('servo_mount','servo_clamp','rail_support')]
-            moving=[('crank',crank),('link',link),('carriage',heads['carriage'].translate((0,0,z)))]
-            record(f'head_{hollow}_{theta}',fixed,moving)
+            moving=[('crank',crank),('link',link),('carriage',heads['carriage'].translate((0,0,z))),
+                    ('MGN_block',hw['block_MGN12H'].translate((0,0,z)))]
+            record(f'head_{hollow}_{theta}',fixed+bolt_heads,moving)
+    lock_fixed=[(n,lock[0][n]) for n in ('lock_guide','lock_servo_mount','lock_servo_clamp')]
+    record('lock_fixed_interfaces',lock_fixed,lock_fixed,True)
+    record('lock_servo_capture',lock_fixed,[('servo',lock[1]['lock_servo_MG996R'])])
+    lock_sensors=[(n,lock[1][n]) for n in ('lock_engage_switch','lock_retract_switch')]
+    record('lock_endstops_vs_fixed',lock_sensors,lock_fixed+[('servo',lock[1]['lock_servo_MG996R'])])
+    record('lock_endstops_vs_bracket',lock_sensors,[('bracket',bracket)])
+    for hollow in (False,True):
+        heads,hw=modules[hollow]
+        sensors=[(n,hw[n]) for n in ('engage_switch','retract_switch')]
+        record(f'head_{hollow}_endstops_vs_fixed',sensors,[(n,heads[n]) for n in ('rail_support','servo_mount','servo_clamp')]+[('servo',hw['servo_MG996R'])])
+        for theta in range(0,181,15):
+            shift=d.slider_z(theta)-147
+            crank,link=d.crank_link(theta)
+            moving=[('crank',crank),('link',link),('carriage',heads['carriage'].translate((0,0,shift)))]
+            record(f'head_{hollow}_endstops_moving_{theta}',sensors,moving)
+    for theta in range(0,181,15):
+        shift=d.slider_z(theta,15,255)-204
+        crank,link=d.crank_link(theta,True)
+        moving=[('crank',crank),('link',link),('carriage',lock[0]['lock_carriage'].translate((0,0,shift)))]
+        record(f'lock_endstops_moving_{theta}',lock_sensors,moving)
     # Mechanical sanity checks with actual generated solids.
     for n,(s,q) in prints.items():
         assert s.isValid() and len(s.Solids())==1,n

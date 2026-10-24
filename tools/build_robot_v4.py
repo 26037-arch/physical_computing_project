@@ -161,14 +161,11 @@ def shaft_hub_strip():
     return hub.clean()
 
 
-def servo_mount():
+def servo_mount(profile_mount=True):
     # Output shaft is near the FRONT of the body, not at its Z centre.
     s = fuse(box(49, 26, 4, (-4, -44, 228)),
              box(49, 3, 44, (-4, -55.5, 206)),
              box(49, 3, 44, (-4, -32.5, 206)))
-    for y in (-55.5, -32.5):
-        for x in (-20, 12):
-            s = s.cut(cyl(3.4, 182, 231, origin=(x, y, 0)))
     # A positively captured body: three fixed sides plus a removable X cap.
     # Do not rely on glue or an unmodelled spline in a printed crank.
     s = s.fuse(box(5.05, 20, 49, (-27.475, -44, 209.5)))
@@ -180,14 +177,25 @@ def servo_mount():
     s=s.fuse(box(48,8,9,(-6,-30,181.5)))
     for y,z in ((-30,181),(-44,231)):
         s=s.cut(cyl(3.4,-31,23,(1,0,0),(0,y,z)))
-    for y in (-55.5,-32.5):
-        for x in (-20,12):
-            s=s.cut(cyl(3.4,172,235,origin=(x,y,0)))
+    if profile_mount:
+        s=s.cut(box(60,6,190,(0,-54,95)))
+        s=s.cut(box(12.6,8.6,180.6,(0,-47,94.5)))
+        # Rev B: a common three-point extrusion mount, no cut-to-length rods.
+        # Upper flange overlaps the existing roof; lower foot sits on P13.
+        s=fuse(s,box(60,6,20,(0,-54,238)),
+               box(18,3,18.65,(-21,-49.5,175.325)),
+               box(4.9,3,7,(-27.55,-49.5,186.5)),
+               box(16,.8,4,(-20,-51.4,181)))
+        for x,z in ((-20,239),(20,239),(-20,171)):
+            s=s.cut(cyl(5.4,-58,-47,(0,1,0),(x,0,z)))
+    # The old cradle and its cap overlapped along X. Leave a printable gap.
+    s=s.cut(box(30,40,59.3,(33.15,-44,204.5)))
     return s.clean()
 
 
 def servo_clamp():
     s=box(4,26,55,(20.3,-44,206.5)).fuse(box(4,8,8,(20.3,-30,181)))
+    s=s.cut(box(60,6,190,(0,-54,95)))
     s=s.cut(cyl(10,17,24,(1,0,0),(0,-44,195)))
     for y,z in ((-30,181),(-44,231)):
         s=s.cut(cyl(3.4,17,24,(1,0,0),(0,y,z)))
@@ -265,12 +273,21 @@ def module_design(hollow=False):
         support = support.cut(corner)
     # Servo body clearance in the rear of the support (axis stays per contract).
     support = support.cut(box(43.9, 22, 43, (-3.5, -44, 205.3)))
+    # Shallow locating lips cannot catch the moving MGN12H wings.
+    for x in (-7.7,7.7):
+        support=support.fuse(box(3,1.5,165,(x,-50.25,92.5)))
+    support=support.fuse(box(18.4,1.5,2.5,(0,-50.25,3.25)))
     for z in range(15, 176, 25):
-        support = support.cut(cyl(3.4, -58, -50, (0, 1, 0), (0, 0, z)))
+        slot=cq.Workplane('XZ',origin=(0,-49,z)).slot2D(14,3.4,90).extrude(10).val()
+        support=support.cut(slot)
     for x, z in itertools.product((-20, 20), (25, 120)):
         support = support.cut(cyl(5.4, -58, -50, (0, 1, 0), (x, 0, z)))
-    for x in (18.75,25.25):
-        slot=cq.Workplane('XZ',origin=(x,-50,154.9)).slot2D(8,2.4,90).extrude(8).val()
+    support=support.cut(cyl(5.4,-58,-47,(0,1,0),(-20,0,171)))
+    support=support.cut(box(16.4,1,4.4,(-20,-51.4,181)))
+    # Switch cases sit OUTSIDE both the carriage and link sweeps. Long leaves reach inward.
+    support=support.fuse(box(22,6,62,(40,-54,159)))
+    for x,z in itertools.product((37.75,44.25),(137.1,180.9)):
+        slot=cq.Workplane('XZ',origin=(x,-50,z)).slot2D(8,2.4,90).extrude(8).val()
         support=support.cut(slot)
     support=support.cut(box(10,8,10,(27,-54,186)))
     heads['rail_support'] = support.clean()
@@ -278,8 +295,10 @@ def module_design(hollow=False):
     heads['servo_clamp'] = servo_clamp()
     heads['crank'], heads['link'] = crank_link()
     hardware['servo_MG996R'] = box(42.9, 19.7, 40.7, (-3.5, -44, 205.3))
+    hardware['rail_MGN12']=hardware['rail_MGN12'].translate((0,0,-.5))
     hardware['servo_output'] = cyl(6, 17.95, 24, (1, 0, 0), (0, -44, 195))
-    hardware['engage_switch'] = box(12.8, 6.5, 5.8, (22, -47.75, 154.9))
+    hardware['engage_switch'] = box(12.8, 6.5, 5.8, (41, -47.75, 137.1))
+    hardware['retract_switch'] = box(12.8, 6.5, 5.8, (41, -47.75, 180.9))
     if not hollow:
         hardware['rear_thrust_F8_16M']=cyl(16,54,59).cut(cyl(8.05,53,60))
         hardware['shaft_collar_8']=cyl(16,59,66).cut(cyl(8.05,58,67))
@@ -324,8 +343,9 @@ def lock_design():
     for z in (180, 190):
         guide = guide.cut(box(b+.3, b+.3, 14, (0, 0, z)))
     for y,z in itertools.product((-9,9),(180,190)):
-        guide=guide.cut(cyl(4.4,-31,15,(1,0,0),(0,y,z)))
-    # Guide is bolted to a metal spine; blind slots do not establish retention.
+        guide=guide.cut(cyl(4.3,-31,-21,(1,0,0),(0,y,z)))
+        guide=guide.cut(cyl(5.6,-30.1,-26,(1,0,0),(0,y,z)))
+    # Heat-set inserts at the rear face eliminate long bolts across the guide.
     # Clamp grips the bar below the lower guide, translated with the slider.
     carriage = fuse(box(18, 18, 10, (0, 0, 204)), box(8, 31, 8, (0, 11.5, 204)),
                     box(26, 10, 8, (9, 24, 204)),
@@ -336,16 +356,17 @@ def lock_design():
     carriage = carriage.cut(cyl(4.6,5,10,(1,0,0),(0,0,204)))
     crank, link = crank_link(lock=True)
     heads = dict(lock_guide=guide.clean(), lock_carriage=carriage.clean(),
-                 lock_servo_mount=servo_mount().translate((0, 68, 60)),
+                 lock_servo_mount=servo_mount(profile_mount=False).translate((0, 68, 60)),
                  lock_servo_clamp=servo_clamp().translate((0,68,60)),
                  lock_crank=crank, lock_link=link)
     hardware = dict(lock_bar=bar, lock_servo_MG996R=box(42.9, 19.7, 40.7, (-3.5, 24, 265.3)),
-                    lock_engage_switch=box(12.8, 6.5, 5.8, (22, 14.75, 211.9)))
+                    lock_engage_switch=box(12.8, 6.5, 5.8, (41, 24, 194.1)),
+                    lock_retract_switch=box(12.8, 6.5, 5.8, (41, 24, 243.9)))
     return heads, hardware
 
 
-FIXED = {'rail_support', 'servo_mount', 'servo_clamp', 'rail_MGN12', 'servo_MG996R', 'servo_output', 'engage_switch'}
-LOCK_FIXED = {'lock_guide', 'lock_servo_mount', 'lock_servo_clamp', 'lock_servo_MG996R', 'lock_engage_switch'}
+FIXED = {'rail_support', 'servo_mount', 'servo_clamp', 'rail_MGN12', 'servo_MG996R', 'servo_output', 'engage_switch', 'retract_switch'}
+LOCK_FIXED = {'lock_guide', 'lock_servo_mount', 'lock_servo_clamp', 'lock_servo_MG996R', 'lock_engage_switch', 'lock_retract_switch'}
 
 
 def module_pose(module, shift):

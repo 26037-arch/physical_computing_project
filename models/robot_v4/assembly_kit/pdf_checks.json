@@ -1,5 +1,7 @@
 {
-  "pages": 39,
+  "passed": true,
+  "revision": "Rev D",
+  "pages": 42,
   "first_page_part_ids": [
     "B01",
     "B02",
@@ -21,6 +23,8 @@
     "B18",
     "B19",
     "B20",
+    "B21",
+    "B22",
     "J01",
     "J02",
     "J03",
@@ -63,9 +67,9 @@
     "P29",
     "P30"
   ],
-  "bookmarks": 39,
-  "clipped_text_spans": null,
-  "pdf_sha256": "ce721d3ac0504ed75f6c72df75bc8d0d30bb8b37514651fa1e7a905c121642bc",
-  "integration_base_commit": "d8c21f49c8be001da35f6dc10457c168cfa5b99a",
-  "clipped_text_note": "not re-measured after the 2026-10-24 merge (strip plate, 6 mm bar, cone pins); re-run the PDF text check before release"
+  "bookmarks": 42,
+  "clipped_text_spans": [],
+  "fonts_embedded": true,
+  "pdf_sha256": "4c6c6354aa87255e2e2dbd38623e58810d55bbc9ec2e8200ba3252d8e31058bf",
+  "integration_base_commit": "83ade39d35a54d3a644a2fec932033650a53e135"
 }

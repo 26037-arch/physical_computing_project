@@ -149,15 +149,15 @@
       "qty": 5,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 65717.3737,
+      "volume_mm3": 73043.7697,
       "size_mm": [
-        60.0,
-        6.0,
+        81.0,
+        7.5,
         190.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 2296,
-        "triangles_after": 2296,
+        "triangles_before": 2964,
+        "triangles_after": 2964,
         "weld_mm": 1e-05
       }
     },
@@ -213,15 +213,15 @@
       "qty": 5,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 32631.2362,
+      "volume_mm3": 36753.1643,
       "size_mm": [
-        50.5000001,
-        31.00000000000015,
-        57.00000019999999
+        60.0,
+        31.0,
+        82.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 1592,
-        "triangles_after": 1592,
+        "triangles_before": 1048,
+        "triangles_after": 1048,
         "weld_mm": 1e-05
       }
     },
@@ -229,15 +229,15 @@
       "qty": 5,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 5517.2071,
+      "volume_mm3": 5253.2071,
       "size_mm": [
-        4.0,
+        4.0000000000000036,
         31.0,
         57.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 544,
-        "triangles_after": 544,
+        "triangles_before": 552,
+        "triangles_after": 552,
         "weld_mm": 1e-05
       }
     },
@@ -373,15 +373,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 23554.6857,
+      "volume_mm3": 25546.2984,
       "size_mm": [
         44.0,
         28.0,
         22.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 720,
-        "triangles_after": 720,
+        "triangles_before": 1376,
+        "triangles_after": 1376,
         "weld_mm": 1e-05
       }
     },
@@ -405,15 +405,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 32631.2362,
+      "volume_mm3": 33600.1444,
       "size_mm": [
-        50.5000001,
-        31.000000000000153,
-        57.00000020000002
+        48.15,
+        31.0,
+        57.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 1592,
-        "triangles_after": 1592,
+        "triangles_before": 464,
+        "triangles_after": 464,
         "weld_mm": 1e-05
       }
     },
@@ -421,15 +421,15 @@
       "qty": 1,
       "valid": true,
       "solids": 1,
-      "volume_mm3": 5517.2071,
+      "volume_mm3": 5253.2071,
       "size_mm": [
-        4.0,
+        4.0000000000000036,
         31.0,
         57.0
       ],
       "mesh_cleanup": {
-        "triangles_before": 544,
-        "triangles_after": 544,
+        "triangles_before": 552,
+        "triangles_after": 552,
         "weld_mm": 1e-05
       }
     },
@@ -577,7 +577,7 @@
       "center": [
         0.0,
         -47.0,
-        95.0
+        94.5
       ],
       "qty": 5,
       "module": "all"
@@ -682,14 +682,28 @@
     },
     "engage_switch": {
       "size": [
-        12.799999999999999,
+        12.800000000000004,
         6.5,
         5.800000000000011
       ],
       "center": [
-        22.0,
+        41.0,
         -47.75,
-        154.9
+        137.1
+      ],
+      "qty": 5,
+      "module": "all"
+    },
+    "retract_switch": {
+      "size": [
+        12.800000000000004,
+        6.5,
+        5.800000000000011
+      ],
+      "center": [
+        41.0,
+        -47.75,
+        180.9
       ],
       "qty": 5,
       "module": "all"
@@ -962,14 +976,28 @@
     },
     "lock_engage_switch": {
       "size": [
-        12.799999999999999,
+        12.800000000000004,
         6.5,
         5.800000000000011
       ],
       "center": [
-        22.0,
-        14.75,
-        211.9
+        41.0,
+        24.0,
+        194.1
+      ],
+      "qty": 1,
+      "module": "LOCK"
+    },
+    "lock_retract_switch": {
+      "size": [
+        12.800000000000004,
+        6.5,
+        5.800000000000011
+      ],
+      "center": [
+        41.0,
+        24.0,
+        243.9
       ],
       "qty": 1,
       "module": "LOCK"

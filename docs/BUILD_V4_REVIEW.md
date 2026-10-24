@@ -1,5 +1,8 @@
 # robot_v4 제작 보강 Rev A 검토 기록
 
+현재 제작 기준은 [Rev C 통합 기록](BUILD_V4_MERGE_REVIEW.md)과 41쪽 상세 PDF다.
+아래는 이전 Rev A 및 병합 당시의 검토 이력이다.
+
 기준 커밋: `b37de3e9` (robot_v4 Draft). 문서 날짜: 2026-10-24 (한국 시간).
 
 ## 제공 결과
