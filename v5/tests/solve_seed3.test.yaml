@@ -1,0 +1,22 @@
+# 자동 생성: node tools/gen_wokwi_test.js 3 — JS 풀이기(sim/solver.js)와 펌웨어 풀이의 교차검증
+name: 시드 3 섞기 → 보드 풀이가 JS 풀이기와 단계별로 일치하고 큐브가 풀린다 (기구 절차 횟수 포함)
+version: 1
+author: physical_computing_project
+steps:
+  - wait-serial: "READY"
+  - write-serial: "Q 1\n"
+  - wait-serial: "MOTORS OFF"
+  - write-serial: "S 3\n"
+  - wait-serial: "SCRAMBLE seed=3 (20): D' R2 U2 B F2 B U R B' R' D2 R' F R L' B D F2 B U'"
+  - wait-serial: "SCRAMBLED exec="
+  - wait-serial: "ms flips=25 spins=13"
+  - write-serial: "V\n"
+  - wait-serial: "CROSS (6): U D' B' L' D2 L'"
+  - wait-serial: "F2L BL (6): F' U F B' U' B"
+  - wait-serial: "F2L FL (3): F U' F'"
+  - wait-serial: "F2L BR (3): B U B'"
+  - wait-serial: "F2L FR (7): F' U F U2 R U R'"
+  - wait-serial: "OLL 2 (13): U F R U R' U' F' B U L U' L' B'"
+  - wait-serial: "PLL T (16): U2 R U R' U' R' F R2 U' R' U' R U R' F' U2"
+  - wait-serial: "TOTAL 54: U D' B' L' D2 L' F' U F B' U' B F U' F' B U B' F' U F U2 R U R' U F R U R' U' F' B U L U' L' B' U2 R U R' U' R' F R2 U' R' U' R U R' F' U2"
+  - wait-serial: "SOLVED ok=1 moves=54 flips=59 spins=41"

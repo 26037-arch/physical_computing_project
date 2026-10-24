@@ -6,10 +6,10 @@
 
 ```powershell
 node tools/serve.js
-# http://localhost:8765/sim/
+# http://localhost:8765/v5/sim/
 ```
 
-이미 포트를 사용 중이면 `node tools/serve.js 8875`로 실행하고 `http://localhost:8875/sim/`을 연다. 이번 캡처는 직접 실행한 8875 서버에서 저장했다. 기존 8765 서버는 최신 정적 파일을 제공했지만 실행 중인 서버 코드에 캡처 엔드포인트가 없어 `not found`를 반환했다. 기존 프로세스는 종료하거나 변경하지 않았다.
+이미 포트를 사용 중이면 `node tools/serve.js 8875`로 실행하고 `http://localhost:8875/v5/sim/`을 연다. 이번 캡처는 직접 실행한 8875 서버에서 저장했다. 기존 8765 서버는 최신 정적 파일을 제공했지만 실행 중인 서버 코드에 캡처 엔드포인트가 없어 `not found`를 반환했다. 기존 프로세스는 종료하거나 변경하지 않았다.
 
 1. **LOAD · 투입 준비**: 후드가 LOAD 150°로 열린다. LCD는 `PLACE CUBE SOLVED` / `WHITE DOWN GRN FRONT`이다.
 2. **LOAD · 장착 완료**: 흰색 아래·초록색 앞의 해결된 큐브를 표시하고 후드를 OPEN 60°로 돌린다. LCD는 `CUBE LOADED` / `SCRAMBLE / SOLVE`이다.
@@ -92,6 +92,6 @@ document.getElementById('view').toBlob(async (blob) => {
 
 ## 변경 범위와 남은 문제
 
-이번 작업이 쓴 파일은 `sim/app.js`, `sim/index.html`, 이 문서와 위 JPEG 두 장이다. `sim/models.js`는 읽기만 했으며 작업 중 다른 작업이 갱신한 V5 모델을 반영했다. 큐브·풀이기·기구 모듈, 펌웨어, tests, tools는 수정하지 않았고 커밋하지 않았다.
+이번 작업이 쓴 파일은 `v5/sim/app.js`, `v5/sim/index.html`, 이 문서와 위 JPEG 두 장이다. `v5/sim/models.js`는 읽기만 했으며 작업 중 다른 작업이 갱신한 V5 모델을 반영했다. 큐브·풀이기·기구 모듈, 펌웨어, tests, tools는 수정하지 않았고 커밋하지 않았다.
 
 남은 제한은 브라우저 애니메이션이 검사 궤적을 재현하는 시각화라는 점이다. 실제 접촉·충격·마찰·서보 성능을 새로 물리 시뮬레이션하지 않는다. 구입 부품은 제공된 상자 외곽이고 STL base의 타워 분리는 x좌표 기준이므로 베이스 숨김 시 가장자리 데크 일부도 타워 그룹에 남을 수 있다. Three.js는 기존 CDN 연결이 필요하다. JPG 직접 저장 엔드포인트는 원본 서버의 PNG 전용 제한으로 지원하지 않으며 문서의 변환 절차를 사용한다.

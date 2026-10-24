@@ -44,8 +44,8 @@ if (Buffer.byteLength(result.js) > limit) {
   result = bundle();
 }
 if (Buffer.byteLength(result.js) > limit) throw new Error('All seven V5 STLs still exceed 6 MB');
-fs.writeFileSync(path.join(root, 'sim/models.js'), result.js, 'utf8');
-const embedded = require(path.join(root, 'sim/models.js'));
+fs.writeFileSync(path.join(root, 'v5/sim/models.js'), result.js, 'utf8');
+const embedded = require(path.join(root, 'v5/sim/models.js'));
 const sourceParams = JSON.parse(fs.readFileSync(path.join(dir, 'parameters.json'), 'utf8'));
 if (JSON.stringify(embedded.params) !== JSON.stringify(sourceParams)) throw new Error('Embedded parameters differ from source');
 for (const name of names) {
@@ -54,4 +54,4 @@ for (const name of names) {
     throw new Error(`${name}: embedded STL differs from source`);
   }
 }
-console.log(`V5 embedded ${Object.keys(result.parts).length} parts; sim/models.js: ${Buffer.byteLength(result.js)} bytes`);
+console.log(`V5 embedded ${Object.keys(result.parts).length} parts; v5/sim/models.js: ${Buffer.byteLength(result.js)} bytes`);

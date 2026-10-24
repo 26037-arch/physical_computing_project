@@ -1,0 +1,75 @@
+# 자동 생성: node tools/gen_mechanism_test.js — V5 기구 절차(장착·재배향 스핀/뒤집기·층 회전·시연 명령·배출)를 실제 모드로 검사
+name: V5 기구 절차 — LOAD 장착, U D' F R2 L B (후드·스핀·뒤집기·층 회전), Y/F 시연, 배출
+version: 1
+author: physical_computing_project
+steps:
+  - wait-serial: "READY"
+  - write-serial: "M R\n"
+  - wait-serial: "ERR not loaded"
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 1
+  - wait-serial: "HOOD LOAD"
+  - wait-serial: "READY TO LOAD"
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 0
+  - delay: 300ms
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 1
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "LOADED"
+  - set-control:
+      part-id: btnStart
+      control: pressed
+      value: 0
+  - write-serial: "M U D' F R2 L B\n"
+  - wait-serial: "HOOD CLOSE"
+  - wait-serial: "TURN D"
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "FLIP"
+  - wait-serial: "FLIP"
+  - wait-serial: "HOOD CLOSE"
+  - wait-serial: "TURN D'"
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "SPIN y2"
+  - wait-serial: "FLIP"
+  - wait-serial: "HOOD CLOSE"
+  - wait-serial: "TURN D"
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "SPIN y"
+  - wait-serial: "FLIP"
+  - wait-serial: "HOOD CLOSE"
+  - wait-serial: "TURN D2"
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "FLIP"
+  - wait-serial: "FLIP"
+  - wait-serial: "HOOD CLOSE"
+  - wait-serial: "TURN D"
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "SPIN y2"
+  - wait-serial: "FLIP"
+  - wait-serial: "HOOD CLOSE"
+  - wait-serial: "TURN D"
+  - wait-serial: "MOVED 6 flips=7 spins=3"
+  - write-serial: "P\n"
+  - wait-serial: "STATE UUUBUDLLDBBFRRDBBRUFLUFBFFLRRURDUFFDBLFULFLDDRRRLBLBDD"
+  - wait-serial: "MECH hood=CLOSE ori=FURBDL loaded=1 flips=7 spins=3 hoods=11"
+  - write-serial: "Y 2\n"
+  - wait-serial: "HOOD OPEN"
+  - wait-serial: "SPIN y2"
+  - write-serial: "F\n"
+  - wait-serial: "FLIP"
+  - write-serial: "P\n"
+  - wait-serial: "STATE UUUBUDLLDBBFRRDBBRUFLUFBFFLRRURDUFFDBLFULFLDDRRRLBLBDD"
+  - wait-serial: "MECH hood=OPEN ori=RDFLUB loaded=1"
+  - write-serial: "E\n"
+  - wait-serial: "EJECT"
+  - wait-serial: "HOOD LOAD"
+  - wait-serial: "EJECTED"
+  - write-serial: "M R\n"
+  - wait-serial: "ERR not loaded"

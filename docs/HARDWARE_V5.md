@@ -168,7 +168,7 @@ A4988: MS1~3 비연결(풀스텝), RESET–SLEEP 묶음, VMOT 12 V + 100 µF, Vr
 
 ## 6. 하루 제작 순서 (상세는 `docs/BUILD_V5.md` / PDF)
 1. 출력(아침, 동시에): base(≈130 g) · hood(55) · cube_holder(20) · hub(5) · lifter(4) · crank(2) · link(3). PETG 또는 PLA, 0.2 mm, 벽 3줄, 충전 20 %. 서포트 없음(후드는 지붕을 베드에, 베이스는 데크를 베드에, 홀더는 판을 베드에(기둥 위), 허브는 플랜지를 베드에).
-2. 출력 중 배선: UNO–A4988–NEMA17, 서보 2, LCD, 버튼, 부저 (4절). `scripts/build.ps1` → 업로드 → 시리얼 `Q 1` `S 1` `V` 로 가상 모드 확인.
+2. 출력 중 배선: UNO–A4988–NEMA17, 서보 2, LCD, 버튼, 부저 (4절). `v5/scripts/build.ps1` → 업로드 → 시리얼 `Q 1` `S 1` `V` 로 가상 모드 확인.
 3. 조립(30 분): 모터를 윗판에 M3×8 ×4 → 허브를 홀더 판 밑에 M3×8 ×2 → 홀더를 축에 끼우고 멈춤나사 → MG996R 을 오른쪽 타워에 M3×16 ×4, 혼을 후드 허브에 M2 ×4, 후드를 걸고 왼쪽 M3×25 피벗 → 리프터를 슬롯에 넣고 M3×20 ×2 → SG90 + 크랭크 + 링크(M3 ×1) → 고무발 4.
 4. 조정(1 h): 시리얼 `H c o l` 로 후드 CLOSE/OPEN/LOAD 각 확인(큐브 넣고 벽이 닿지 않는 최소 각), `K <각>` 으로 리프터 최상 각(큐브가 넘어가는 최소 각 + 5°), `O <스텝>` 오버슈트(층이 90° 로 정렬되는 최소값). 값은 `mechanism.h` 상수로 저장.
 5. 시험: 손으로 섞은 뒤 `R` 리셋 후 20수 `S` → `V`. 5회 연속 `SOLVED ok=1` 이면 시연 가능.
@@ -180,9 +180,9 @@ A4988: MS1~3 비연결(풀스텝), RESET–SLEEP 묶음, VMOT 12 V + 100 µF, Vr
 .venv-cad\Scripts\python.exe tools\check_robot_v5.py          # 2D 운동학·물리 검사 → models/robot_v5/kinematic_checks.json
 .venv-cad\Scripts\python.exe tools\build_robot_v5.py          # CAD → models/robot_v5/print/*.stl|step, robot_assembly.step/glb, parameters.json
 .venv-cad\Scripts\python.exe tools\check_robot_v5_cad.py      # 3D 간섭 검사 → mechanical_checks.json
-node tools\embed_models_v5.js                                 # → sim/models.js
-node tools\gen_wokwi_test.js 1 && node tools\gen_mechanism_test.js
-powershell -ExecutionPolicy Bypass -File scripts\simulate.ps1 -Scenario tests\solve_seed1.test.yaml -TimeoutMs 180000
+node tools\embed_models_v5.js                                 # → v5/sim/models.js
+node v5	ools\gen_wokwi_test.js 1 && node v5	ools\gen_mechanism_test.js
+powershell -ExecutionPolicy Bypass -File v5\scripts\simulate.ps1 -Scenario v5	ests\solve_seed1.test.yaml -TimeoutMs 180000
 ```
 
 ## 8. CAD 결과 (build_robot_v5.py) — Rev B
@@ -268,7 +268,7 @@ PETG 1.27 g/cm³, 선폭0.4 mm·벽3줄·충전20%, 적층0.2 mm·속도60 mm/s�
 }
 ```
 
-STL 허용오차0.05 mm/0.12 rad. `sim/models.js`는 **1,370,525 bytes**이고 `CubeModels.parts`에7종, `CubeModels.params`에 `parameters.json` 전체를 넣었다. 6 MB 미만이라0.1/0.3 재생성은 실행하지 않았다. 임베더에서 매개변수 JSON과7종의 디코딩 STL이 원본과 바이트 단위로 일치함을 검증했다. `faces`는 빈 객체다.
+STL 허용오차0.05 mm/0.12 rad. `v5/sim/models.js`는 **1,370,525 bytes**이고 `CubeModels.parts`에7종, `CubeModels.params`에 `parameters.json` 전체를 넣었다. 6 MB 미만이라0.1/0.3 재생성은 실행하지 않았다. 임베더에서 매개변수 JSON과7종의 디코딩 STL이 원본과 바이트 단위로 일치함을 검증했다. `faces`는 빈 객체다.
 
 ### 8.6 렌더·재생성·Fusion
 

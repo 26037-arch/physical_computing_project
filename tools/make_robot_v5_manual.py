@@ -470,7 +470,7 @@ def write_manual():
     w.image('wiring', 55, '신호와 전원 경로를 구분한 블록도. 각 핀은 아래 표와 연결합니다.')
     w.table(PINS, [21, 58, 99], size=7.7, padding=2.5)
     w.para(section(HARD, '## 4.').split('\n\n')[-1], size=8, leading=11.5)
-    w.para('powershell -ExecutionPolicy Bypass -File scripts/build.ps1\npowershell -ExecutionPolicy Bypass -File scripts/upload.ps1 -Port COMx', size=8, leading=12)
+    w.para('powershell -ExecutionPolicy Bypass -File v5/scripts/build.ps1\npowershell -ExecutionPolicy Bypass -File v5/scripts/upload.ps1 -Port COMx', size=8, leading=12)
     for line in PREP[1:]:
         w.para(line, size=8.1, leading=11.6)
     w.para('A4988 1A/1B/2A/2B는 NEMA17의 코일 두 쌍에 연결합니다. RESET과 SLEEP을 묶고 GND를 공통으로 연결합니다. 작업 중 커넥터를 바꿀 때는 전원을 끕니다.', size=8)

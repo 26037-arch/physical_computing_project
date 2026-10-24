@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "author": "physical_computing_project",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 180, "left": 20, "attrs": {} },
+
+    { "type": "wokwi-a4988", "id": "drvCup", "top": -200, "left": 380, "attrs": {} },
+    { "type": "wokwi-stepper-motor", "id": "motCup", "top": -300, "left": 600, "attrs": { "size": "17", "display": "angle", "arrow": "green" } },
+
+    { "type": "wokwi-servo", "id": "srvHood", "top": 150, "left": 900, "attrs": { "horn": "single" } },
+    { "type": "wokwi-servo", "id": "srvLift", "top": 300, "left": 900, "attrs": { "horn": "single" } },
+
+    { "type": "wokwi-lcd1602", "id": "lcd1", "top": 420, "left": 300, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-pushbutton", "id": "btnStart", "top": 420, "left": 700, "attrs": { "color": "green", "label": "START / hold=LOAD" } },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": 400, "left": 1020, "attrs": { "volume": "0.1" } }
+  ],
+  "connections": [
+    [ "uno:2", "drvCup:STEP", "green", [] ],
+    [ "uno:7", "drvCup:DIR", "orange", [] ],
+    [ "uno:6", "drvCup:ENABLE", "gray", [] ],
+    [ "drvCup:RESET", "drvCup:SLEEP", "gray", [] ], [ "drvCup:GND", "uno:GND.1", "black", [] ], [ "drvCup:VDD", "uno:5V", "red", [] ],
+    [ "drvCup:1A", "motCup:B+", "blue", [] ], [ "drvCup:1B", "motCup:B-", "blue", [] ], [ "drvCup:2A", "motCup:A+", "purple", [] ], [ "drvCup:2B", "motCup:A-", "purple", [] ],
+
+    [ "uno:8", "srvHood:PWM", "orange", [] ], [ "srvHood:V+", "uno:5V", "red", [] ], [ "srvHood:GND", "uno:GND.3", "black", [] ],
+    [ "uno:9", "srvLift:PWM", "orange", [] ], [ "srvLift:V+", "uno:5V", "red", [] ], [ "srvLift:GND", "uno:GND.3", "black", [] ],
+
+    [ "lcd1:SDA", "uno:A4", "cyan", [] ], [ "lcd1:SCL", "uno:A5", "magenta", [] ],
+    [ "lcd1:VCC", "uno:5V", "red", [] ], [ "lcd1:GND", "uno:GND.2", "black", [] ],
+
+    [ "btnStart:1.l", "uno:A2", "yellow", [] ], [ "btnStart:2.l", "uno:GND.2", "black", [] ],
+    [ "bz1:2", "uno:A3", "white", [] ], [ "bz1:1", "uno:GND.3", "black", [] ]
+  ],
+  "dependencies": {}
+}

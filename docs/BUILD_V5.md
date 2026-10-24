@@ -67,7 +67,7 @@ A4988 VDD ─ 5 V, GND ─ GND UNO A4/A5 ─ LCD SDA/SCL, LCD VCC 5 V
 A4988 VMOT ─ 12 V (+100 µF) 서보 V+ ─ 5 V USB 어댑터 (+), GND 공통
 A4988 1A/1B/2A/2B ─ NEMA17 한 코일씩 (저항 2 옴 안팎인 두 선이 한 코일)
 ```
-1. 모터 없이 먼저 보드만 USB 로 연결 → `powershell -ExecutionPolicy Bypass -File scripts/build.ps1` → `scripts/upload.ps1 -Port COMx`.
+1. 모터 없이 먼저 보드만 USB 로 연결 → `powershell -ExecutionPolicy Bypass -File v5/scripts/build.ps1` → `v5/scripts/upload.ps1 -Port COMx`.
 2. 시리얼 115200: `Q 1` → `S 1` → `V` 가 `SOLVED ok=1` 로 끝나면 풀이기는 정상 (가상 모드).
 3. A4988 Vref: 전원을 넣고 모터 없이 전위차계 중심에서 GND 까지 **0.48 V**(= 0.6 A × 0.8, A4988 Rs 0.1 옴 기준) 로 맞춘다.
 4. 모터 연결 후 `Q 0` → `Y 1`: 컵 모터가 위에서 봐서 시계로 90° 돌면 정상, 반대면 `motors.h` 의 `CW_LEVEL` 을 뒤집는다. (아직 장착 전이라 `ERR not loaded` 가 나오면 `L` 두 번으로 가상 장착하거나 `Q 1`.)
@@ -101,7 +101,7 @@ A4988 1A/1B/2A/2B ─ NEMA17 한 코일씩 (저항 2 옴 안팎인 두 선이 �
 5회 연속 성공하면 끝. 실패 유형과 대처: 층 어긋남 → 4단계 오버슈트, 뒤집기 실패 → 6단계, 큐브가 기둥에 걸려 스핀 안 됨 → 큐브 윤활·기둥 안쪽 사포.
 
 ## 6. 관중에게 보이는 것
-큐브는 책상 위 약 75 mm, 앞·좌·우 면 전부와 후드 구멍으로 윗면이 보인다. 타워·서보·배선은 뒤쪽. 시연대는 관중이 **앞에서 약간 위**를 보도록 놓고, LCD 는 베이스 앞에 세운다. 시뮬레이터(`node tools/serve.js` → `http://localhost:8765/sim/`)를 옆 화면에 띄우면 같은 명령·같은 로그가 3D 로 함께 움직인다.
+큐브는 책상 위 약 75 mm, 앞·좌·우 면 전부와 후드 구멍으로 윗면이 보인다. 타워·서보·배선은 뒤쪽. 시연대는 관중이 **앞에서 약간 위**를 보도록 놓고, LCD 는 베이스 앞에 세운다. 시뮬레이터(`node tools/serve.js` → `http://localhost:8765/v5/sim/`)를 옆 화면에 띄우면 같은 명령·같은 로그가 3D 로 함께 움직인다.
 
 ## 7. 안전
 12 V 는 A4988 VMOT 에만. 서보 전원은 보드 5 V 핀이 아니라 USB 어댑터에서. 전원을 끄면 컵이 자유롭게 돌 수 있으니 켜기 전에 노치 방향(2 단계)을 다시 확인한다. 큐브가 넘어가는 동안 손을 넣지 않는다.
