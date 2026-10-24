@@ -1,0 +1,471 @@
+{
+  "pdf": "docs/BUILD_V5_제작설명서.pdf",
+  "generated_on": "2026-10-24",
+  "source_date": "2026-10-24",
+  "base_commit": "83ade39",
+  "source_scope": "Current working tree; includes uncommitted V5 source data.",
+  "passed": true,
+  "checks": {
+    "page_count_in_requested_range": true,
+    "page_count_exact": true,
+    "all_pages_A4_portrait": true,
+    "outline_matches_pages": true,
+    "all_used_fonts_embedded": true,
+    "korean_text_extracts_on_all_pages": true,
+    "no_replacement_characters": true,
+    "no_layout_overflow": true,
+    "all_seven_print_parts_in_text": true,
+    "screw_rows_match_source": true,
+    "all_pdf_pages_rendered": true
+  },
+  "page_count": 16,
+  "outline_count": 16,
+  "outline": [
+    {
+      "title": "V5 큐브 로봇",
+      "page": 1
+    },
+    {
+      "title": "01  한눈에 보기 | 세 장치가 하는 일",
+      "page": 2
+    },
+    {
+      "title": "02  출력 부품 지도 | Rev B 일곱 부품",
+      "page": 3
+    },
+    {
+      "title": "03  준비물 | 키트와 구매품",
+      "page": 4
+    },
+    {
+      "title": "04  아침 | 나사 확인과 출력 시작",
+      "page": 5
+    },
+    {
+      "title": "05  출력 중 | 배선과 펌웨어",
+      "page": 6
+    },
+    {
+      "title": "06  조립 | 모터와 컵",
+      "page": 7
+    },
+    {
+      "title": "07  조립 | 후드 서보와 후드 걸기",
+      "page": 8
+    },
+    {
+      "title": "08  조립 | 리프터와 슬롯",
+      "page": 9
+    },
+    {
+      "title": "09  조립 | 리프터 서보·크랭크·링크",
+      "page": 10
+    },
+    {
+      "title": "10  조립 | 고무발과 최종 확인",
+      "page": 11
+    },
+    {
+      "title": "11  조정 | 일곱 단계와 LCD",
+      "page": 12
+    },
+    {
+      "title": "12  저녁 | 시연 리허설과 관중 배치",
+      "page": 13
+    },
+    {
+      "title": "13  설계 근거 | 검사값과 뒤집기 궤적",
+      "page": 14
+    },
+    {
+      "title": "14  Rev B | CAD 결과와 제작 전 확인",
+      "page": 15
+    },
+    {
+      "title": "15  부록 | 파일·재생성·출처",
+      "page": 16
+    }
+  ],
+  "fonts": {
+    "/AAAAAA+NanumGothicBold": {
+      "embedded": true,
+      "subtype": "/TrueType",
+      "used_pages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "has_to_unicode": true
+    },
+    "/AAAAAB+NanumGothicBold": {
+      "embedded": true,
+      "subtype": "/TrueType",
+      "used_pages": [
+        13,
+        14,
+        15,
+        16
+      ],
+      "has_to_unicode": true
+    },
+    "/AAAAAA+NanumGothic": {
+      "embedded": true,
+      "subtype": "/TrueType",
+      "used_pages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "has_to_unicode": true
+    },
+    "/AAAAAB+NanumGothic": {
+      "embedded": true,
+      "subtype": "/TrueType",
+      "used_pages": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "has_to_unicode": true
+    },
+    "/AAAAAC+NanumGothic": {
+      "embedded": true,
+      "subtype": "/TrueType",
+      "used_pages": [
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "has_to_unicode": true
+    },
+    "/Helvetica": {
+      "embedded": false,
+      "subtype": "/Type1",
+      "used_pages": [
+        2,
+        4,
+        5,
+        6,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "has_to_unicode": false
+    }
+  },
+  "figure_count": 18,
+  "figures": [
+    {
+      "file": "docs/images/v5_manual/assembly_world.png",
+      "title": "OPEN 조립 전체: 월드 자세, 앞 비스듬히",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/roles_section.png",
+      "title": "장치 역할과 후드·리프터 자세",
+      "source": "STEP x=0, hood arm x=36, tower x=42 sections; parameters.json"
+    },
+    {
+      "file": "docs/images/v5_manual/print_cube_holder.png",
+      "title": "cube_holder 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/print_hub.png",
+      "title": "hub 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/print_hood.png",
+      "title": "hood 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/print_lifter.png",
+      "title": "lifter 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/print_base.png",
+      "title": "base 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/print_crank.png",
+      "title": "crank 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/print_link.png",
+      "title": "link 베드 출력 자세",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_01.png",
+      "title": "조립 1: 관련 CAD 부품 분해도",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_02.png",
+      "title": "조립 2: 관련 CAD 부품 분해도",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_03.png",
+      "title": "조립 3: 관련 CAD 부품 분해도",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_04.png",
+      "title": "조립 4: 관련 CAD 부품 분해도",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_05.png",
+      "title": "조립 5: 관련 CAD 부품 분해도",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_06.png",
+      "title": "조립 6: 관련 CAD 부품 분해도",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/assembly_07.png",
+      "title": "조립 7: 베이스 밑면의 고무발 홈",
+      "source": "models/robot_v5/print/*.step; tools/build_robot_v5.py pose/purchased functions"
+    },
+    {
+      "file": "docs/images/v5_manual/flip_trace.png",
+      "title": "뒤집기 궤적: 기록된 다섯 자세",
+      "source": "kinematic_checks.json flip_trace; actual cube BRep transformed per yf/theta_deg"
+    },
+    {
+      "file": "docs/images/v5_manual/wiring.png",
+      "title": "신호·전원 블록 배선도",
+      "source": "docs/HARDWARE_V5.md §4; docs/BUILD_V5.md §2 (functional diagram, not CAD)"
+    }
+  ],
+  "rendered_pages": [
+    "docs/images/v5_manual/page_01.png",
+    "docs/images/v5_manual/page_02.png",
+    "docs/images/v5_manual/page_03.png",
+    "docs/images/v5_manual/page_04.png",
+    "docs/images/v5_manual/page_05.png",
+    "docs/images/v5_manual/page_06.png",
+    "docs/images/v5_manual/page_07.png",
+    "docs/images/v5_manual/page_08.png",
+    "docs/images/v5_manual/page_09.png",
+    "docs/images/v5_manual/page_10.png",
+    "docs/images/v5_manual/page_11.png",
+    "docs/images/v5_manual/page_12.png",
+    "docs/images/v5_manual/page_13.png",
+    "docs/images/v5_manual/page_14.png",
+    "docs/images/v5_manual/page_15.png",
+    "docs/images/v5_manual/page_16.png"
+  ],
+  "render_engine": "Windows.Data.Pdf (actual PDF pages, 1200 px width)",
+  "layout": [
+    {
+      "page": 1,
+      "content_bottom_mm": 58.74
+    },
+    {
+      "page": 2,
+      "content_bottom_mm": 90.99
+    },
+    {
+      "page": 3,
+      "content_bottom_mm": 33.64
+    },
+    {
+      "page": 4,
+      "content_bottom_mm": 125.72
+    },
+    {
+      "page": 5,
+      "content_bottom_mm": 116.21
+    },
+    {
+      "page": 6,
+      "content_bottom_mm": 83.49
+    },
+    {
+      "page": 7,
+      "content_bottom_mm": 87.19
+    },
+    {
+      "page": 8,
+      "content_bottom_mm": 88.46
+    },
+    {
+      "page": 9,
+      "content_bottom_mm": 83.25
+    },
+    {
+      "page": 10,
+      "content_bottom_mm": 72.75
+    },
+    {
+      "page": 11,
+      "content_bottom_mm": 70.33
+    },
+    {
+      "page": 12,
+      "content_bottom_mm": 137.08
+    },
+    {
+      "page": 13,
+      "content_bottom_mm": 75.51
+    },
+    {
+      "page": 14,
+      "content_bottom_mm": 104.62
+    },
+    {
+      "page": 15,
+      "content_bottom_mm": 146.37
+    },
+    {
+      "page": 16,
+      "content_bottom_mm": 114.09
+    }
+  ],
+  "source_discrepancies_and_remaining_issues": [
+    "BUILD_V5.md §0 표 제목은 21개이나 M 나사 행별 수량 합계는 21개. 원본 행과 수량을 그대로 사용; 고무발·패드는 별도.",
+    "BUILD_V5.md §0 구매 제목은 3종이나 표는 B01~B05. 구동 핵심 3종과 전원·커패시터를 모두 수록.",
+    "BRIEF의 출력 6종·나사 17개는 Rev B와 불일치. 출력 7종과 BUILD §0의 현재 표를 우선.",
+    "허브 체결: BUILD §0 M3×8은 인서트/셀프탭 조건. HARDWARE §8.1의 현재 관통 CAD는 별도 너트/인서트가 필요하며 관통+너트는 M3×12 권장. 실제 체결 방식 확인 필요.",
+    "BUILD §1의 프린터 1대 8~12 h보다 manufacturing.json 최신 총시간 추정이 큼. 최신 제조 추정값을 일정에 사용; 슬라이서 검증 전.",
+    "BUILD §3의 타워 Ø8 표현은 Rev B HARDWARE §2.4의 Ø3.2 피벗·Ø24 카운터보어와 다름. 실제 STEP과 구매 서보/혼의 끼움 우선.",
+    "HARDWARE §1의 회전 부호 문구와 높이 식은 다름. 월드 렌더는 CAD와 동일한 z_world=z*cos20+y*sin20을 사용.",
+    "실물 출력·하중·마찰·구매 혼/나사/너트 공차·착지 소음은 미검증. CAD 통과가 실물 성공 보증은 아님."
+  ],
+  "source_screw_table": {
+    "heading_count": 21,
+    "M_screw_sum_from_rows": 21,
+    "rows": [
+      [
+        "모터 → 베이스 윗판",
+        "M3×8",
+        "4"
+      ],
+      [
+        "허브 → 홀더 판 밑",
+        "M3×8 (히트셋 인서트 2 또는 셀프탭)",
+        "2"
+      ],
+      [
+        "홀더 멈춤나사",
+        "M3×6 (무두 또는 접시)",
+        "1"
+      ],
+      [
+        "MG996R → 오른쪽 타워",
+        "M3×16 + 너트",
+        "4"
+      ],
+      [
+        "혼 → 후드 허브",
+        "M2×8 (서보 동봉)",
+        "4"
+      ],
+      [
+        "후드 피벗 (왼쪽)",
+        "M3×25 + 너트",
+        "1"
+      ],
+      [
+        "리프터 슬롯 핀",
+        "M3×20 + 너트 (몸통만 슬롯을 지남)",
+        "2"
+      ],
+      [
+        "링크 → 크랭크",
+        "M3×12 + 너트",
+        "1"
+      ],
+      [
+        "SG90 → 왼쪽 타워",
+        "M2×8 (동봉)",
+        "2"
+      ],
+      [
+        "고무발",
+        "Ø10 접착식",
+        "4"
+      ],
+      [
+        "선반 패드",
+        "실리콘 시트 0.5 mm (또는 자전거 튜브 조각) 16×4",
+        "1"
+      ]
+    ],
+    "policy": "Preserve BUILD_V5 §0 rows and counts exactly; no silent correction."
+  },
+  "source_hashes_sha256": {
+    "docs/MANUAL_V5_BRIEF.md": "fefb0443ec14de974d4670311d9626db3bc1b7c4a3915ade5a2cdbd627aeee1c",
+    "docs/BUILD_V5.md": "e1119431c1bcb88e262bfcea434ae80e804c882ed4654e2eb9cdb9fed1774621",
+    "docs/HARDWARE_V5.md": "c585ef0787d8b9252d4edf17f9ae82c1cb82b64037b06ebdb01cad8a54887bce",
+    "models/robot_v5/parameters.json": "df493b47df369994d7218d766dd1ff2f399a77a591279e2859f49f2f53a83cca",
+    "models/robot_v5/manufacturing.json": "b07660e81bedbbc281c94a064bef3c6ad587f28d2d7d9cda25c31dda11e116f1",
+    "models/robot_v5/kinematic_checks.json": "63a5306e89cc5a2655606f65f05e4e3d29739feb5b42b095f55025be68332ad1",
+    "models/robot_v5/mechanical_checks.json": "b70f9563bc8cf9f626f78526a81aa8cb5f79ce47e5b4235bf3f00e5df731bafe",
+    "models/robot_v5/print/cube_holder.step": "f818f791c5cf7ebb3170b9e33ec33399542c3fdc0127db36cb18e01297e66e2c",
+    "models/robot_v5/print/hub.step": "16d0139e2065d94dccb6594fdbc02485a9bc2725b6b760f0037942fb34ec6c18",
+    "models/robot_v5/print/hood.step": "b024021a86ac890f198c91e0fa9be71f66eb2602e65d08a24d44dcfd752e3347",
+    "models/robot_v5/print/lifter.step": "a1c48d5117f705ebd08d718133dc29cd95bebf407e17c4c8ea32da1bc9202469",
+    "models/robot_v5/print/base.step": "6cfbe02b53a7d8030282b0d3dc9c32ed5ca35a5af4e02623960b9569d28ff2bd",
+    "models/robot_v5/print/crank.step": "fa5eb2f1549e6b1387416c3ca5f576b12cc708dde47315f160976baa0b6f0d11",
+    "models/robot_v5/print/link.step": "f082d57673ecb67840bb080dc40f0bdbedbcfaa4a47df18ac72251e8ba0d45ef"
+  },
+  "visual_review": {
+    "status": "pending",
+    "contact_sheet": "docs/images/v5_manual/pages_contact_sheet.png"
+  }
+}

@@ -1,7 +1,7 @@
 // tools/gen_wokwi_test.js — JS 풀이기의 결과로 Wokwi 교차검증 시나리오를 만든다.
 //   node tools/gen_wokwi_test.js [seed=1]  →  tests/solve_seed<seed>.test.yaml
 // 펌웨어가 같은 시드로 섞고 풀면 단계별 수열이 JS 와 글자 단위로 같아야 통과한다.
-// V4: 가상 모드(Q 1)에서도 기구 절차(뒤집기·지지 전환)를 계획하므로 flips/regrips 횟수도 JS 기구 모델과 같아야 한다.
+// V5: 가상 모드(Q 1)에서도 기구 절차(스핀·뒤집기·후드)를 계획하므로 flips/spins 횟수도 JS 기구 모델과 같아야 한다.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -11,12 +11,12 @@ const { Mechanism } = require('../sim/mechanism.js');
 const seed = parseInt(process.argv[2] || '1', 10);
 const scr = C.scramble(seed, 20);
 const r = new Solver().solve(new C.Cube().apply(scr));
-const mech = new Mechanism();                 // 가상 모드 시작 상태: 모두 후퇴, orient 1
+const mech = new Mechanism();                 // 가상 모드 시작 상태: 후드 OPEN, ori = z2(흰색 아래)
 mech.planSeq(scr);
-const scrStats = `flips=${mech.flips} regrips=${mech.regrips}`;
+const scrStats = `flips=${mech.flips} spins=${mech.spins}`;
 mech.resetCounters();
 mech.planSeq(r.moves);
-const solStats = `flips=${mech.flips} regrips=${mech.regrips}`;
+const solStats = `flips=${mech.flips} spins=${mech.spins}`;
 const q = (s) => JSON.stringify(s);
 const steps = [
   `  - wait-serial: "READY"`,

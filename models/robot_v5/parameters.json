@@ -1,0 +1,206 @@
+{
+  "cube_mm": 57.0,
+  "layer_mm": 19.0,
+  "tilt_deg": 20.0,
+  "post_clearance_mm": 1.0,
+  "post_h_mm": 15.0,
+  "post_t_mm": 5.0,
+  "post_arm_mm": 17.0,
+  "post_chamfer_mm": 4.0,
+  "post_flip_relief_deg": 65.1,
+  "post_flip_pivot_y_mm": -28.3,
+  "post_flip_margin_mm": 0.2,
+  "post_footprint_trim": true,
+  "plate_mm": 70.0,
+  "plate_t_mm": 4.0,
+  "notch_w_mm": 20.0,
+  "notch_y_mm": 23.0,
+  "plate_corner_r_mm": 1.5,
+  "plate_shaft_relief_d_mm": 5.4,
+  "plate_shaft_relief_depth_mm": 1.5,
+  "horizontal_bore_roof_relief": true,
+  "hub_d_mm": 16.0,
+  "hub_h_mm": 14.0,
+  "hub_flange_d_mm": 30.0,
+  "hub_flange_t_mm": 3.0,
+  "motor_mm": 42.3,
+  "motor_box_outer_mm": 50.0,
+  "motor_face_z_mm": -25.0,
+  "motor_len_mm": 40.0,
+  "motor_plate_t_mm": 5.0,
+  "table_zw_mm": -78.0,
+  "foot_boss_d_mm": 12.0,
+  "hood_clearance_mm": 1.5,
+  "hood_wall_mm": 3.0,
+  "hood_bottom_z_mm": 21.0,
+  "hood_roof_clear_mm": 1.5,
+  "hood_roof_t_mm": 3.0,
+  "hood_back_wall": false,
+  "hinge_y_mm": -90.0,
+  "hinge_z_mm": 40.0,
+  "hinge_hub_d_mm": 20.0,
+  "arm_t_mm": 6.0,
+  "hood_arm_roof_web": true,
+  "lifter_print_ramp": true,
+  "sg90_mount_outer_x_mm": -61.5,
+  "sg90_mount_bottom_offset_mm": 50.0,
+  "mg996r_rear_lug_mm": 3.0,
+  "mg996r_pocket_open_top": true,
+  "hood_open_deg": 60.0,
+  "hood_flip_deg": 90.0,
+  "hood_load_deg": 120.0,
+  "lift_contact_y_mm": -27.0,
+  "lift_bottom_z_mm": -6.5,
+  "lift_stroke_mm": 66.0,
+  "lift_dir_deg": 26.0,
+  "shelf_len_mm": 3.5,
+  "shelf_t_mm": 2.5,
+  "lip_h_mm": 1.5,
+  "lip_t_mm": 3.0,
+  "hook_w_mm": 16.0,
+  "cube_edge_r_mm": 1.5,
+  "slider_bar_dy_mm": -14.0,
+  "slider_bar_dz_mm": -5.0,
+  "slider_bar_mm": 4.0,
+  "slider_bar_half_x_mm": 38.5,
+  "crank_r_mm": 33.0,
+  "link_mm": 70.0,
+  "cube_mass_kg": 0.1,
+  "hood_mass_kg": 0.05,
+  "mu_floor": 0.35,
+  "mu_ledge": 0.8,
+  "g": 9.81,
+  "hood_in": 60.0,
+  "hood_out": 66.0,
+  "post_in": 29.5,
+  "post_out": 34.5,
+  "hinge": [
+    -90.0,
+    40.0
+  ],
+  "lift_Q0": [
+    -23.8297381743219,
+    -6.5
+  ],
+  "lift_Q1": [
+    -52.762233862401004,
+    52.82040705574502
+  ],
+  "lift_B0": [
+    -37.8297381743219,
+    -11.5
+  ],
+  "lift_B1": [
+    -66.76223386240102,
+    47.82040705574502
+  ],
+  "servo_axes": {
+    "hood": [
+      42.5,
+      -90.0,
+      40.0
+    ],
+    "lift": [
+      -61.5,
+      -82.98196629359688,
+      81.07578676881421
+    ]
+  },
+  "lever_planes_x_mm": {
+    "crank": [
+      -55.0,
+      -51.0
+    ],
+    "link": [
+      -50.0,
+      -46.0
+    ]
+  },
+  "revision": "B",
+  "link_centres_mm": 70.0,
+  "table_world_z_mm": -78.0,
+  "world_height_equation": "z_world = z*cos(tilt) + y*sin(tilt)",
+  "crank_branch": "Upper-axis rod points down rail: physical 90 deg gives 41.266703 mm; lower-axis reference gives 24.733297 mm.",
+  "print_offsets": {
+    "cube_holder": [
+      0.0,
+      0.0,
+      -4.0
+    ],
+    "hub": [
+      0.0,
+      0.0,
+      -18.0000001
+    ],
+    "hood": [
+      0.0,
+      -33.5,
+      21.0
+    ],
+    "lifter": [
+      0.0,
+      -31.829738174321903,
+      -13.5
+    ],
+    "base": [
+      -4.25,
+      -41.5,
+      -92.1051221097762
+    ],
+    "crank": [
+      -54.0,
+      -75.7488423715771,
+      47.4155832409417
+    ],
+    "link": [
+      -48.0,
+      -53.172728311939615,
+      -15.5
+    ]
+  },
+  "purchased": {
+    "nema17": {
+      "size": [
+        42.3,
+        42.3,
+        62.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        -34.0
+      ],
+      "qty": 1,
+      "envelope_only": true
+    },
+    "mg996r": {
+      "size": [
+        44.0,
+        40.5,
+        20.5
+      ],
+      "center": [
+        58.5,
+        -80.0,
+        40.0
+      ],
+      "qty": 1,
+      "envelope_only": true
+    },
+    "sg90": {
+      "size": [
+        28.69999999999999,
+        22.5,
+        12.199999999999989
+      ],
+      "center": [
+        -69.85,
+        -82.98196629359688,
+        81.07578676881421
+      ],
+      "qty": 1,
+      "envelope_only": true
+    }
+  },
+  "faces": {}
+}

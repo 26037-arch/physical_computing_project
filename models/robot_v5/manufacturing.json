@@ -1,0 +1,282 @@
+{
+  "status": "Rev B CAD; see mechanical_checks.json for geometric checks; physical operation unverified",
+  "parameters": {
+    "cube_mm": 57.0,
+    "layer_mm": 19.0,
+    "tilt_deg": 20.0,
+    "post_clearance_mm": 1.0,
+    "post_h_mm": 15.0,
+    "post_t_mm": 5.0,
+    "post_arm_mm": 17.0,
+    "post_chamfer_mm": 4.0,
+    "post_flip_relief_deg": 65.1,
+    "post_flip_pivot_y_mm": -28.3,
+    "post_flip_margin_mm": 0.2,
+    "post_footprint_trim": true,
+    "plate_mm": 70.0,
+    "plate_t_mm": 4.0,
+    "notch_w_mm": 20.0,
+    "notch_y_mm": 23.0,
+    "plate_corner_r_mm": 1.5,
+    "plate_shaft_relief_d_mm": 5.4,
+    "plate_shaft_relief_depth_mm": 1.5,
+    "horizontal_bore_roof_relief": true,
+    "hub_d_mm": 16.0,
+    "hub_h_mm": 14.0,
+    "hub_flange_d_mm": 30.0,
+    "hub_flange_t_mm": 3.0,
+    "motor_mm": 42.3,
+    "motor_box_outer_mm": 50.0,
+    "motor_face_z_mm": -25.0,
+    "motor_len_mm": 40.0,
+    "motor_plate_t_mm": 5.0,
+    "table_zw_mm": -78.0,
+    "foot_boss_d_mm": 12.0,
+    "hood_clearance_mm": 1.5,
+    "hood_wall_mm": 3.0,
+    "hood_bottom_z_mm": 21.0,
+    "hood_roof_clear_mm": 1.5,
+    "hood_roof_t_mm": 3.0,
+    "hood_back_wall": false,
+    "hinge_y_mm": -90.0,
+    "hinge_z_mm": 40.0,
+    "hinge_hub_d_mm": 20.0,
+    "arm_t_mm": 6.0,
+    "hood_arm_roof_web": true,
+    "lifter_print_ramp": true,
+    "sg90_mount_outer_x_mm": -61.5,
+    "sg90_mount_bottom_offset_mm": 50.0,
+    "mg996r_rear_lug_mm": 3.0,
+    "mg996r_pocket_open_top": true,
+    "hood_open_deg": 60.0,
+    "hood_flip_deg": 90.0,
+    "hood_load_deg": 120.0,
+    "lift_contact_y_mm": -27.0,
+    "lift_bottom_z_mm": -6.5,
+    "lift_stroke_mm": 66.0,
+    "lift_dir_deg": 26.0,
+    "shelf_len_mm": 3.5,
+    "shelf_t_mm": 2.5,
+    "lip_h_mm": 1.5,
+    "lip_t_mm": 3.0,
+    "hook_w_mm": 16.0,
+    "cube_edge_r_mm": 1.5,
+    "slider_bar_dy_mm": -14.0,
+    "slider_bar_dz_mm": -5.0,
+    "slider_bar_mm": 4.0,
+    "slider_bar_half_x_mm": 38.5,
+    "crank_r_mm": 33.0,
+    "link_mm": 70.0,
+    "cube_mass_kg": 0.1,
+    "hood_mass_kg": 0.05,
+    "mu_floor": 0.35,
+    "mu_ledge": 0.8,
+    "g": 9.81
+  },
+  "print_parts": {
+    "cube_holder": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 20662.032,
+      "estimated_plastic_mm3": 16207.878,
+      "grams_each": 20.584,
+      "grams_total": 20.584,
+      "size_mm": [
+        70.0,
+        70.0,
+        19.0
+      ],
+      "print_size_mm": [
+        70.0,
+        70.0,
+        19.0
+      ],
+      "print_pose": "Plate underside on bed, posts up; separate hub.",
+      "estimated_hours": 1.407
+    },
+    "hub": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 3994.088,
+      "estimated_plastic_mm3": 3193.131,
+      "grams_each": 4.055,
+      "grams_total": 4.055,
+      "size_mm": [
+        30.0,
+        30.0,
+        14.000000100000001
+      ],
+      "print_size_mm": [
+        30.0,
+        30.0,
+        14.000000100000003
+      ],
+      "print_pose": "Flange on bed (X 180 deg), shaft up; D bore vertical.",
+      "estimated_hours": 0.277
+    },
+    "hood": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 56014.462,
+      "estimated_plastic_mm3": 42660.497,
+      "grams_each": 54.179,
+      "grams_total": 54.179,
+      "size_mm": [
+        78.0,
+        133.0,
+        40.5
+      ],
+      "print_size_mm": [
+        78.0,
+        133.0,
+        40.50000000000002
+      ],
+      "print_pose": "Roof and extended arm top webs on bed (X 180 deg).",
+      "estimated_hours": 3.703
+    },
+    "lifter": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1951.32,
+      "estimated_plastic_mm3": 1951.32,
+      "grams_each": 2.478,
+      "grams_total": 2.478,
+      "size_mm": [
+        77.0,
+        16.000000000000004,
+        8.5
+      ],
+      "print_size_mm": [
+        77.0,
+        8.5,
+        16.000000000000007
+      ],
+      "print_pose": "Rear crossbar face on bed (X +90 deg); flat T body rises to hook.",
+      "estimated_hours": 0.169
+    },
+    "base": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 197029.848,
+      "estimated_plastic_mm3": 130392.737,
+      "grams_each": 165.599,
+      "grams_total": 165.599,
+      "size_mm": [
+        120.5,
+        133.0,
+        187.1051221097762
+      ],
+      "print_size_mm": [
+        120.5,
+        183.33663374200472,
+        152.48296631714715
+      ],
+      "print_pose": "World-horizontal deck underside on bed (X +20 deg).",
+      "estimated_hours": 11.319
+    },
+    "crank": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 1240.16,
+      "estimated_plastic_mm3": 1240.16,
+      "grams_each": 1.575,
+      "grams_total": 1.575,
+      "size_mm": [
+        6.0,
+        22.466247844039557,
+        37.66020352787251
+      ],
+      "print_size_mm": [
+        37.66020352787252,
+        22.466247844039557,
+        6.0000000000000036
+      ],
+      "print_pose": "Flat back on bed (Y +90 deg), horn pocket upwards.",
+      "estimated_hours": 0.108
+    },
+    "link": {
+      "qty": 1,
+      "valid": true,
+      "solids": 1,
+      "volume_mm3": 2376.722,
+      "estimated_plastic_mm3": 2327.489,
+      "grams_each": 2.956,
+      "grams_total": 2.956,
+      "size_mm": [
+        4.000000000000007,
+        38.68598027523542,
+        70.9155832409417
+      ],
+      "print_size_mm": [
+        70.9155832409417,
+        38.68598027523542,
+        4.000000000000014
+      ],
+      "print_pose": "Flat side down (rotate Y 90 deg).",
+      "estimated_hours": 0.202
+    }
+  },
+  "purchased": {
+    "nema17": {
+      "size": [
+        42.3,
+        42.3,
+        62.0
+      ],
+      "center": [
+        0.0,
+        0.0,
+        -34.0
+      ],
+      "qty": 1,
+      "envelope_only": true
+    },
+    "mg996r": {
+      "size": [
+        44.0,
+        40.5,
+        20.5
+      ],
+      "center": [
+        58.5,
+        -80.0,
+        40.0
+      ],
+      "qty": 1,
+      "envelope_only": true
+    },
+    "sg90": {
+      "size": [
+        28.69999999999999,
+        22.5,
+        12.199999999999989
+      ],
+      "center": [
+        -69.85,
+        -82.98196629359688,
+        81.07578676881421
+      ],
+      "qty": 1,
+      "envelope_only": true
+    }
+  },
+  "density_g_cm3": 1.27,
+  "infill_fraction": 0.2,
+  "shell_lines": 3,
+  "line_width_mm": 0.4,
+  "layer_height_mm": 0.2,
+  "speed_mm_s": 60,
+  "time_overhead_factor": 1.5,
+  "mass_model": "min(volume, area*1.2mm) shell plus 20% remaining core; slicer estimate required",
+  "grams_total": 251.426,
+  "estimated_hours_total": 17.185,
+  "stl_tolerance_mm": 0.05,
+  "stl_angular_tolerance": 0.12,
+  "effective_post_top_mm": 15.0
+}

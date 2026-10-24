@@ -1,581 +1,499 @@
-// sim/app.js — 3D 시뮬레이터 (V4 기구: 도넛 큐브 + 측면 2핀 헤드 4개 + 아래 D 헤드(중공축·벨트) + 잠금 막대, 서보 크랭크 이송, 뒤집기).
-// 펌웨어(main.ino)와 같은 명령(S/V/M/L/E/F/R)·같은 시리얼 출력 줄·같은 LCD 문구로 동작하고,
-// 기구 절차는 sim/mechanism.js(= firmware/main/mechanism.cpp)가 정한다. 치수·좌표는 docs/HARDWARE_V4.md 2절
-// (= tools/build_robot_v4.py, models/robot_v4/parameters.json) 을 그대로 쓴다.
-//  - 회전: 물리 면 p 의 헤드 스핀들(판·핀 2·허브·축)이 엣지 2개를 핀으로 밀어 그 층을 돌린다 (측면: 적도 엣지, D: DF/DB).
-//  - 지지: 회전할 면의 쌍(F/B 또는 R/L)만 결합(핀 삽입 3 mm). 다른 쌍과 D 헤드는 24 mm 후퇴. D 회전은 D 헤드 결합.
-//  - 잠금 막대: 아래에서 중공 D 축을 지나 큐브 중심 센터 판 소켓까지 올라와 코어를 잡는다(V3 중앙축 대신). 뒤집기 때만 30 mm 내려간다.
-//  - 뒤집기: 위(U)에는 헤드가 없다. 논리 면이 위에 오면 R/L 만 결합한 채 두 헤드가 같은 방향으로 180° 돌아 큐브를 뒤집는다.
-//  - 장착: 위가 열려 있다. D 헤드가 결합 위치로 올라오면 큐브를 손으로 핀 위에 올려놓고(흰색 아래) LOAD → 막대·F/B 가 잡는다.
-(function () {
+// V5 Rev B: tools/robot_v5_params.py:P dimensions, CubeMechanism action protocol.
+// Units are mm. Holder origin: cube bottom centre; +y audience, +z up.
+(async function () {
   'use strict';
-  const C = CubeLib, S = CubeSolver, MECH = CubeMechanism;
-  const MODELS = (typeof CubeModels !== 'undefined') ? CubeModels : { params: {}, parts: {} };
-  // CAD 매개변수 (models/robot_v4/parameters.json). 값이 없으면 docs/HARDWARE_V4.md 의 기본값.
-  const P = Object.assign({ cube_mm: 57, piece_mm: 18.8, pitch_mm: 19.1, retract_mm: 24, pin_mm: 3, socket_mm: 3.4,
-    socket_depth_mm: 6, pin_engagement_mm: 4.8, socket_countersink_mm: 7, pin_tip_mm: 1, pin_tip_h_mm: 1, pin_length_mm: 16, plate_thickness_mm: 6,
-    recess_depth_mm: 2, lock_bar_mm: 6, lock_socket_mm: 6.4, lock_socket_depth_mm: 5,
-    lock_stroke_mm: 30, lock_crank_r_mm: 15, lock_tip_y_mm: -22.5, lock_length_mm: 230, crank_r_mm: 12, link_mm: 36, servo_axis: [22, -44, 195],
-    lock_servo_axis: [22, 24, 255], hollow_id_mm: 12.5, hollow_od_mm: 17, hollow_length_mm: 82, motor_offset_mm: 60,
-    strip_width_mm: 16, strip_pad_y_mm: 14.5, strip_pad_mm: [8, 4] }, MODELS.params || {});
-  const UNIT = P.pitch_mm;                 // 1 단위 = 조각 중심 간격 = 19.1 mm
-  const mm = (x) => x / UNIT;
-  const HALF = mm(P.cube_mm / 2);          // 큐브 중심 → 면 거리 (28.5 mm): 헤드 배치용
-  const SURF = mm(P.piece_mm / 2);         // 큐비 중심 → 그 면 거리 (9.4 mm)
-  const SCRAMBLE_LEN = 20;
-  // 보드 속도 추정 근거: Wokwi(Uno, 16 MHz AVR) 시드 1 측정 — CALC nodes=108161 ms=4733
-  const AVR_NODES_PER_SEC = 108161 / 4.733;
-  const FACE_NAMES = ['U', 'R', 'F', 'D', 'L', 'B'];
-  const SIDE = [2, 1, 5, 4];               // 물리 측면 헤드 F R B L (표시 순서)
-  const DF = 3;                            // 아래 D 헤드 = 물리 D
-
-  // ---------- 3D 장면 ----------
-  const canvas = document.getElementById('view');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0f1216);
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 400);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x334455, 0.85));
-  const keyLight = new THREE.DirectionalLight(0xffffff, 0.8); keyLight.position.set(6, 9, 7); scene.add(keyLight);
-  const fill = new THREE.DirectionalLight(0xffffff, 0.4); fill.position.set(-7, -4, -6); scene.add(fill);
-
-  // 면 순서 U R F D L B. 바깥 법선, 그 면을 정면에서 볼 때 스티커 격자의 오른쪽/아래 방향
-  const N = [[0, 1, 0], [1, 0, 0], [0, 0, 1], [0, -1, 0], [-1, 0, 0], [0, 0, -1]];
-  const RIGHT = [[1, 0, 0], [0, 0, -1], [1, 0, 0], [1, 0, 0], [0, 0, 1], [-1, 0, 0]];
-  const DOWN = [[0, 0, 1], [0, -1, 0], [0, -1, 0], [0, 0, -1], [0, -1, 0], [0, -1, 0]];
-  // 헤드 모듈의 국소 X축 (HARDWARE_V4.md 2.1 FACES_V4 xDir): 측면은 모두 월드 +y(위), D 는 +x (핀 → DF/DB, 레일 → −z)
-  const HEAD_X = [null, [0, 1, 0], [0, 1, 0], [1, 0, 0], [0, 1, 0], [0, 1, 0]];
-  const COLORS = [0xf2f2f2, 0xd62828, 0x1b9e3f, 0xf7d308, 0xf77f00, 0x0057b8];
-  const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
-
-  // ----- 도넛 큐브: 조각 18.8 mm, 피치 19.1 mm. 엣지 노출면 2곳에 Ø3.4 소켓, U/D 센터는 2 mm 파인 판(사각 소켓 8.4, 막대 끝 y −23.5) -----
-  const cubeGroup = new THREE.Group(); scene.add(cubeGroup);
-  const cubies = {};  // "x,y,z" → Group (논리 위치)
-  const cubieGeo = new THREE.BoxGeometry(mm(P.piece_mm), mm(P.piece_mm), mm(P.piece_mm));
-  const recessGeo = new THREE.BoxGeometry(mm(P.piece_mm), mm(P.piece_mm - P.recess_depth_mm), mm(P.piece_mm));
-  const cubieMat = new THREE.MeshStandardMaterial({ color: 0x15181c, roughness: 0.6 });
-  for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
-    if (!x && !y && !z) continue;
-    const g = new THREE.Group(); g.position.set(x, y, z);
-    const recessed = !x && !z;                              // U/D 센터: 바깥쪽 recess_depth_mm(2) 가 비어 소켓 칸(도넛 구멍)이 된다
-    const body = new THREE.Mesh(recessed ? recessGeo : cubieGeo, cubieMat);
-    if (recessed) body.position.y = -y * mm(P.recess_depth_mm / 2);
-    g.add(body);
-    g.userData.home = [x, y, z];
-    cubeGroup.add(g); cubies[`${x},${y},${z}`] = g;
+  const $ = (id) => document.getElementById(id), errors = [];
+  function showError(error) {
+    const message = error.message || String(error); errors.push(message);
+    $('error').hidden = false; $('error').textContent = message;
   }
-  const stickerGeo = new THREE.PlaneGeometry(mm(15.5), mm(15.5));
-  const socketMat = new THREE.MeshStandardMaterial({ color: 0x0b0d10, roughness: 0.9 });
-  const pocketMat = new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: 0.8 });
-  const screwMat = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, roughness: 0.4, metalness: 0.6 });
-  const CS_DEPTH = (P.socket_countersink_mm - P.socket_mm) / 2;   // 90° 카운터싱크 깊이 (Ø7 → Ø3.4: 1.8)
-  const socketGeo = new THREE.CircleGeometry(mm(P.socket_countersink_mm / 2), 20);
-  const socketConeGeo = new THREE.CylinderGeometry(mm(P.socket_countersink_mm / 2), mm(P.socket_mm / 2), mm(CS_DEPTH), 20, 1, true);   // 카운터싱크 (안쪽 면)
-  const socketWallGeo = new THREE.CylinderGeometry(mm(P.socket_mm / 2), mm(P.socket_mm / 2), mm(P.socket_depth_mm - CS_DEPTH), 20, 1, true);
-  const pocketGeo = new THREE.CircleGeometry(mm(3.5), 24);
-  const screwGeo = new THREE.CircleGeometry(mm(2.7), 20);
-  const lockSocketGeo = new THREE.PlaneGeometry(mm(P.lock_socket_mm), mm(P.lock_socket_mm));
-  const stickers = [];  // 54개, 큐비의 자식
-  for (let f = 0; f < 6; f++) for (let k = 0; k < 9; k++) {
-    const r = (k / 3) | 0, c = k % 3;
-    const pos = v3(N[f]).add(v3(RIGHT[f]).multiplyScalar(c - 1)).add(v3(DOWN[f]).multiplyScalar(r - 1));
-    const owner = cubies[`${pos.x},${pos.y},${pos.z}`];
-    const n = v3(N[f]);
-    const zeros = pos.toArray().filter((v) => v === 0).length;
-    const recessed = zeros === 2 && (f === 0 || f === 3);
-    const depth = recessed ? mm(P.recess_depth_mm) : 0;
-    const m = new THREE.Mesh(stickerGeo, new THREE.MeshStandardMaterial({ color: COLORS[f], roughness: 0.35 }));
-    m.position.copy(n.clone().multiplyScalar(SURF - depth + mm(0.05)));
-    m.lookAt(n.clone().multiplyScalar(4));
-    owner.add(m); stickers.push(m);
-    if (zeros === 1) {  // 엣지: 노출면 중앙에 구동 소켓 (Ø3.4, 깊이 6) + 90° 카운터싱크 Ø7 (핀 원뿔 끝과 함께 자동 정렬)
-      const hole = new THREE.Mesh(socketGeo, socketMat);
-      hole.position.copy(n.clone().multiplyScalar(SURF + mm(0.1))); hole.lookAt(n.clone().multiplyScalar(4)); owner.add(hole);
-      const innerMat = new THREE.MeshStandardMaterial({ color: 0x1a1d22, side: THREE.BackSide });
-      const cone = new THREE.Mesh(socketConeGeo, innerMat);
-      cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n);
-      cone.position.copy(n.clone().multiplyScalar(SURF - mm(CS_DEPTH / 2))); owner.add(cone);
-      const wall = new THREE.Mesh(socketWallGeo, innerMat);
-      wall.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n);
-      wall.position.copy(n.clone().multiplyScalar(SURF - mm(CS_DEPTH + (P.socket_depth_mm - CS_DEPTH) / 2))); owner.add(wall);
-    } else if (recessed) {  // U/D 센터 판: 잠금 막대용 사각 소켓 8.4
-      const sq = new THREE.Mesh(lockSocketGeo, socketMat);
-      sq.position.copy(n.clone().multiplyScalar(SURF - depth + mm(0.1))); sq.lookAt(n.clone().multiplyScalar(4)); owner.add(sq);
-    } else if (zeros === 2) {  // 측면 센터: Ø7 포켓 + M3 나사 머리
-      const pocket = new THREE.Mesh(pocketGeo, pocketMat);
-      pocket.position.copy(n.clone().multiplyScalar(SURF + mm(0.1))); pocket.lookAt(n.clone().multiplyScalar(4)); owner.add(pocket);
-      const head = new THREE.Mesh(screwGeo, screwMat);
-      head.position.copy(n.clone().multiplyScalar(SURF - mm(0.6))); head.lookAt(n.clone().multiplyScalar(4)); owner.add(head);
-    }
-  }
-  function paint(cube) {
-    const fc = cube.toFacelets();
-    for (let i = 0; i < 54; i++) stickers[i].material.color.setHex(COLORS[fc[i]]);
-  }
-
-  // ----- STL (mm, base64) → BufferGeometry (단위: 피치). XY 중심·바닥 z=0 으로 저장된 출력 파일이므로 조립 오프셋을 더해 놓는다 -----
-  function stlGeometry(b64, offset) {
-    const bin = atob(b64), u8 = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-    const dv = new DataView(u8.buffer);
-    const tri = dv.getUint32(80, true);
-    const pos = new Float32Array(tri * 9), nor = new Float32Array(tri * 9);
-    let o = 84;
-    for (let t = 0; t < tri; t++) {
-      const nx = dv.getFloat32(o, true), ny = dv.getFloat32(o + 4, true), nz = dv.getFloat32(o + 8, true); o += 12;
-      for (let v = 0; v < 3; v++) {
-        const i = t * 9 + v * 3;
-        pos[i] = mm(dv.getFloat32(o, true) + offset[0]); pos[i + 1] = mm(dv.getFloat32(o + 4, true) + offset[1]); pos[i + 2] = mm(dv.getFloat32(o + 8, true) + offset[2]); o += 12;
-        nor[i] = nx; nor[i + 1] = ny; nor[i + 2] = nz;
-      }
-      o += 2;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
-    return g;
-  }
-  // 조립 좌표에서의 [XY 중심, 바닥 z] (mm). parameters.json 의 print_offsets 가 있으면 그것을, 없으면 docs/HARDWARE_V4.md 7절 표의 값을 쓴다.
-  const HEAD = {
-    drive_plate_2pin:         { offset: [0, 0, 0.8],      color: 0x34659a },   // D 전용 50×50 (Ø22 막대 통과)
-    drive_plate_strip:        { offset: [0, 0, 0.8],      color: 0x34659a },   // 측면 4개: 적도 띠 16×50 (D 층 회전과 간섭 없음)
-    shaft_hub:                { offset: [0, 0, 11],       color: 0x7998b8 },
-    bearing_front_cap_direct: { offset: [0, 0, 33],       color: 0xaab3bd },
-    bearing_housing_direct:   { offset: [0, -7.5, 35],    color: 0xaab3bd },
-    bearing_rear_cap_direct:  { offset: [0, 0, 52],       color: 0xaab3bd },
-    carriage_direct:          { offset: [0, -12.5, 32],   color: 0x7d8898 },
-    shaft_hub_hollow:         { offset: [0, 0, 11],       color: 0x7998b8 },
-    bearing_front_cap_hollow: { offset: [0, 0, 33],       color: 0xaab3bd },
-    bearing_housing_hollow:   { offset: [0, -5, 35],      color: 0xaab3bd },
-    bearing_rear_cap_hollow:  { offset: [0, 0, 58],       color: 0xaab3bd },
-    carriage_hollow:          { offset: [28, -12.5, 32],  color: 0x7d8898 },
-    rail_support:             { offset: [0, -54, 0],      color: 0x4a525f },
-    servo_mount:              { offset: [-4.75, -41.5, 177], color: 0x4a525f },
-    servo_clamp:              { offset: [20.3, -41.5, 177], color: 0x4a525f },
-    crank:                    { offset: [26, -44, 180],   color: 0x8d949c },
-    link:                     { offset: [31, -44, 143],   color: 0xc9ced6 },
-    lock_guide:               { offset: [-8, 0, 174],     color: 0x4a525f },
-    lock_carriage:            { offset: [10, 10, 199],    color: 0x7d8898 },
-    lock_servo_mount:         { offset: [-4.75, 26.5, 237], color: 0x4a525f },
-    lock_servo_clamp:         { offset: [20.3, 26.5, 237], color: 0x4a525f },
-    lock_crank:               { offset: [26, 24, 237],    color: 0x8d949c },
-    lock_link:                { offset: [31, 24, 200],    color: 0xc9ced6 },
-  };
-  const OFF = P.print_offsets || {};
-  const GEO = {};
-  for (const k of Object.keys(HEAD)) if (MODELS.parts && MODELS.parts[k]) GEO[k] = stlGeometry(MODELS.parts[k].b64, OFF[k] || HEAD[k].offset);
-  const MAT = {};
-  for (const k of Object.keys(HEAD)) MAT[k] = new THREE.MeshStandardMaterial({ color: HEAD[k].color, roughness: 0.6, metalness: 0.05 });
-  const steelMat = new THREE.MeshStandardMaterial({ color: 0xc9ced6, roughness: 0.3, metalness: 0.8 });
-  const padMat = new THREE.MeshStandardMaterial({ color: 0xd65c47, roughness: 0.9 });
-  const motorMat = new THREE.MeshStandardMaterial({ color: 0x23272e, roughness: 0.7, metalness: 0.3 });
-  const servoMat = new THREE.MeshStandardMaterial({ color: 0x2f3a4a, roughness: 0.7 });
-  const alumMat = new THREE.MeshStandardMaterial({ color: 0x8d949c, roughness: 0.45, metalness: 0.5 });
-  const railMat = new THREE.MeshStandardMaterial({ color: 0xb8bec6, roughness: 0.35, metalness: 0.7 });
-  const beltMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
-  const lockMat = new THREE.MeshStandardMaterial({ color: 0xc34a35, roughness: 0.4, metalness: 0.5 });
-  // 국소 z 축 방향 원기둥 (지름 d, z0~z1 mm, 중심 x,y mm)
-  function cylZ(d, z0, z1, mat, x = 0, y = 0, seg = 24) {
-    const g = new THREE.CylinderGeometry(mm(d / 2), mm(d / 2), mm(z1 - z0), seg); g.rotateX(Math.PI / 2);
-    const m = new THREE.Mesh(g, mat); m.position.set(mm(x), mm(y), mm((z0 + z1) / 2)); return m;
-  }
-  // 국소 z 축 방향 원뿔대 (z0 에서 지름 d0, z1 에서 지름 d1)
-  function coneZ(d0, d1, z0, z1, mat, x = 0, y = 0, seg = 16) {
-    const g = new THREE.CylinderGeometry(mm(d1 / 2), mm(d0 / 2), mm(z1 - z0), seg); g.rotateX(Math.PI / 2);
-    const m = new THREE.Mesh(g, mat); m.position.set(mm(x), mm(y), mm((z0 + z1) / 2)); return m;
-  }
-  // 국소 x 축 방향 원기둥 (풀리·서보 축)
-  function cylX(d, x0, x1, mat, y, z, seg = 24) {
-    const g = new THREE.CylinderGeometry(mm(d / 2), mm(d / 2), mm(x1 - x0), seg); g.rotateZ(Math.PI / 2);
-    const m = new THREE.Mesh(g, mat); m.position.set(mm((x0 + x1) / 2), mm(y), mm(z)); return m;
-  }
-  function boxAt(sx, sy, sz, cx, cy, cz, mat) {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(mm(sx), mm(sy), mm(sz)), mat); m.position.set(mm(cx), mm(cy), mm(cz)); return m;
-  }
-  // parameters.json 의 구매품 외형({size, center})이 있으면 그 자리에, 없으면 기본 자리에 상자를 그린다
-  const PUR = P.purchased || {};
-  function envelope(name, size, center, mat) {
-    const e = PUR[name]; const s = e ? e.size : size, c = e ? e.center : center;
-    return boxAt(s[0], s[1], s[2], c[0], c[1], c[2], mat);
-  }
-  const pitch = P.pitch_mm;
-  const PIN_XY = (P.pin_positions || [[0, pitch], [0, -pitch]]);   // 엣지 소켓 위치 = 구동판 핀 위치 (국소)
-  const SA = P.servo_axis, LK = P.link_mm;
-  // 서보 크랭크: 축(국소 x 방향, axis 위치) → 크랭크 r → 링크 LK → 캐리지 러그(x=axis.x, y=axis.y, z=lugZ+d).
-  // θ=0 (크랭크가 −z, 큐브 쪽) 결합 d=0, θ=π 후퇴 d=2r. 캐리지 그룹을 국소 z 로 d 만큼 옮긴다.
-  // servoName = parameters.json purchased 항목 이름 (측면·D: servo_MG996R, 막대: lock_servo_MG996R — 자리가 다르다)
-  function makeCrank(parent, axis, r, lugZ, carriageGroup, servoName = 'servo_MG996R') {
-    parent.add(envelope(servoName, [42.9, 19.7, 40.7], [axis[0] - 25.5, axis[1], axis[2] + 10.3], servoMat));
-    parent.add(cylX(6, axis[0] - 4, axis[0] + 2, alumMat, axis[1], axis[2]));          // 서보 출력축
-    const crank = new THREE.Group(); crank.position.set(mm(axis[0]), mm(axis[1]), mm(axis[2])); parent.add(crank);
-    crank.add(boxAt(4, 6, r + 4, 0, 0, -r / 2, alumMat));                                 // 크랭크 암
-    const link = boxAt(4, 4, LK, 0, 0, 0, steelMat); parent.add(link);
-    const obj = { theta: 0, shift: 0, crank, link };
-    obj.set = (theta) => {
-      obj.theta = theta; crank.rotation.x = theta;
-      const yp = r * Math.sin(theta), zp = axis[2] - r * Math.cos(theta);
-      const d = zp - Math.sqrt(LK * LK - yp * yp) - lugZ;
-      obj.shift = d; carriageGroup.position.z = mm(d);
-      const pin = new THREE.Vector3(mm(axis[0]), mm(axis[1] + yp), mm(zp));
-      const lug = new THREE.Vector3(mm(axis[0]), mm(axis[1]), mm(lugZ + d));
-      link.position.copy(pin.clone().add(lug).multiplyScalar(0.5));
-      link.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), lug.clone().sub(pin).normalize());
+  window.addEventListener('error', e => { const m = String((e.error && e.error.message) || e.message || ''); if (/ResizeObserver loop/.test(m)) return; showError(e.error || e.message); });   // ResizeObserver 루프 경고는 무해한 브라우저 알림
+  window.addEventListener('unhandledrejection', e => showError(e.reason));
+  try {
+    if (!window.THREE) throw new Error('Three.js CDN을 불러오지 못했습니다. 네트워크 연결 후 새로고침하세요.');
+    const C=CubeLib, S=CubeSolver, M=CubeMechanism, FACE='URFDLB';
+    const deg=n=>n*Math.PI/180, clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
+    const mix=(a,b,t)=>a+(b-a)*t, ease=t=>{t=clamp(t);return t*t*(3-2*t);};
+    const vec=a=>new THREE.Vector3(...a), X=vec([1,0,0]), Z=vec([0,0,1]);
+    const defaults={
+      cube_mm:57,layer_mm:19,tilt_deg:20,post_clearance_mm:1,post_h_mm:15,post_t_mm:5,
+      post_arm_mm:17,post_chamfer_mm:4,post_flip_relief_deg:65.1,post_flip_pivot_y_mm:-28.3,post_flip_margin_mm:.2,
+      plate_mm:70,plate_t_mm:4,plate_corner_r_mm:1.5,notch_w_mm:20,notch_y_mm:23,
+      hub_d_mm:16,hub_h_mm:14,hub_flange_d_mm:30,hub_flange_t_mm:3,
+      motor_mm:42.3,motor_box_outer_mm:50,motor_face_z_mm:-25,motor_len_mm:40,motor_plate_t_mm:5,table_zw_mm:-78,
+      hood_clearance_mm:1.5,hood_wall_mm:3,hood_bottom_z_mm:21,hood_roof_clear_mm:1.5,
+      hood_roof_t_mm:3,hood_back_wall:false,hinge_y_mm:-90,hinge_z_mm:40,hinge_hub_d_mm:20,arm_t_mm:6,
+      hood_open_deg:60,hood_flip_deg:90,hood_load_deg:120,lift_contact_y_mm:-27,
+      lift_bottom_z_mm:-6.5,lift_stroke_mm:66,lift_dir_deg:26,shelf_len_mm:3.5,
+      shelf_t_mm:2.5,lip_h_mm:1.5,lip_t_mm:3,hook_w_mm:16,cube_edge_r_mm:1.5,
+      slider_bar_dy_mm:-14,slider_bar_dz_mm:-5,slider_bar_mm:4,slider_bar_half_x_mm:38.5,
+      crank_r_mm:33,link_mm:70,sg90_mount_outer_x_mm:-61.5,sg90_mount_bottom_offset_mm:50,cube_mass_kg:.10,
+      hood_mass_kg:.05,mu_floor:.35,mu_ledge:.8,g:9.81
     };
-    return obj;
-  }
-  const heads = {};   // 물리 면 → { p, face, frame, carriage, motor, spin, angle, crank }
-  function buildHead(p) {
-    const n = v3(N[p]), x = v3(HEAD_X[p]), y = n.clone().cross(x);   // CAD 와 같은 오른손 좌표계 (x, y, n)
-    const hollow = p === DF;                                           // D: 중공축 + 비킨 모터 + 벨트 (잠금 막대 통과)
-    const face = new THREE.Group();
-    face.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, n));
-    face.position.copy(n.clone().multiplyScalar(HALF));
-    scene.add(face);
-    // 프레임 고정부: 레일 지지판, MGN12 레일(12×8×180), 서보 마운트, 결합 스위치
-    const frame = new THREE.Group(); face.add(frame);
-    if (GEO.rail_support) frame.add(new THREE.Mesh(GEO.rail_support, MAT.rail_support));
-    else frame.add(boxAt(60, 6, 190, 0, -54, 95, MAT.rail_support));
-    frame.add(boxAt(12, 8, 180, 0, -47, 95, railMat));
-    if (GEO.servo_mount) frame.add(new THREE.Mesh(GEO.servo_mount, MAT.servo_mount));
-    if (GEO.servo_clamp) frame.add(new THREE.Mesh(GEO.servo_clamp, MAT.servo_clamp));
-    frame.add(envelope('engage_switch', [12.8, 6.5, 5.8], [22, -47.75, 154.9], servoMat));   // 결합 스위치: 캐리지 러그(z 147)가 결합 위치에서 누른다
-    // 이송부(캐리지): 하우징·캡·캐리지·MGN12H 블록·추력 베어링·모터. 크랭크가 국소 +z 로 밀어낸다
-    const carriage = new THREE.Group(); face.add(carriage);
-    const V = hollow ? '_hollow' : '_direct';
-    for (const k of ['bearing_housing', 'bearing_front_cap', 'bearing_rear_cap', 'carriage']) if (GEO[k + V]) carriage.add(new THREE.Mesh(GEO[k + V], MAT[k + V]));
-    if (!GEO['carriage' + V]) { carriage.add(boxAt(60, 6, 120, 0, -35, 92, MAT.carriage_direct)); carriage.add(boxAt(hollow ? 116 : 60, 58, 6, hollow ? 28 : 0, -3, 101, MAT.carriage_direct)); carriage.add(boxAt(12, 19, 10, 22, -41.5, 147, MAT.carriage_direct)); }
-    if (!GEO['bearing_housing' + V]) { carriage.add(boxAt(hollow ? 44 : 34, hollow ? 44 : 34, hollow ? 23 : 17, 0, 0, hollow ? 46.5 : 43.5, MAT.bearing_housing_direct)); carriage.add(boxAt(60, 6, hollow ? 23 : 17, 0, -29, hollow ? 46.5 : 43.5, MAT.bearing_housing_direct)); }
-    carriage.add(boxAt(27, 4.9, 45.4, 0, -40.45, 84, alumMat));                 // MGN12H 블록 윗판
-    for (const bx of [-9.85, 9.85]) carriage.add(boxAt(7.3, 6.1, 45.4, bx, -45.95, 84, alumMat));
-    const motor = new THREE.Group(); carriage.add(motor);
-    const mx = hollow ? P.motor_offset_mm : 0;
-    motor.add(boxAt(42.3, 42.3, 40, mx, 0, 124, motorMat));                     // NEMA17 몸통 104~144 (D 는 x +60 으로 비킴)
-    motor.add(cylZ(22, 102, 104, alumMat, mx, 0));
-    motor.add(boxAt(10, 10, 1, mx, 0, 144.6, new THREE.MeshStandardMaterial({ color: COLORS[p] })));
-    if (hollow) {
-      motor.add(cylZ(5, 84, 104, steelMat, mx, 0, 12));                         // 비킨 모터 축
-      motor.add(cylZ(28, 76, 84, alumMat, mx, 0)); motor.add(cylZ(20, 84, 94, alumMat, mx, 0));   // 40T 구동 풀리
-      motor.add(boxAt(mx, 2, 6, mx / 2, 13.5, 80, beltMat)); motor.add(boxAt(mx, 2, 6, mx / 2, -13.5, 80, beltMat));   // 벨트 2가닥
+    // crank/link also exist in V4; require the V5 parameter signature.
+    const embedded=window.CubeModels||{params:{},parts:{}};
+    const forcePrimitives=new URLSearchParams(location.search).get('geometry')==='primitive';
+    const models=!forcePrimitives&&Number.isFinite(embedded.params?.hinge_y_mm)?embedded:{params:{},parts:{}};
+    let checks=null;
+    if(!forcePrimitives)try {const r=await fetch('../models/robot_v5/kinematic_checks.json');if(r.ok)checks=await r.json();}catch(_){/* analytic fallback */}
+    const P=Object.assign({},defaults,checks?.parameters,models.params), H=P.cube_mm/2, pitch=P.layer_mm;
+    const q0=[P.lift_contact_y_mm-P.lift_bottom_z_mm*Math.tan(deg(P.lift_dir_deg)),P.lift_bottom_z_mm];
+    const liftDir=[-Math.sin(deg(P.lift_dir_deg)),Math.cos(deg(P.lift_dir_deg))];
+    const hinge=[0,P.hinge_y_mm,P.hinge_z_mm],hoodAngles=[0,P.hood_open_deg,P.hood_load_deg];
+    const roofZ=P.cube_mm+P.hood_roof_clear_mm,hoodIn=H+P.hood_clearance_mm,hoodOut=hoodIn+P.hood_wall_mm;
+    const postIn=H+P.post_clearance_mm,postOut=postIn+P.post_t_mm;
+    const crankRadius=P.crank_r_mm,linkLength=P.link_centres_mm??P.link_mm;
+    // Use the CAD axis when provided; otherwise derive the inline dead-centre
+    // axis from P (the rounded documentation coordinate cannot close a 70 mm link).
+    const crankAxis=P.servo_axes?.lift||[P.sg90_mount_outer_x_mm,
+      q0[0]+P.slider_bar_dy_mm+(P.lift_stroke_mm+linkLength-crankRadius)*liftDir[0],
+      q0[1]+P.slider_bar_dz_mm+(P.lift_stroke_mm+linkLength-crankRadius)*liftDir[1]];
+    const crankPlane=P.lever_planes_x_mm?.crank||[-55,-51],linkPlane=P.lever_planes_x_mm?.link||[-50,-46];
+    const crankX=(crankPlane[0]+crankPlane[1])/2,linkX=(linkPlane[0]+linkPlane[1])/2;
+    const cube=new C.Cube(),mech=new M.Mechanism();
+    // Planner state is the future state; displayed state advances only on completion.
+    const displayed={hood:M.OPEN,loaded:false,ori:M.ORI_START.slice(),flips:0,spins:0,hoods:0};
+    const visual={hood:P.hood_open_deg,lifter:0,cup:0,theta:0,yf:H};
+    const canvas=$('view'),renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputEncoding=THREE.sRGBEncoding;
+    const scene=new THREE.Scene();scene.background=new THREE.Color(0x142028);scene.fog=new THREE.Fog(0x142028,900,1800);
+    const camera=new THREE.PerspectiveCamera(35,1,1,2500);camera.up.set(0,0,1);
+    scene.add(new THREE.HemisphereLight(0xf0fff9,0x455763,1.05));
+    for(const [p,power] of [[[120,-220,340],1.25],[[-220,60,150],.65],[[40,240,200],.55]]){
+      const light=new THREE.DirectionalLight(0xffffff,power);light.position.set(...p);scene.add(light);
     }
-    // 회전부(스핀들): 구동판 + 핀 2 + 패드 + 허브 + 축(측면: Ø8 + 커플링, D: 중공 OD17/ID12.5 + 40T 종동 풀리)
-    //   측면 판은 적도 띠(국소 x = 월드 위, 폭 16)라 D 층(y ≤ −9.7, 쓸림 반경 38.65)이 측면 쌍을 결합한 채 돌 수 있다. D 판은 50×50 (Ø22 로 막대 통과)
-    const spin = new THREE.Group(); carriage.add(spin);
-    const plateKey = hollow ? 'drive_plate_2pin' : 'drive_plate_strip';
-    if (GEO[plateKey]) spin.add(new THREE.Mesh(GEO[plateKey], MAT[plateKey]));
-    else { spin.add(boxAt(hollow ? 50 : P.strip_width_mm, 50, 6, 0, 0, 8, MAT[plateKey])); }
-    for (const [px, py] of PIN_XY) {   // Ø3×16 핀 2개: 끝 원뿔 90° (Ø3→Ø1), 삽입 4.8
-      spin.add(cylZ(P.pin_mm, -P.pin_engagement_mm + P.pin_tip_h_mm, -P.pin_engagement_mm + P.pin_length_mm, steelMat, px, py, 12));
-      spin.add(coneZ(P.pin_tip_mm, P.pin_mm, -P.pin_engagement_mm, -P.pin_engagement_mm + P.pin_tip_h_mm, steelMat, px, py, 12));
+    // World audience is -y: yaw 180°, then world x tilt -20°. This gives the
+    // checker's z_world=z*cos(20°)+y*sin(20°), so the rear is lower.
+    const tilt=new THREE.Group();tilt.rotation.x=-deg(P.tilt_deg);scene.add(tilt);
+    const robot=new THREE.Group();robot.rotation.z=Math.PI;tilt.add(robot);
+    const cup=new THREE.Group(),hood=new THREE.Group(),lifter=new THREE.Group();
+    const base=new THREE.Group(),towers=new THREE.Group(),hardware=new THREE.Group();
+    robot.add(cup,hood,lifter,base,towers,hardware);hood.position.set(...hinge);
+    const mat=(color,metalness=.05)=>new THREE.MeshStandardMaterial({color:new THREE.Color(color).convertSRGBToLinear(),roughness:.55,metalness});
+    const cupMat=mat(0x65c9ae),hoodMat=mat(0x729dc5),liftMat=mat(0xeab467),baseMat=mat(0x3d535d);
+    const towerMat=mat(0x4a626c),metal=mat(0xb0c3cb,.75),dark=mat(0x202b33),servoMat=mat(0x253b52),smallServoMat=mat(0x3b6691);
+    const assetModes={};
+    function mesh(parent,geometry,material,position=[0,0,0]){const o=new THREE.Mesh(geometry,material);o.position.set(...position);parent.add(o);return o;}
+    function box(parent,size,center,material){return mesh(parent,new THREE.BoxGeometry(...size),material,center);}
+    function cylinder(parent,r,length,center,direction,material){const o=mesh(parent,new THREE.CylinderGeometry(r,r,length,32),material,center);o.quaternion.setFromUnitVectors(vec([0,1,0]),vec(direction));return o;}
+    function yzGeometry(points,x0,thickness,holes=[]){
+      const shape=new THREE.Shape(points.map(p=>new THREE.Vector2(...p)));
+      for(const h of holes)shape.holes.push(new THREE.Path(h.map(p=>new THREE.Vector2(...p))));
+      const g=new THREE.ExtrudeGeometry(shape,{depth:thickness,bevelEnabled:false});
+      g.applyMatrix4(new THREE.Matrix4().makeBasis(vec([0,1,0]),vec([0,0,1]),vec([1,0,0])));g.translate(x0,0,0);return g;
     }
-    if (hollow) { for (const sx of [-pitch, pitch]) for (const sy of [-pitch, pitch]) spin.add(boxAt(8, 8, 0.8, sx, sy, 0.4, padMat)); }   // D: 모서리 패드 4
-    else { for (const sy of [-P.strip_pad_y_mm, P.strip_pad_y_mm]) spin.add(boxAt(P.strip_pad_mm[0], P.strip_pad_mm[1], 0.8, 0, sy, 0.4, padMat)); }   // 측면: 적도 엣지 위 패드 2
-    const hubKey = hollow && GEO.shaft_hub_hollow ? 'shaft_hub_hollow' : 'shaft_hub';
-    if (GEO[hubKey]) spin.add(new THREE.Mesh(GEO[hubKey], MAT[hubKey]));
-    else { spin.add(boxAt(hollow ? 32 : P.strip_width_mm, 32, 5, 0, 0, 13.5, MAT.shaft_hub)); spin.add(cylZ(24, 16, 28, MAT.shaft_hub)); }
-    if (hollow) {
-      spin.add(cylZ(P.hollow_od_mm, 16, 16 + P.hollow_length_mm, steelMat));    // 중공 회전축 OD17, 길이82 (안 Ø12.5로 막대 통과)
-      spin.add(cylZ(28, 76, 84, alumMat)); spin.add(cylZ(20, 84, 94, alumMat)); // 40T 종동 풀리
-    } else {
-      spin.add(cylZ(8, 16, 83, steelMat));                                      // 8 mm 축
-      spin.add(cylZ(19, 70, 95, alumMat));                                      // 5→8 커플링
-      spin.add(cylZ(5, 84, 104, steelMat, 0, 0, 12));                           // 모터 축
+    function stlGeometry(b64,offset){
+      const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));if(bytes.length<84)throw Error('STL header');
+      const dv=new DataView(bytes.buffer),n=dv.getUint32(80,true);if(84+n*50>bytes.length)throw Error('STL length');
+      const positions=new Float32Array(n*9);
+      for(let t=0;t<n;t++)for(let v=0;v<3;v++)for(let k=0;k<3;k++)positions[t*9+v*3+k]=dv.getFloat32(84+t*50+12+v*12+k*4,true)+offset[k];
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(positions,3));g.computeVertexNormals();return g;
     }
-    const h = { p, face, frame, carriage, motor, spin, angle: 0 };
-    h.crank = makeCrank(frame, SA, P.crank_r_mm, 147, carriage);
-    heads[p] = h;
-    return h;
-  }
-  for (const p of SIDE) buildHead(p);
-  buildHead(DF);
-  // ----- 잠금 막대 유닛: D 모듈 아래, y 축. 막대 6×6 이 중공축을 지나 센터 판 소켓(결합 끝 y −22.5, 후퇴 −52.5)까지. 소켓 바닥 여유 1.0, 행정 30 -----
-  const lock = (() => {
-    const n = v3(N[DF]), x = v3([1, 0, 0]), y = n.clone().cross(x);
-    const g = new THREE.Group();
-    g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, n));
-    g.position.copy(n.clone().multiplyScalar(HALF));
-    scene.add(g);
-    const frame = new THREE.Group(); g.add(frame);
-    const LSA = P.lock_servo_axis;
-    if (GEO.lock_guide) frame.add(new THREE.Mesh(GEO.lock_guide, MAT.lock_guide)); else frame.add(boxAt(30, 30, 30, 0, 0, 175, MAT.rail_support));   // 출력 가이드 블록 (사각 구멍 8.3)
-    if (GEO.lock_servo_mount) frame.add(new THREE.Mesh(GEO.lock_servo_mount, MAT.lock_servo_mount)); else frame.add(boxAt(8, 30, 60, 0, LSA[1], 240, MAT.rail_support));
-    if (GEO.lock_servo_clamp) frame.add(new THREE.Mesh(GEO.lock_servo_clamp, MAT.lock_servo_clamp));
-    frame.add(envelope('lock_engage_switch', [12.8, 6.5, 5.8], [22, 14.75, 211.9], servoMat));   // 막대 결합 스위치 (SENS LOCK)
-    const carriage = new THREE.Group(); g.add(carriage);
-    const tipZ = -(P.cube_mm / 2 + P.lock_tip_y_mm);   // 결합 시 막대 끝 (면 평면 기준 국소 z, 안쪽이 −): y −22.5 → z −6 (소켓 바닥 −21.5 까지 1 mm 축방향 여유)
-    const barLen = P.lock_length_mm;
-    carriage.add(boxAt(P.lock_bar_mm, P.lock_bar_mm, barLen, 0, 0, tipZ + barLen / 2, lockMat));   // 막대
-    if (GEO.lock_carriage) carriage.add(new THREE.Mesh(GEO.lock_carriage, MAT.lock_carriage)); else { carriage.add(boxAt(24, 24, 20, 0, 0, 214, MAT.carriage_direct)); carriage.add(boxAt(12, 19, 10, 22, LSA[1], 204, MAT.carriage_direct)); }
-    const crank = makeCrank(frame, LSA, P.lock_crank_r_mm, 204, carriage, 'lock_servo_MG996R');
-    return { group: g, frame, carriage, crank };
-  })();
-  // 유닛 번호(mechanism.js) → 크랭크 목록
-  const UNIT_CRANKS = [[heads[2].crank, heads[5].crank], [heads[1].crank, heads[4].crank], [heads[DF].crank], [lock.crank]];
-  const UNIT_LABEL = ['F/B', 'R/L', 'D', 'LOCK'];
-
-  // ---------- 카메라 조작 ----------
-  const VIEW_ALL = { theta: 0.7, phi: 1.05, dist: 46 }, VIEW_CUBE = { theta: 0.7, phi: 1.0, dist: 13 };
-  let theta = VIEW_ALL.theta, phi = VIEW_ALL.phi, dist = VIEW_ALL.dist;
-  function updateCamera() {
-    camera.position.set(dist * Math.sin(phi) * Math.sin(theta), dist * Math.cos(phi), dist * Math.sin(phi) * Math.cos(theta));
-    camera.lookAt(0, 0.5, 0);
-  }
-  function setView(v) { theta = v.theta; phi = v.phi; dist = v.dist; updateCamera(); }
-  let drag = null;
-  canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY }; canvas.style.cursor = 'grabbing'; });
-  window.addEventListener('pointerup', () => { drag = null; canvas.style.cursor = 'grab'; });
-  window.addEventListener('pointermove', (e) => {
-    if (!drag) return;
-    theta -= (e.clientX - drag.x) * 0.008; phi = Math.min(2.9, Math.max(0.25, phi - (e.clientY - drag.y) * 0.008));
-    drag = { x: e.clientX, y: e.clientY }; updateCamera();
-  });
-  canvas.addEventListener('wheel', (e) => { e.preventDefault(); dist = Math.min(90, Math.max(4, dist * (e.deltaY > 0 ? 1.08 : 0.92))); updateCamera(); }, { passive: false });
-  function resize() {
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-  }
-  window.addEventListener('resize', resize);
-
-  // ---------- 동작 큐: 수열 → 기구 절차(mechanism.js) → 애니메이션 ----------
-  const cube = new C.Cube();
-  const mech = new MECH.Mechanism();
-  const pivot = new THREE.Group(); scene.add(pivot);
-  const queue = [];       // 대기 중인 논리 수 {m}
-  let actions = [];       // 지금 수의 남은 기구 동작
-  let current = null;     // 진행 중 애니메이션
-  let paused = false;
-  let allMoves = [], moveIdx = 0, queueLabel = '', onQueueDone = null, execStart = 0;
-  const speedEl = document.getElementById('speed'), feedEl = document.getElementById('feed');
-  // 시작 상태 = 펌웨어의 장착 완료 상태: 큐브 장착(흰색 아래, orient 1), D·막대·F/B 결합, R/L 후퇴
-  mech.load(); mech.load(); mech.resetCounters();
-  for (let u = 0; u < 4; u++) for (const c of UNIT_CRANKS[u]) c.set(mech.engaged[u] ? 0 : Math.PI);
-  cubeGroup.rotation.x = Math.PI;        // orient 1: 논리 U(흰색)가 아래
-
-  const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-  function startAction(a) {
-    if (a.line) log(a.line);
-    if (a.type === 'engage' || a.type === 'retract') {
-      const cranks = UNIT_CRANKS[a.unit];
-      current = { type: 'crank', unit: a.unit, cranks, from: cranks[0].theta, to: a.type === 'engage' ? 0 : Math.PI, start: performance.now(), dur: +feedEl.value };
-    } else if (a.type === 'flip') {
-      current = { type: 'flip', from: cubeGroup.rotation.x, start: performance.now(), dur: 2 * +speedEl.value + 200, r0: heads[1].angle, l0: heads[4].angle };
-    } else if (a.type === 'turn') {
-      startMove(a);
-    } else current = { type: 'noop', start: performance.now(), dur: 0 };
-    renderHeads();
-  }
-  function startMove(a) {
-    const f = (a.m / 3) | 0, k = a.m % 3, p = a.face;
-    const turns = k === 2 ? -1 : k + 1;   // U=+1(시계 90°), U2=+2, U'=-1(반시계 90°)
-    const nLogical = v3(N[f]);
-    const members = [];
-    for (const g of Object.values(cubies)) {
-      const h = g.userData.home;
-      if (h[0] * nLogical.x + h[1] * nLogical.y + h[2] * nLogical.z === 1) members.push(g);
+    function part(name,parent,material,fallback,origin=[0,0,0]){
+      const data=models.parts?.[name],offset=P.print_offsets?.[name];
+      if(data?.b64&&Array.isArray(offset)&&offset.length===3){try{const g=stlGeometry(data.b64,offset);g.translate(...origin.map(v=>-v));mesh(parent,g,material);assetModes[name]='STL';return;}catch(_){/* per-part fallback */}}
+      fallback();assetModes[name]='primitive';
     }
-    pivot.rotation.set(0, 0, 0); pivot.updateMatrixWorld();
-    for (const o of members) pivot.attach(o);
-    const axis = nLogical.clone().applyQuaternion(cubeGroup.quaternion);   // 뒤집힌 큐브면 물리 면 법선이 된다
-    current = { type: 'move', m: a.m, f, p, start: performance.now(), dur: Math.abs(turns) * +speedEl.value, members, axis, angle: -turns * Math.PI / 2 };
-    renderQueue();
-  }
-  function startNext() {
-    if (!actions.length) { const item = queue.shift(); actions = mech.plan(item.m); }
-    startAction(actions.shift());
-  }
-  function finishCurrent() {
-    const c = current;
-    if (c.type === 'move') {
-      pivot.setRotationFromAxisAngle(c.axis, c.angle); pivot.updateMatrixWorld();
-      for (const o of c.members) { cubeGroup.attach(o); o.position.set(...o.userData.home); o.rotation.set(0, 0, 0); }
-      const h = heads[c.p]; h.angle += c.angle; h.spin.rotation.z = h.angle;
-      cube.move(c.m); paint(cube);
-      moveIdx++;
-      if (moveIdx % 4 === 0 || moveIdx === allMoves.length) lcd(queueLabel, `${moveIdx}/${allMoves.length}`);
-    } else if (c.type === 'crank') { for (const k of c.cranks) k.set(c.to); }
-    else if (c.type === 'flip') { cubeGroup.rotation.x = c.from + Math.PI; heads[1].angle = c.r0 + Math.PI; heads[4].angle = c.l0 - Math.PI; heads[1].spin.rotation.z = heads[1].angle; heads[4].spin.rotation.z = heads[4].angle; }
-    current = null;
-    renderQueue(); renderHeads();
-    if (!queue.length && !actions.length && onQueueDone) { const cb = onQueueDone; onQueueDone = null; cb(); }
-  }
-  function enqueue(moves, label, done) {
-    allMoves = moves.slice(); moveIdx = 0; queueLabel = label; onQueueDone = done; execStart = performance.now(); mech.resetCounters();
-    for (const m of moves) queue.push({ m });
-    lcd(label, `0/${moves.length}`); renderQueue(); renderHeads();
-    setBusy(true);
-  }
-  // 수열 없이 기구 동작만 (장착/배출/뒤집기)
-  function enqueueActions(list, label, done) {
-    actions = list.slice(); onQueueDone = done; allMoves = []; moveIdx = 0; queueLabel = label;
-    lcd(label, ''); renderQueue(); setBusy(true);
-  }
-  function animate(now) {
-    requestAnimationFrame(animate);
-    if (!current && (queue.length || actions.length) && !paused) startNext();
-    if (current && !paused) {
-      const t = current.dur > 0 ? Math.min(1, (now - current.start) / current.dur) : 1;
-      const e = ease(t), c = current;
-      if (c.type === 'move') {
-        pivot.setRotationFromAxisAngle(c.axis, c.angle * e);
-        heads[c.p].spin.rotation.z = heads[c.p].angle + c.angle * e;
-      } else if (c.type === 'crank') {
-        for (const k of c.cranks) k.set(c.from + (c.to - c.from) * e);
-      } else if (c.type === 'flip') {
-        cubeGroup.rotation.x = c.from + Math.PI * e;
-        heads[1].spin.rotation.z = c.r0 + Math.PI * e; heads[4].spin.rotation.z = c.l0 - Math.PI * e;
+    function buildHolder(){
+      const p=P.plate_mm/2,n=P.notch_w_mm/2,e=P.notch_y_mm,t=P.plate_t_mm;
+      box(cup,[2*e,2*e,t],[0,0,-t/2],cupMat);
+      for(const sx of [-1,1])for(const sy of [-1,1]){
+        box(cup,[p-n,p-e,t],[sx*(n+p)/2,sy*(e+p)/2,-t/2],cupMat);
+        box(cup,[p-e,e-n,t],[sx*(e+p)/2,sy*(n+e)/2,-t/2],cupMat);
       }
-      if (t >= 1) finishCurrent();
+      // Two L arms per post; a 4 mm inner bevel leaves a 1 mm top land.
+      function relief(poly){
+        const slope=1/Math.tan(deg(P.post_flip_relief_deg)),start=-P.post_flip_pivot_y_mm+P.post_flip_margin_mm;
+        const out=[],f=p=>p[0]-start-slope*p[1];
+        for(let i=0;i<poly.length;i++){
+          const a=poly[i],b=poly[(i+1)%poly.length],fa=f(a),fb=f(b);
+          if(fa>=0)out.push(a);
+          if((fa>=0)!==(fb>=0)){const t=fa/(fa-fb);out.push([mix(a[0],b[0],t),mix(a[1],b[1],t)]);}
+        }return out;
+      }
+      for(const sx of [-1,1])for(const sy of [-1,1]){
+        const a=postOut-P.post_arm_mm,h=P.post_h_mm,ch=P.post_chamfer_mm;
+        const poly=[[postIn,0],[postOut,0],[postOut,h],[postIn+ch,h],[postIn,h-ch]];
+        for(const [lo,hi,profile] of [[a,H+.1,relief(poly)],[H+.1,postOut,poly]]){
+          mesh(cup,yzGeometry(profile.map(([y,z])=>[sy*y,z]),sx>0?lo:-hi,hi-lo),cupMat);
+          const arm=mesh(cup,yzGeometry(profile.map(([y,z])=>[-sx*y,z]),sy>0?lo:-hi,hi-lo),cupMat);arm.rotation.z=Math.PI/2;
+        }
+      }
     }
-    renderer.render(scene, camera);
-  }
-
-  // ---------- 패널 ----------
-  const logEl = document.getElementById('log');
-  function log(s) { logEl.textContent += s + '\n'; logEl.scrollTop = logEl.scrollHeight; }
-  function lcd(a, b) {
-    const pad = (s) => (s || '').toString().slice(0, 16).padEnd(16);
-    document.getElementById('lcd').textContent = pad(a) + '\n' + pad(b);
-  }
-  function renderQueue() {
-    const el = document.getElementById('queue');
-    if (!allMoves.length) { el.textContent = ''; return; }
-    el.innerHTML = allMoves.map((m, i) => `<span class="${i < moveIdx ? 'done' : i === moveIdx ? 'cur' : ''}">${C.moveName(m)}</span>`).join(' ');
-  }
-  // 상태 칩: F R B L D LOCK + orient, 요약 문장
-  function renderHeads() {
-    const chips = document.getElementById('heads');
-    const feedUnit = current && current.type === 'crank' ? current.unit : -1;
-    const items = [];
-    for (const p of [...SIDE, DF]) {
-      const u = p === DF ? 2 : (p === 2 || p === 5) ? 0 : 1;
-      const turning = current && current.type === 'move' && current.p === p;
-      const flipping = current && current.type === 'flip' && (p === 1 || p === 4);
-      const inPos = heads[p].crank.theta < 0.01;
-      const cls = turning || flipping ? 'turn' : feedUnit === u ? 'feed' : inPos ? 'in' : 'out';
-      const txt = turning ? '회전' : flipping ? '뒤집기' : feedUnit === u ? '이송' : inPos ? '결합' : `−${P.retract_mm}`;
-      items.push(`<span class="chip ${cls}" title="${FACE_NAMES[p]}: 핀 2개 (${p === DF ? 'DF/DB' : '적도 엣지'})">${FACE_NAMES[p]}<small>${txt}</small></span>`);
-    }
-    const lin = lock.crank.theta < 0.01;
-    items.push(`<span class="chip ${feedUnit === 3 ? 'feed' : lin ? 'in' : 'out'}" title="잠금 막대 ${P.lock_bar_mm} mm: 코어 고정, 뒤집기 때만 내림">LOCK<small>${feedUnit === 3 ? '이송' : lin ? '고정' : `−${P.lock_stroke_mm}`}</small></span>`);
-    items.push(`<span class="chip ${mech.orient ? 'in' : 'out'}" title="orient: 논리 U(흰색)가 아래면 1">${mech.orient ? '흰색↓' : '흰색↑'}<small>orient ${mech.orient}</small></span>`);
-    chips.innerHTML = items.join('');
-    let text;
-    if (current && current.type === 'crank') text = `${UNIT_LABEL[current.unit]} ${current.to === 0 ? (current.unit === 3 ? '올리는 중 (막대 → 센터 판 소켓)' : '결합 중 (서보 크랭크, 핀 삽입 3 mm)') : (current.unit === 3 ? '내리는 중 (30 mm, 뒤집기 공간)' : '해제 중 (24 mm 후퇴)')}`;
-    else if (current && current.type === 'flip') text = 'R/L 만 결합한 채 두 헤드가 같은 방향으로 180° → 큐브 뒤집기';
-    else if (current && current.type === 'move') text = `${FACE_NAMES[current.f]} 수 → 물리 ${FACE_NAMES[current.p]} 헤드 회전 (막대가 코어 고정)`;
-    else text = mech.loaded ? '장착됨 · 대기' : mech.engaged[MECH.D] ? 'D 헤드 결합 — 큐브를 핀 위에 올려놓고 LOAD' : '대기';
-    document.getElementById('headText').textContent = `${text} · 뒤집기 ${mech.flips}회 · 결합 ${mech.regrips}회`;
-  }
-  function setBusy(b) { for (const id of ['btnScramble', 'btnSolve', 'btnMoves', 'btnReset', 'btnLoad', 'btnFlip']) document.getElementById(id).disabled = b; }
-  const busy = () => !!current || queue.length > 0 || actions.length > 0;
-  function finishLog(prefix) { log(`${prefix} flips=${mech.flips} regrips=${mech.regrips}`); }
-  // 수열의 기구 비용 미리 계산 (상태를 바꾸지 않도록 복제본으로)
-  function planStats(moves) {
-    const m2 = new MECH.Mechanism(); Object.assign(m2, { engaged: mech.engaged.slice(), orient: mech.orient, loaded: mech.loaded });
-    m2.planSeq(moves); return { flips: m2.flips, regrips: m2.regrips };
-  }
-
-  function doScramble(seed) {
-    if (!mech.loaded) { log('ERR not loaded'); return; }
-    const seq = C.scramble(seed, SCRAMBLE_LEN);
-    log(`SCRAMBLE seed=${seed} (${SCRAMBLE_LEN}): ${C.seqToString(seq)}`);
-    enqueue(seq, 'SCRAMBLING', () => {
-      finishLog(`SCRAMBLED exec=${Math.round(performance.now() - execStart)}ms`);
-      lcd('SCRAMBLED 20mv', `seed ${seed}`); setBusy(false);
+    part('cube_holder',cup,cupMat,buildHolder);
+    // Separate hub shares the cup's rotation; it is not part of cube_holder.
+    part('hub',cup,cupMat,()=>{
+      cylinder(cup,P.hub_d_mm/2,P.hub_h_mm,[0,0,-P.plate_t_mm-P.hub_h_mm/2],[0,0,1],cupMat);
+      cylinder(cup,P.hub_flange_d_mm/2,P.hub_flange_t_mm,[0,0,-P.plate_t_mm-P.hub_flange_t_mm/2],[0,0,1],cupMat);
     });
-  }
-  function doSolve() {
-    if (!mech.loaded) { log('ERR not loaded'); return; }
-    if (cube.isSolved()) { log('ALREADY SOLVED'); lcd('ALREADY SOLVED', ''); return; }
-    log('SOLVING'); lcd('SOLVING...', 'cross');
-    const solver = new S.Solver();
-    const t0 = performance.now();
-    let r;
-    try { r = solver.solve(cube); } catch (e) { log('SOLVE FAILED ' + e.message); lcd('SOLVE FAILED', 'check cube'); return; }
-    const calcMs = performance.now() - t0;
-    const tb = document.querySelector('#stages tbody'); tb.innerHTML = '';
-    for (const st of r.stages) {
-      log(`${st.name} (${st.moves.length}): ${C.seqToString(st.moves)} | nodes=${st.nodes} ms=${st.ms.toFixed(1)}`);
-      const est = st.nodes / AVR_NODES_PER_SEC;
-      tb.insertAdjacentHTML('beforeend', `<tr><td>${st.name}</td><td class="num">${st.moves.length}</td><td class="mv">${C.seqToString(st.moves)}</td><td class="num">${st.nodes}</td><td class="num">${est < 0.05 ? '<0.1' : est.toFixed(1)} s</td></tr>`);
-    }
-    log(`TOTAL ${r.moves.length}: ${C.seqToString(r.moves)}`);
-    log(`CALC nodes=${r.nodes} ms=${calcMs.toFixed(1)}`);
-    const st = planStats(r.moves);
-    const quarterTurns = r.moves.reduce((s, m) => s + (m % 3 === 1 ? 2 : 1), 0);
-    document.getElementById('stMoves').textContent = r.moves.length;
-    document.getElementById('stNodes').textContent = r.nodes.toLocaleString();
-    document.getElementById('stTime').textContent = calcMs.toFixed(1);
-    document.getElementById('stRegrip').textContent = `${st.regrips} / ${st.flips}`;
-    const flipMs = 2 * +speedEl.value + 200;
-    const mechMs = quarterTurns * +speedEl.value + st.regrips * 2 * +feedEl.value + st.flips * flipMs;   // 결합 1회 ≈ 결합 + 나중 해제 = 이송 2번
-    document.getElementById('estNote').textContent = `Uno 예상 = 노드 ÷ ${Math.round(AVR_NODES_PER_SEC).toLocaleString()} 노드/초 (Wokwi 시드 1 실측). 전체 ${(r.nodes / AVR_NODES_PER_SEC).toFixed(1)} s. UNO R4(48 MHz, 32bit)는 이보다 수 배 빠를 것으로 예상(실측 전). `
-      + `기구 실행 예상 = 90° ${quarterTurns}회 × ${speedEl.value} ms + 결합/해제 ${st.regrips}회 × 2 × ${feedEl.value} ms + 뒤집기 ${st.flips}회 × ${flipMs} ms ≈ ${(mechMs / 1000).toFixed(1)} s (이송은 서보 크랭크의 목표값, 실측 아님).`;
-    enqueue(r.moves, 'EXECUTING', () => {
-      const ok = cube.isSolved();
-      finishLog(`SOLVED ok=${ok ? 1 : 0} moves=${r.moves.length}`);
-      log(`calc=${Math.round(calcMs)}ms exec=${Math.round(performance.now() - execStart)}ms`);
-      lcd(ok ? 'SOLVED!' : 'MISMATCH', `${r.moves.length}mv`); setBusy(false);
+    part('hood',hood,hoodMat,()=>{
+      const g=new THREE.Group();g.position.set(0,-hinge[1],-hinge[2]);hood.add(g);
+      const z=(P.hood_bottom_z_mm+roofZ)/2,height=roofZ-P.hood_bottom_z_mm;
+      // Rev B: front (+y) wall and two side walls only. Rear roof rim remains.
+      box(g,[2*hoodOut,P.hood_wall_mm,height],[0,hoodIn+P.hood_wall_mm/2,z],hoodMat);
+      for(const sign of [-1,1]){
+        box(g,[P.hood_wall_mm,hoodOut+hoodIn,height],[sign*(hoodIn+P.hood_wall_mm/2),-P.hood_wall_mm/2,z],hoodMat);
+        box(g,[2*hoodOut,11,P.hood_roof_t_mm],[0,sign*(hoodOut-5.5),roofZ+P.hood_roof_t_mm/2],hoodMat);
+        box(g,[11,44,P.hood_roof_t_mm],[sign*(hoodOut-5.5),0,roofZ+P.hood_roof_t_mm/2],hoodMat);
+        const points=[[hinge[1],hinge[2]-10],[-hoodOut,P.hood_bottom_z_mm],[-hoodOut,roofZ+P.hood_roof_t_mm],[hinge[1]-10,roofZ+P.hood_roof_t_mm],[hinge[1]-10,hinge[2]]];
+        mesh(g,yzGeometry(points,sign>0?hoodOut:-hoodOut-P.arm_t_mm,P.arm_t_mm),hoodMat);
+        cylinder(g,P.hinge_hub_d_mm/2,P.arm_t_mm,[sign*(hoodOut+P.arm_t_mm/2),hinge[1],hinge[2]],[1,0,0],hoodMat);
+      }
+    },hinge);
+    const slot0=[q0[0]+P.slider_bar_dy_mm,q0[1]+P.slider_bar_dz_mm];
+    const slot1=[slot0[0]+liftDir[0]*P.lift_stroke_mm,slot0[1]+liftDir[1]*P.lift_stroke_mm];
+    part('lifter',lifter,liftMat,()=>{
+      const [y,z]=q0,[by,bz]=slot0;
+      mesh(lifter,yzGeometry([[y-P.shelf_len_mm,z-P.shelf_t_mm],[y,z-P.shelf_t_mm],[y,z-1],[y-1,z],[y-P.shelf_len_mm,z]],-P.hook_w_mm/2,P.hook_w_mm),liftMat);
+      box(lifter,[P.hook_w_mm,P.lip_t_mm,P.shelf_t_mm+P.lip_h_mm],[0,y-P.shelf_len_mm-P.lip_t_mm/2,z+(P.lip_h_mm-P.shelf_t_mm)/2],liftMat);
+      mesh(lifter,yzGeometry([[by-2,bz-2],[y-P.shelf_len_mm,z-P.shelf_t_mm],[y-P.shelf_len_mm,z+P.lip_h_mm],[by-2,bz+2]],-P.hook_w_mm/2,P.hook_w_mm),liftMat);
+      box(lifter,[2*P.slider_bar_half_x_mm,P.slider_bar_mm,P.slider_bar_mm],[0,by,bz],liftMat);
+      box(lifter,[P.hook_w_mm,P.shelf_len_mm-1,.5],[0,y-(P.shelf_len_mm+1)/2,z+.25],dark);
     });
-  }
-  function doMoves(str) {
-    if (!mech.loaded) { log('ERR not loaded'); return; }
-    let seq;
-    try { seq = C.parseMoves(str); } catch (e) { log('ERR bad moves'); return; }
-    if (!seq.length) return;
-    enqueue(seq, 'MOVING', () => { finishLog(`MOVED ${seq.length}`); lcd('CUBE ROBOT V4', cube.isSolved() ? 'solved' : 'scrambled'); setBusy(false); });
-  }
-  // LOAD 버튼: 장착됨 → 배출(막대·F/B·R/L 해제, D 핀이 받침, 손으로 꺼냄) / D 결합 상태 → 막대·F/B 결합 / 그 외 → D 결합
-  function doLoad() {
-    const wasLoaded = mech.loaded;
-    const list = mech.load();
-    enqueueActions(list, wasLoaded ? 'EJECTING' : 'LOADING', () => {
-      if (wasLoaded) lcd('REMOVE CUBE', 'LOAD: next cube');
-      else if (mech.loaded) { lcd('CUBE LOADED', 'SCRAMBLE / SOLVE'); }
-      else lcd('PLACE CUBE: PINS', 'WHITE DOWN > LOAD');
-      setBusy(false); renderHeads();
+    const tableZ=y=>(P.table_zw_mm-y*Math.sin(deg(P.tilt_deg)))/Math.cos(deg(P.tilt_deg));
+    part('base',base,baseMat,()=>{
+      const outer=P.motor_box_outer_mm/2,inner=outer-3,face=P.motor_face_z_mm;
+      const top=new THREE.Shape([[-outer,-outer],[outer,-outer],[outer,outer],[-outer,outer]].map(p=>new THREE.Vector2(...p)));
+      const hole=new THREE.Path();hole.absarc(0,0,11.5,0,Math.PI*2,true);top.holes.push(hole);
+      const plate=new THREE.ExtrudeGeometry(top,{depth:P.motor_plate_t_mm,bevelEnabled:false,curveSegments:32});plate.translate(0,0,face);mesh(base,plate,baseMat);
+      for(const sign of [-1,1]){
+        mesh(base,yzGeometry([[-outer,tableZ(-outer)],[outer,tableZ(outer)],[outer,face],[-outer,face]],sign>0?inner:-outer,3),baseMat);
+        const y0=sign>0?inner:-outer,y1=y0+3;
+        mesh(base,yzGeometry([[y0,tableZ(y0)],[y1,tableZ(y1)],[y1,face],[y0,face]],-inner,2*inner),baseMat);
+      }
+      const deckH=4/Math.cos(deg(P.tilt_deg));
+      mesh(base,yzGeometry([[-105,tableZ(-105)],[-22,tableZ(-22)],[-22,tableZ(-22)+deckH],[-105,tableZ(-105)+deckH]],-56,112),baseMat);
     });
-  }
-  function doFlip() {
-    if (!mech.loaded) { log('ERR not loaded'); return; }
-    enqueueActions(mech.manualFlip(), 'FLIPPING', () => { lcd('FLIPPED', mech.orient ? 'white down' : 'white up'); setBusy(false); });
-  }
-
-  document.getElementById('btnScramble').onclick = () => { if (!busy()) doScramble(parseInt(document.getElementById('seed').value, 10) || 0); };
-  document.getElementById('btnSolve').onclick = () => { if (!busy()) doSolve(); };
-  document.getElementById('btnMoves').onclick = () => { if (!busy()) doMoves(document.getElementById('moves').value); };
-  document.getElementById('btnLoad').onclick = () => { if (!busy()) doLoad(); };
-  document.getElementById('btnFlip').onclick = () => { if (!busy()) doFlip(); };
-  document.getElementById('moves').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !busy()) doMoves(e.target.value); });
-  document.getElementById('btnReset').onclick = () => { if (busy()) return; cube.reset(); paint(cube); log('RESET'); lcd('CUBE ROBOT V4', 'reset'); allMoves = []; renderQueue(); };
-  document.getElementById('btnPause').onclick = (e) => {
-    paused = !paused; e.target.textContent = paused ? '계속' : '일시정지';
-    if (current) {
-      if (paused) current.elapsed = performance.now() - current.start;
-      else current.start = performance.now() - (current.elapsed || 0);
+    if(assetModes.base==='STL'){
+      // CAD base includes both towers: separate outer triangles for visibility controls.
+      const source=base.children[0],p=source.geometry.attributes.position.array,outer=[],rest=[];
+      for(let i=0;i<p.length;i+=9){const xs=[p[i],p[i+3],p[i+6]];((xs.every(x=>x>=39.49)||xs.every(x=>x<=-39.49))?outer:rest).push(...p.slice(i,i+9));}
+      for(const [parent,data] of [[base,rest],[towers,outer]]){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(data,3));g.computeVertexNormals();mesh(parent,g,baseMat);}
+      base.remove(source);source.geometry.dispose();
+    }else{
+      const n=[liftDir[1]*1.7,-liftDir[0]*1.7];
+      const hole=[[slot0[0]+n[0],slot0[1]+n[1]],[slot1[0]+n[0],slot1[1]+n[1]],[slot1[0]-n[0],slot1[1]-n[1]],[slot0[0]-n[0],slot0[1]-n[1]]];
+      for(const s of [-1,1]){
+        const height=s<0?95:65;
+        mesh(towers,yzGeometry([[-105,tableZ(-105)+4],[-35,tableZ(-35)+4],[-35,height],[-105,height]],s>0?39.5:-45.5,6,[hole]),towerMat);
+      }
+      // SG90 pocket outside the left tower; lower gusset reaches the tower.
+      const sy=crankAxis[1],sz=crankAxis[2],mount=P.sg90_mount_outer_x_mm;
+      mesh(towers,yzGeometry([[sy-17,sz-50],[sy+17,sz-50],[sy+17,sz+10],[sy-17,sz+10]],mount-3,3,
+        [[[sy-11.25,sz-6.1],[sy+11.25,sz-6.1],[sy+11.25,sz+6.1],[sy-11.25,sz+6.1]]]),towerMat);
+      const gusset=new THREE.Shape([new THREE.Vector2(-45.5,sz-50),new THREE.Vector2(mount,sz-50),new THREE.Vector2(-45.5,sz-50-(Math.abs(mount)-45.5))]);
+      const g=new THREE.ExtrudeGeometry(gusset,{depth:34,bevelEnabled:false});g.rotateX(Math.PI/2);g.translate(0,sy+17,0);mesh(towers,g,towerMat);
+      box(towers,[6,3,25],[42.5,-106.5,40.5],towerMat);
     }
-    if (paused) lcd('PAUSED', `${moveIdx}/${allMoves.length}`); else if (allMoves.length) lcd(queueLabel, `${moveIdx}/${allMoves.length}`);
-  };
-  document.getElementById('btnView').onclick = () => setView(VIEW_ALL);
-  document.getElementById('btnViewCube').onclick = () => setView(VIEW_CUBE);
-  speedEl.oninput = () => { document.getElementById('speedVal').textContent = speedEl.value; };
-  feedEl.oninput = () => { document.getElementById('feedVal').textContent = feedEl.value; };
-  const chkFrame = document.getElementById('chkFrame'), chkMotor = document.getElementById('chkMotor');
-  function applyVisibility() {
-    for (const h of Object.values(heads)) {
-      h.frame.visible = chkFrame.checked;
-      for (const o of h.carriage.children) if (o !== h.spin && o !== h.motor) o.visible = chkFrame.checked;
-      h.motor.visible = chkMotor.checked;
+    for(const s of [-1,1])cylinder(hardware,2,14,[s*43,hinge[1],hinge[2]],[1,0,0],metal);
+    const purchased=P.purchased||{
+      nema17:{size:[P.motor_mm,P.motor_mm,P.motor_len_mm+22],center:[0,0,P.motor_face_z_mm+(22-P.motor_len_mm)/2]},
+      mg996r:{size:[44,40.5,20.5],center:[58.5,P.hinge_y_mm+10,P.hinge_z_mm]},
+      sg90:{size:[28.7,22.5,12.2],center:[P.sg90_mount_outer_x_mm-8.35,crankAxis[1],crankAxis[2]]}
+    };
+    for(const [name,p] of Object.entries(purchased))if(Array.isArray(p.size)&&Array.isArray(p.center)){
+      // NEMA envelope includes its shaft: draw body and shaft separately so
+      // the 42.3 mm body stops at the underside of the motor top plate.
+      if(/nema17/i.test(name))box(hardware,[P.motor_mm,P.motor_mm,P.motor_len_mm],[0,0,P.motor_face_z_mm-P.motor_len_mm/2],metal);
+      else box(hardware,p.size,p.center,/SG90|MG90/i.test(name)?smallServoMat:servoMat);
     }
-    lock.frame.visible = chkFrame.checked;
-    for (const o of lock.carriage.children) if (o.material !== lockMat) o.visible = chkFrame.checked;
-  }
-  chkFrame.onchange = chkMotor.onchange = applyVisibility;
+    cylinder(hardware,2.5,22,[0,0,P.motor_face_z_mm+11],[0,0,1],metal);cylinder(hardware,10.5,6,[39.5,hinge[1],hinge[2]],[1,0,0],dark);
+    const crank=new THREE.Group(),link=new THREE.Group();robot.add(crank,link);
+    part('crank',crank,liftMat,()=>{box(crank,[crankPlane[1]-crankPlane[0],crankRadius,8],[0,crankRadius/2,0],liftMat);for(const y of [0,crankRadius])cylinder(crank,4,4,[0,y,0],[1,0,0],liftMat);},[crankX,crankAxis[1],crankAxis[2]]);
+    part('link',link,metal,()=>box(link,[3,linkLength,5],[0,linkLength/2,0],metal),[linkX,...slot0]);
+    let restCrank=null,restLink=null;
+    const pin=cylinder(robot,1.5,10,[0,0,0],[1,0,0],metal);
+    for(const sign of [-1,1])cylinder(lifter,1.5,20,[sign*(P.slider_bar_half_x_mm+8),...slot0],[1,0,0],metal);
+    function setLifter(s){
+      visual.lifter=s;lifter.position.set(0,liftDir[0]*s,liftDir[1]*s);
+      const by=slot0[0]+liftDir[0]*s,bz=slot0[1]+liftDir[1]*s,dy=by-crankAxis[1],dz=bz-crankAxis[2],d=Math.hypot(dy,dz);
+      // Upper-axis branch: pin sweeps toward +N=(cos26,sin26), matching CAD.
+      // s=L+r-r*cos(theta)-sqrt(L²-r²*sin²(theta)); theta=90 gives 41.266703.
+      const alpha=Math.atan2(dz,dy)+Math.acos(clamp((d*d+crankRadius*crankRadius-linkLength*linkLength)/(2*d*crankRadius),-1,1));
+      const ey=crankAxis[1]+crankRadius*Math.cos(alpha),ez=crankAxis[2]+crankRadius*Math.sin(alpha),beta=Math.atan2(ez-bz,ey-by);
+      visual.linkageError=Math.abs(Math.hypot(by-ey,bz-ez)-linkLength);
+      visual.crankAngle=alpha;visual.servoAngle=(alpha-Math.atan2(-liftDir[1],-liftDir[0]))*180/Math.PI;visual.linkAngle=beta;
+      if(restCrank===null){restCrank=alpha;restLink=beta;}
+      crank.position.set(crankX,crankAxis[1],crankAxis[2]);crank.rotation.x=alpha-(assetModes.crank==='STL'?restCrank:0);
+      link.position.set(linkX,by,bz);link.rotation.x=beta-(assetModes.link==='STL'?restLink:0);pin.position.set((crankX+linkX)/2,ey,ez);
+    }
+    function setHood(angle){visual.hood=angle;hood.rotation.x=deg(angle);}
 
-  // 시작
-  paint(cube); resize(); updateCamera(); applyVisibility(); renderHeads();
-  log('READY cube-robot v4 (S [seed] | V | M <moves> | L | E | F | P | R | Q 0|1)');
-  log('LOADED orient=1');
-  requestAnimationFrame(animate);
-  window.CubeSim = { cube, mech, doScramble, doSolve, doMoves, doLoad, doFlip, heads: () => ({ orient: mech.orient, flips: mech.flips, regrips: mech.regrips, shift: [...SIDE, DF].map((p) => [FACE_NAMES[p], +heads[p].crank.shift.toFixed(2)]), lock: +lock.crank.shift.toFixed(2) }), params: P };  // 콘솔/테스트용
+    // Standard cube: 26 rounded cubies and 54 stickers. R is audience-right
+    // (holder -x); this basis matches D CCW, y CW and x' F->D exactly.
+    const N=[[0,0,1],[-1,0,0],[0,1,0],[0,0,-1],[1,0,0],[0,-1,0]];
+    const RIGHT=[[-1,0,0],[0,-1,0],[-1,0,0],[-1,0,0],[0,1,0],[1,0,0]];
+    const DOWN=[[0,1,0],[0,0,-1],[0,0,-1],[0,-1,0],[0,0,-1],[0,0,-1]];
+    const colors=[0xf6f4e9,0xde413f,0x35b76f,0xffd742,0xff893e,0x3483d7];
+    const cubePose=new THREE.Group(),orientation=new THREE.Group(),layer=new THREE.Group();
+    robot.add(cubePose);cubePose.add(orientation,layer);cubePose.position.z=H;
+    const cubies=[],byPosition={},stickers=[];
+    function roundedBox(size,r){
+      const h=(size-2*r)/2,s=new THREE.Shape();s.moveTo(-h+r,-h);s.lineTo(h-r,-h);s.quadraticCurveTo(h,-h,h,-h+r);s.lineTo(h,h-r);s.quadraticCurveTo(h,h,h-r,h);s.lineTo(-h+r,h);s.quadraticCurveTo(-h,h,-h,h-r);s.lineTo(-h,-h+r);s.quadraticCurveTo(-h,-h,-h+r,-h);
+      const g=new THREE.ExtrudeGeometry(s,{depth:size-2*r,steps:1,bevelEnabled:true,bevelSegments:3,bevelSize:r,bevelThickness:r,curveSegments:4});
+      // Shrink XY profile before bevel: resulting outer dimensions remain size.
+      return g;
+    }
+    const bodyGeo=roundedBox(pitch,P.cube_edge_r_mm);
+    bodyGeo.translate(0,0,-(pitch-2*P.cube_edge_r_mm)/2);
+    for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++)for(let z=-1;z<=1;z++){
+      if(!x&&!y&&!z)continue;const g=new THREE.Group();g.position.set(x*pitch,y*pitch,z*pitch);g.userData.home=g.position.clone();g.userData.coord=[x,y,z];orientation.add(g);mesh(g,bodyGeo,dark);cubies.push(g);byPosition[[x,y,z].join(',')]=g;
+    }
+    // Rounded sticker planes sit on the commercial cube's unmodified faces.
+    const stickerShape=new THREE.Shape(),a=7.8,r=1.1;
+    stickerShape.moveTo(-a+r,-a);stickerShape.lineTo(a-r,-a);stickerShape.quadraticCurveTo(a,-a,a,-a+r);stickerShape.lineTo(a,a-r);stickerShape.quadraticCurveTo(a,a,a-r,a);stickerShape.lineTo(-a+r,a);stickerShape.quadraticCurveTo(-a,a,-a,a-r);stickerShape.lineTo(-a,-a+r);stickerShape.quadraticCurveTo(-a,-a,-a+r,-a);
+    const stickerGeo=new THREE.ShapeGeometry(stickerShape,5);
+    for(let f=0;f<6;f++)for(let k=0;k<9;k++){
+      const p=vec(N[f]).addScaledVector(vec(RIGHT[f]),k%3-1).addScaledVector(vec(DOWN[f]),Math.floor(k/3)-1);
+      const g=byPosition[p.toArray().join(',')],sticker=mesh(g,stickerGeo,mat(colors[f]));
+      sticker.position.copy(vec(N[f]).multiplyScalar(pitch/2+.025));sticker.quaternion.setFromUnitVectors(Z,vec(N[f]));
+      stickers.push({mesh:sticker,owner:g,normal:vec(N[f]),index:f*9+k});
+    }
+    function paint(){const fc=cube.toFacelets();for(const s of stickers)s.mesh.material.color.setHex(colors[fc[s.index]]).convertSRGBToLinear();}
+    function homeCubies(){for(const g of cubies){orientation.add(g);g.position.copy(g.userData.home);g.quaternion.identity();}layer.rotation.set(0,0,0);}
+    function startOrientation(){orientation.quaternion.setFromAxisAngle(vec([0,1,0]),Math.PI);}
+    // y2 about holder +y is z2 in cube notation: U<->D, R<->L, F unchanged.
+    startOrientation();paint();cubePose.visible=false;setHood(P.hood_open_deg);setLifter(0);
+    const table=mesh(scene,new THREE.PlaneGeometry(1600,1600),mat(0x1b2a31),[0,0,P.table_zw_mm-.5]);
+    const grid=new THREE.GridHelper(900,30,0x35515c,0x243a44);grid.rotation.x=Math.PI/2;grid.position.z=P.table_zw_mm-.2;scene.add(grid);
+    // Four feet at the world-horizontal base bottom.
+    for(const [x,y] of [[-20,18],[20,18],[-43,-87],[43,-87]])cylinder(base,5,1,[x,y+Math.sin(deg(P.tilt_deg))*.5,tableZ(y)+Math.cos(deg(P.tilt_deg))*.5],[0,Math.sin(deg(P.tilt_deg)),Math.cos(deg(P.tilt_deg))],dark);
+
+    // Kinematic trace interpolation; analytic fallback follows the same checker equations.
+    const trace=[{s:0,theta_deg:0,yf:H},...(checks?.flip_trace||[])];
+    const tip=checks?.checks?.D_flip_topples_forward;
+    const flipStroke=tip?.s||63.3,flipTheta=tip?.theta_deg||65.1,flipY=tip?.yf??-28.3;
+    if(trace.length===1){for(let s=7.3;s<flipStroke;s+=1){const qy=q0[0]+liftDir[0]*s,qz=q0[1]+liftDir[1]*s;let th=Math.asin(clamp(qz/P.cube_mm));const ebz=qz+P.cube_edge_r_mm*Math.sin(th);th=Math.asin(clamp(ebz/P.cube_mm));trace.push({s,theta_deg:th*180/Math.PI,yf:Math.min(H,qy-P.cube_edge_r_mm*Math.cos(Math.asin(clamp(qz/P.cube_mm)))+P.cube_mm*Math.cos(th))});}}
+    trace.push({s:flipStroke,theta_deg:flipTheta,yf:flipY});trace.sort((a,b)=>a.s-b.s);
+    function traceAt(s){
+      if(s<=-q0[1]/liftDir[1])return{theta:0,yf:H};
+      let i=1;while(i<trace.length-1&&trace[i].s<s)i++;
+      const a=trace[i-1],b=trace[i],t=clamp((s-a.s)/(b.s-a.s||1));return{theta:mix(a.theta_deg,b.theta_deg,t),yf:mix(a.yf,b.yf,t)};
+    }
+
+    let current=null,actions=[],actionIndex=0,completion=null,paused=false,verifying=false;
+    let moves=[],moveIndex=0,estimate=0,elapsed=0,lastTick=0,label='IDLE',freezeFlip=false;
+    const history=[],coverage={hood:0,turn:0,spin:0,flip:0,msg:0,loaded:0,ejected:0};
+    function log(s){const el=$('log');el.textContent+=s+'\n';if(el.textContent.length>65000)el.textContent=el.textContent.slice(-50000);el.scrollTop=el.scrollHeight;}
+    function lcd(a,b=''){/* Preserve the exact longer V5 load instruction from §3.4. */$('lcd').textContent=a+'\n'+b;}
+    function busy(){return!!current||actionIndex<actions.length||verifying;}
+    function renderQueue(){ $('queue').innerHTML=moves.map((m,i)=>`<span class="${i<moveIndex?'done':i===moveIndex?'cur':''}">${C.moveName(m)}</span>`).join(' '); }
+    function renderState(){
+      $('stHood').textContent=`${M.HOOD_NAME[displayed.hood]} ${Math.round(visual.hood)}°`;
+      $('stLifter').textContent=visual.lifter.toFixed(1);$('stEstimate').textContent=(estimate/1000).toFixed(1)+' s';
+      $('stCrank').textContent=visual.servoAngle.toFixed(1)+'°';
+      for(const k of ['flips','spins','hoods'])$('st'+k[0].toUpperCase()+k.slice(1)).textContent=displayed[k];
+      $('orientation').innerHTML=displayed.ori.map((f,p)=>`<div class="face"><small>${FACE[p]}</small><b>${FACE[f]}</b></div>`).join('');
+      $('machineStatus').textContent=verifying?'VERIFYING':busy()?(paused?'PAUSED':label):displayed.loaded?'CUBE LOADED':'AWAITING CUBE';
+      $('actionLabel').textContent=current?current.a.line:'IDLE';
+      $('progress').max=Math.max(estimate,1);$('progress').value=Math.min(elapsed,estimate);
+      $('btnLoad').textContent=displayed.loaded?'LOAD · EJECT':displayed.hood===M.LOAD?'LOAD · 장착 완료':'LOAD · 투입 준비';
+      for(const id of ['btnLoad','btnReset','btnVerify'])$(id).disabled=busy();
+      for(const id of ['btnScramble','btnSolve','btnMoves','btnFlip','btnSpin','captureFlip'])$(id).disabled=busy()||!displayed.loaded;
+      $('btnPause').disabled=!busy()||verifying;$('btnPause').textContent=paused?'계속':'일시정지';
+    }
+    function orientationFromAction(a){
+      if(a.type==='spin')for(let k=0;k<a.k;k++){const o=displayed.ori,[u,r,f,d,l,b]=o;o.splice(0,6,u,b,r,d,f,l);}
+      if(a.type==='flip'){const [u,r,f,d,l,b]=displayed.ori;displayed.ori=[b,r,u,f,l,d];}
+    }
+    function beginAction(a,quiet=false){
+      if(!(a.type in coverage))throw Error('Unknown mechanism action: '+a.type);
+      const state={a,ms:0,duration:M.Mechanism.durationMs(a),q:orientation.quaternion.clone(),cup:visual.cup,hood:visual.hood,selected:[]};
+      current=state;if(!quiet)log(a.line);history.push(a.line);if(history.length>3000)history.shift();coverage[a.type]++;
+      if(a.type==='turn'){
+        if(displayed.hood!==M.CLOSE)throw Error('TURN requires CLOSE');
+        if(displayed.ori[3]!==Math.floor(a.m/3))throw Error('Logical turn is not at D');
+        robot.updateMatrixWorld(true);
+        for(const g of cubies)if(g.userData.home.clone().applyQuaternion(orientation.quaternion).z<-pitch/2){layer.attach(g);state.selected.push(g);}
+        if(state.selected.length!==9)throw Error('Bottom layer must contain 9 cubies');
+      }
+      return state;
+    }
+    function poseFlip(c,theta,yf){
+      visual.theta=theta;visual.yf=yf;const t=deg(theta);
+      cubePose.position.set(0,yf+H*(-Math.cos(t)+Math.sin(t)),H*(Math.sin(t)+Math.cos(t)));
+      orientation.quaternion.copy(c.q).premultiply(new THREE.Quaternion().setFromAxisAngle(X,-t));
+    }
+    function sampleAction(c,t){
+      const a=c.a,e=ease(t);t=clamp(t);
+      if(a.type==='hood')setHood(mix(c.hood,hoodAngles[a.pos],e));
+      if(a.type==='spin'){
+        const angle=(a.k===3?1:-a.k)*Math.PI/2*e;visual.cup=c.cup+angle;cup.rotation.z=visual.cup;
+        orientation.quaternion.copy(c.q).premultiply(new THREE.Quaternion().setFromAxisAngle(Z,angle));
+      }
+      if(a.type==='turn'){
+        const target=(a.k===0?1:a.k===1?2:-1)*Math.PI/2,over=Math.sign(target)*deg(7.2);
+        const angle=t<.82?(target+over)*ease(t/.82):mix(target+over,target,ease((t-.82)/.18));
+        layer.rotation.z=angle;visual.cup=c.cup+angle;cup.rotation.z=visual.cup;
+      }
+      if(a.type==='flip'){
+        const ms=t*2300;
+        // Reference phase proportions: 275 hood + 900 lift + 250 topple +
+        // 600 return + 275 hood. Normalize to durationMs so revised firmware
+        // timings still complete every phase and always retract the lifter.
+        if(ms<275){setHood(mix(P.hood_open_deg,P.hood_flip_deg,ease(ms/275)));setLifter(0);poseFlip(c,0,H);}
+        else if(ms<1175){setHood(P.hood_flip_deg);const s=flipStroke*ease((ms-275)/900),p=traceAt(s);setLifter(s);poseFlip(c,p.theta,p.yf);}
+        else if(ms<1425){setHood(P.hood_flip_deg);setLifter(flipStroke);const t=(ms-1175)/250;poseFlip(c,mix(flipTheta,90,t*t),flipY);}
+        else{poseFlip(c,90,-H);cubePose.position.set(0,0,H);setLifter(ms<2025?flipStroke*(1-ease((ms-1425)/600)):0);setHood(ms<2025?P.hood_flip_deg:mix(P.hood_flip_deg,P.hood_open_deg,ease((ms-2025)/275)));}
+      }
+    }
+    function finishAction(c,quiet=false){
+      const a=c.a;sampleAction(c,1);
+      if(a.type==='hood'){displayed.hood=a.pos;displayed.hoods++;}
+      if(a.type==='turn'){cube.move(a.m);homeCubies();paint();moveIndex++;if(!quiet)renderQueue();}
+      if(a.type==='spin'){orientationFromAction(a);displayed.spins++;}
+      if(a.type==='flip'){orientationFromAction(a);displayed.flips++;cubePose.position.set(0,0,H);visual.theta=0;visual.yf=H;}
+      if(a.type==='msg'){
+        if(a.line==='READY TO LOAD')lcd('PLACE CUBE SOLVED','WHITE DOWN GRN FRONT');
+        if(a.line==='EJECT')lcd('REMOVE CUBE');
+      }
+      if(a.type==='loaded'){
+        displayed.loaded=true;displayed.ori=M.ORI_START.slice();cube.reset();homeCubies();startOrientation();paint();cubePose.position.set(0,0,H);cubePose.visible=true;
+        lcd('CUBE LOADED','SCRAMBLE / SOLVE');$('loadHint').textContent='장착 완료 · LOAD를 누르면 배출합니다.';
+      }
+      if(a.type==='ejected'){displayed.loaded=false;cubePose.visible=false;lcd('REMOVE CUBE');$('loadHint').textContent='큐브 제거 · LOAD를 눌러 새 큐브를 장착합니다.';}
+      current=null;
+    }
+    function enqueue(list,name,done,seq=[]){
+      actions=list;actionIndex=0;completion=done;label=name;estimate=list.reduce((s,a)=>s+M.Mechanism.durationMs(a),0);elapsed=0;paused=false;lastTick=performance.now();
+      moves=seq.slice();moveIndex=0;renderQueue();$('summary').textContent=`${seq.length} moves · ${list.length} actions · ${(estimate/1000).toFixed(1)} s`;renderState();
+    }
+    function tick(delta){
+      let budget=delta;
+      while(current||actionIndex<actions.length){
+        if(!current)beginAction(actions[actionIndex++]);
+        const c=current;
+        if(c.duration===0){finishAction(c);continue;}
+        const consume=Math.min(budget,c.duration-c.ms);c.ms+=consume;budget-=consume;elapsed+=consume;
+        sampleAction(c,c.ms/c.duration);
+        if(freezeFlip&&c.a.type==='flip'&&c.ms>=c.duration*1050/2300){freezeFlip=false;c.ms=c.duration*1050/2300;sampleAction(c,c.ms/c.duration);paused=true;break;}
+        if(c.ms>=c.duration)finishAction(c);else break;
+      }
+      if(!current&&actionIndex>=actions.length&&completion){const done=completion;completion=null;done();}
+    }
+    function resetCounters(){mech.resetCounters();displayed.flips=displayed.spins=displayed.hoods=0;}
+    function requireLoaded(){if(displayed.loaded)return true;log('ERR not loaded');return false;}
+    function doLoad(){if(busy())return;const was=mech.loaded;enqueue(mech.load(),was?'EJECTING':'LOADING',()=>{});}
+    function doMoves(text){
+      if(busy()||!requireLoaded())return;let seq;
+      try{seq=C.parseMoves(text);}catch(_){log('ERR bad moves');lcd('ERR bad moves');return;}
+      if(!seq.length)return;resetCounters();enqueue(mech.planSeq(seq),'MOVING',()=>{log(`MOVED ${seq.length} flips=${mech.flips} spins=${mech.spins}`);lcd('CUBE ROBOT V5',cube.isSolved()?'solved':'scrambled');},seq);
+    }
+    function doScramble(seed){
+      if(busy()||!requireLoaded())return;resetCounters();const seq=C.scramble(seed,20);
+      log(`SCRAMBLE seed=${seed} (20): ${C.seqToString(seq)}`);lcd('SCRAMBLING',`seed ${seed}`);
+      enqueue(mech.planSeq(seq),'SCRAMBLING',()=>{log(`SCRAMBLED exec=${Math.round(estimate)}ms flips=${mech.flips} spins=${mech.spins}`);lcd('SCRAMBLED 20mv',`seed ${seed}`);},seq);
+    }
+    function doSolve(){
+      if(busy()||!requireLoaded())return;if(cube.isSolved()){log('ALREADY SOLVED');lcd('ALREADY SOLVED');return;}
+      lcd('SOLVING...','CFOP');log('SOLVING');const t0=performance.now();let result;
+      try{result=new S.Solver().solve(cube.clone());}catch(e){log('SOLVE FAILED '+e.message);lcd('SOLVE FAILED');return;}
+      const calc=performance.now()-t0;$('stages').tBodies[0].textContent='';
+      for(const st of result.stages){log(`${st.name} (${st.moves.length}): ${C.seqToString(st.moves)} | nodes=${st.nodes} ms=${st.ms.toFixed(1)}`);const row=$('stages').tBodies[0].insertRow();for(const value of [st.name,st.moves.length,st.nodes,st.ms.toFixed(1)])row.insertCell().textContent=value;}
+      resetCounters();log(`TOTAL ${result.moves.length}: ${C.seqToString(result.moves)}`);
+      enqueue(mech.planSeq(result.moves),'EXECUTING',()=>{const ok=cube.isSolved();log(`SOLVED ok=${+ok} moves=${result.moves.length} flips=${mech.flips} spins=${mech.spins} calc=${Math.round(calc)}ms exec=${Math.round(estimate)}ms`);lcd(ok?'SOLVED!':'MISMATCH',`${result.moves.length}mv`);},result.moves);
+    }
+    function doFlip(freeze=false){if(busy()||!requireLoaded())return;freezeFlip=freeze;enqueue(mech.manualFlip(),'FLIPPING',()=>lcd('CUBE LOADED','SCRAMBLE / SOLVE'));}
+    function doSpin(k=1){if(busy()||!requireLoaded())return;enqueue(mech.manualSpin(k),'SPINNING',()=>lcd('CUBE LOADED','SCRAMBLE / SOLVE'));}
+    function reset(){
+      if(busy())return;cube.reset();mech.reset();Object.assign(displayed,{hood:M.OPEN,loaded:false,ori:M.ORI_START.slice(),flips:0,spins:0,hoods:0});
+      homeCubies();startOrientation();paint();cubePose.visible=false;cubePose.position.set(0,0,H);setHood(P.hood_open_deg);setLifter(0);visual.cup=0;cup.rotation.z=0;
+      actions=[];actionIndex=0;completion=null;moves=[];moveIndex=0;estimate=elapsed=0;paused=false;freezeFlip=false;
+      $('stages').tBodies[0].textContent='';$('summary').textContent='큐브를 장착해 시작하세요.';$('loadHint').textContent='LOAD 두 번: 투입 준비 → 장착. 흰색 아래 · 초록색 앞.';
+      renderQueue();renderState();log('RESET');lcd('CUBE ROBOT V5','LOAD: PLACE CUBE');
+    }
+
+    // Orbit controls without extra CDN dependencies; all presets show the rear servos.
+    const presets={audience:[210,-350,205],side:[390,0,110],top:[0,0,500],rear:[-220,340,190]};
+    const target=vec([0,28,5]);let radius=420,azimuth=0,elevation=.45;
+    function updateCamera(){camera.position.copy(target).add(vec([radius*Math.cos(elevation)*Math.sin(azimuth),-radius*Math.cos(elevation)*Math.cos(azimuth),radius*Math.sin(elevation)]));camera.lookAt(target);}
+    function setView(name){const p=vec(presets[name]||presets.audience).sub(target);radius=p.length();azimuth=Math.atan2(p.x,-p.y);elevation=Math.asin(p.z/radius);updateCamera();document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===name)));}
+    let dragging=null;
+    canvas.addEventListener('pointerdown',e=>{dragging=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);});
+    canvas.addEventListener('pointermove',e=>{if(!dragging)return;azimuth-=(e.clientX-dragging[0])*.007;elevation=clamp(elevation+(e.clientY-dragging[1])*.007,-.08,Math.PI/2-.001);dragging=[e.clientX,e.clientY];updateCamera();});
+    canvas.addEventListener('pointerup',()=>{dragging=null;});canvas.addEventListener('pointercancel',()=>{dragging=null;});
+    canvas.addEventListener('wheel',e=>{e.preventDefault();radius=clamp(radius*Math.exp(e.deltaY*.001),180,900);updateCamera();},{passive:false});
+    function resize(){const r=$('stage').getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();}
+    new ResizeObserver(resize).observe($('stage'));setView('audience');resize();
+    async function saveScreenshot(name){
+      renderer.render(scene,camera);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+      if(!blob)throw Error('Canvas capture failed');const r=await fetch('/__screenshot?name='+encodeURIComponent(name),{method:'POST',headers:{'Content-Type':'image/png'},body:blob});
+      const text=await r.text();if(!r.ok)throw Error(text);$('shotStatus').textContent=text;return text;
+    }
+
+    // A single deterministic animation path is shared by playback and regression.
+    // The regression samples real transforms, checks every sticker across turn
+    // boundaries, and checks the quaternion against the independent planner ori.
+    function assert(ok,message){if(!ok)throw Error('Verification: '+message);}
+    function checkOrientation(){
+      for(let p=0;p<6;p++){const f=displayed.ori[p],n=vec(N[f]).applyQuaternion(orientation.quaternion);assert(n.distanceTo(vec(N[p]))<1e-6,'quaternion / ori '+FACE[p]);}
+      assert(displayed.ori.join()===mech.ori.join(),'planner orientation');
+    }
+    function stickerPositions(){
+      const result=[];
+      for(const s of stickers){const q=s.owner.quaternion,point=s.mesh.position.clone().applyQuaternion(q).add(s.owner.position),normal=s.normal.clone().applyQuaternion(q);
+        if(s.owner.parent===layer){point.applyQuaternion(layer.quaternion);normal.applyQuaternion(layer.quaternion);}else{point.applyQuaternion(orientation.quaternion);normal.applyQuaternion(orientation.quaternion);}
+        result.push({point,normal,color:s.mesh.material.color.getHex()});}
+      return result;
+    }
+    const samples=[0,.10,.32,.50,.56,.62,.78,.90,1];
+    async function verify(){
+      if(busy())return;reset();verifying=true;renderState();const report=$('verification');report.textContent='검증 0 / 300';
+      const seen=new Set(),variants=new Set();let tested=0;
+      function run(list){
+        const expected=list.map(a=>a.line),actual=[];
+        for(const a of list){const c=beginAction(a,true);actual.push(a.line);seen.add(a.type);variants.add(a.type+':'+(a.k??a.pos??a.line));
+          for(const t of samples){sampleAction(c,t);assert([...orientation.quaternion.toArray(),...cubePose.position.toArray(),crank.rotation.x,link.rotation.x].every(Number.isFinite),'finite transforms');assert(visual.linkageError<1e-6,'70 mm link closure');}
+          const before=a.type==='turn'?stickerPositions():null;finishAction(c,true);
+          if(a.type==='flip'){assert(visual.lifter===0&&Math.abs(visual.hood-P.hood_open_deg)<1e-6,'FLIP returns lifter and hood');assert(cubePose.position.distanceTo(vec([0,0,H]))<1e-6,'FLIP seated alignment');}
+          if(before){const after=stickerPositions();for(const b of before){assert(after.some(a=>a.color===b.color&&a.point.distanceTo(b.point)<.01&&a.normal.distanceTo(b.normal)<.001),'sticker continuity at TURN '+a.line);}}
+          tested++;
+        }
+        assert(actual.join('\n')===expected.join('\n'),'action line order');
+        checkOrientation();assert(displayed.hood===mech.hood,'hood state');assert(displayed.loaded===mech.loaded,'loaded state');
+        for(const k of ['flips','spins','hoods'])assert(displayed[k]===mech[k],'counter '+k);
+      }
+      try{
+        // Check the Rev B upper-axis branch independently of playback samples.
+        const middleStroke=linkLength+crankRadius-Math.sqrt(linkLength**2-crankRadius**2);
+        for(const [s,theta] of [[0,0],[middleStroke,90],[P.lift_stroke_mm,180]]){
+          setLifter(s);assert(Math.abs(visual.servoAngle-theta)<1e-4,'upper-axis crank angle '+theta);assert(visual.linkageError<1e-6,'crank dead-centre closure');
+        }setLifter(0);
+        run(mech.load());assert($('lcd').textContent==='PLACE CUBE SOLVED\nWHITE DOWN GRN FRONT','READY LCD');run(mech.load());
+        run(mech.planSeq(C.parseMoves("R U R' U' F D2 B L")));
+        // Include every direction and all marker actions independently of scrambles.
+        for(const k of [1,2,3])run(mech.manualSpin(k));run(mech.manualFlip());run(mech.eject());run(mech.load());
+        for(let seed=1;seed<=300;seed++){
+          cube.reset();paint();resetCounters();const scramble=C.scramble(seed,20),scrambleActions=mech.planSeq(scramble);run(scrambleActions);
+          log(`VERIFY seed=${seed}`);log(`SCRAMBLED exec=${scrambleActions.reduce((s,a)=>s+M.Mechanism.durationMs(a),0)}ms flips=${mech.flips} spins=${mech.spins}`);
+          const t0=performance.now(),result=new S.Solver().solve(cube.clone()),calc=Math.round(performance.now()-t0);resetCounters();
+          const solveActions=mech.planSeq(result.moves);run(solveActions);assert(cube.isSolved(),'seed '+seed);
+          log(`SOLVED ok=1 moves=${result.moves.length} flips=${mech.flips} spins=${mech.spins} calc=${calc}ms exec=${solveActions.reduce((s,a)=>s+M.Mechanism.durationMs(a),0)}ms`);
+          if(seed%5===0){report.textContent=`S → V ${seed} / 300 · ${tested} actions`;await new Promise(resolve=>setTimeout(resolve,0));}
+        }
+        assert(seen.size===7,'all seven action types');for(const k of [0,1,2])assert(variants.has('turn:'+k),'turn variant '+k);
+        report.textContent=`PASS · 300 / 300 SOLVED ok=1\n${tested} actions · ${[...seen].join(', ')}\nori / counters / 54 stickers / finite transforms / line order OK`;
+        log('VERIFY PASS seeds=1..300');
+      }catch(e){report.textContent='FAIL · '+e.message;showError(e);}
+      finally{verifying=false;reset();renderState();}
+    }
+
+    $('btnLoad').onclick=doLoad;$('btnReset').onclick=reset;$('btnScramble').onclick=()=>doScramble(Number($('seed').value)||0);$('btnSolve').onclick=doSolve;
+    $('btnMoves').onclick=()=>doMoves($('moves').value);$('moves').addEventListener('keydown',e=>{if(e.key==='Enter')doMoves(e.target.value);});
+    $('btnFlip').onclick=()=>doFlip();$('btnSpin').onclick=()=>doSpin();$('captureFlip').onclick=()=>doFlip(true);
+    $('btnPause').onclick=()=>{paused=!paused;lastTick=performance.now();renderState();};
+    document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+    $('showHood').onchange=e=>{hood.visible=e.target.checked;};$('showTowers').onchange=e=>{towers.visible=e.target.checked;};$('showBase').onchange=e=>{base.visible=e.target.checked;};
+    $('shotRobot').onclick=()=>saveScreenshot('sim_v5_robot.png').catch(e=>{$('shotStatus').textContent=e.message;});
+    $('shotFlip').onclick=()=>saveScreenshot('sim_v5_flip.png').catch(e=>{$('shotStatus').textContent=e.message;});$('btnVerify').onclick=verify;
+    $('modelSource').textContent=`V5 Rev B · ${Object.values(assetModes).filter(m=>m==='STL').length}/7 STL · ${checks?'검사 궤적':'기본 궤적'} · 57 mm`;
+    function animate(now){
+      requestAnimationFrame(animate);const delta=Math.min(100,now-(lastTick||now));lastTick=now;
+      if(!paused&&!verifying)tick(delta*Number($('speed').value));renderState();renderer.render(scene,camera);
+    }
+    paint();renderQueue();renderState();log('READY cube-robot v5 (S [seed] | V | M <moves> | L | E | F | Y <k> | R)');
+    window.CubeSim={cube,mech,params:P,assetModes,visual,displayed,errors,coverage,history,doLoad,doMoves,doScramble,doSolve,doFlip,doSpin,reset,verify,setView,saveScreenshot,
+      state:()=>({busy:busy(),paused,action:current?.a,estimate,elapsed,quaternion:orientation.quaternion.toArray(),...displayed,visual:{...visual}})};
+    requestAnimationFrame(animate);
+  }catch(e){showError(e);}
 })();

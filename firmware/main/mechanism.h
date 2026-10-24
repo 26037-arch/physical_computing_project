@@ -1,48 +1,51 @@
-// mechanism.h — V4 기구 절차: 이송 유닛 4개(F/B 쌍, R/L 쌍, 아래 D 헤드, 잠금 막대)의 서보 크랭크 결합·후퇴, 뒤집기, 장착/배출
-//   규칙은 docs/HARDWARE_V4.md 3절과 같고 sim/mechanism.js 와 동작 순서·출력 줄·횟수(flips/regrips)가 같다.
-//   논리 면(풀이기) → 물리 면: orient 0 = 항등, orient 1 = x축 180° 뒤집힘 (U↔D, F↔B). 회전 방향은 그대로.
-//   위(U)에는 모터가 없으므로 물리 U 가 필요한 수 앞에는 FLIP 을 끼워 넣어 그 면을 아래 D 헤드로 가져온다.
-//   잠금 막대(LOCK)는 아래에서 중공 D 축을 지나 큐브 중심의 센터 판 소켓에 들어가 코어를 고정한다(V3 중앙축 대신).
-//   면을 돌리는 동안 항상 올라가 있고 뒤집기 때만 내린다.
-//   결합은 유닛마다 마이크로스위치로 확인하며, 확인되지 않으면 그 수를 실행하지 않고 false 를 돌려준다.
-//   가상 모드(Motors::isEnabled()==false)에서는 절차를 계획·출력만 하고 서보·센서·스텝은 건너뛴다.
+// mechanism.h — V5 기구 절차 (docs/HARDWARE_V5.md 3절): 컵 스텝모터 1 + 후드 서보 + 리프터 서보.
+//   규칙·동작 순서·출력 줄은 sim/mechanism.js 와 같다 (flips/spins 횟수까지 Wokwi 로 교차검증).
+//   물리 위치: U(0) R(1) F(2) D(3) L(4) B(5). ori[p] = 그 물리 위치에 지금 있는 논리 면.
+//   모든 층 회전은 아래(D 위치)에서만 한다. 논리 면 f 를 아래로 가져오는 재배향:
+//     D: 없음 / F: FLIP / R: SPIN y → FLIP / L: SPIN y' → FLIP / B: SPIN y2 → FLIP / U: FLIP → FLIP
+//   SPIN y = 큐브 전체가 위에서 봐서 시계 방향(U 와 같은 방향) = 컵 시계. FLIP = x' (F→D, D→B, B→U, U→F).
+//   TURN D = 아래 층을 아래에서 봐서 시계 = 컵을 위에서 봐서 반시계 (+ 오버슈트 2 스텝 후 복귀).
+//   스핀·뒤집기 앞에는 HOOD OPEN, 층 회전 앞에는 HOOD CLOSE 가 자동으로 들어간다(상태가 바뀔 때만 줄을 낸다).
+//   가상 모드(Motors::isEnabled()==false)에서는 줄만 내고 서보·스텝은 생략한다.
 #pragma once
 #include <Arduino.h>
 #include <Servo.h>
 #include "motors.h"
 
-enum Unit : uint8_t { UNIT_FB = 0, UNIT_RL = 1, UNIT_D = 2, UNIT_LOCK = 3 };
+enum HoodPos : uint8_t { HOOD_CLOSE = 0, HOOD_OPEN = 1, HOOD_LOAD = 2 };
 
 class Mechanism {
  public:
   void begin(Motors* m);
-  bool prepare(uint8_t logicalMove, uint8_t& physMove);   // 지지 전환(+뒤집기) 후 돌릴 물리 수 번호
-  bool flip();                                             // 큐브 x축 180° (R/L 결합, 나머지 해제, 막대 내림)
-  bool load();                                             // LOAD 버튼 한 단계 (비어 있음→D 결합·큐브 대기 / 올려놓음→막대·F/B 결합 / 장착됨→배출)
+  bool doMove(uint8_t logicalMove);     // 재배향(+HOOD CLOSE) → TURN. 실패(장착 안 됨)면 false
+  bool flip();                          // 큐브 x' (후드 OPEN → 70° → 리프터 올렸다 내림 → 60°)
+  bool spin(uint8_t k);                 // 큐브 전체 y^k (k 1..3), 후드 OPEN
+  bool load();                          // LOAD 버튼 한 단계 (비어 있음→후드 LOAD·큐브 대기 / 넣음→후드 OPEN·장착 / 장착됨→배출)
   bool eject();
   bool isLoaded() const { return loaded; }
-  bool waitingForCube() const { return !loaded && engaged[UNIT_D]; }
-  void resetCounters() { flips = 0; regrips = 0; }
+  bool waitingForCube() const { return !loaded && hoodPos == HOOD_LOAD; }
+  void resetCounters() { flips = 0; spins = 0; hoods = 0; }
   void printStatus(Print& p);
-  uint8_t orient = 1;          // 장착은 흰색(U) 면을 아래로 → 논리 U 가 아래 D 헤드
-  uint16_t flips = 0, regrips = 0;
-  uint16_t sensorTimeoutMs = 1500;   // 결합/해제 확인 대기 ms (시리얼 T 명령으로 조정; 0 = 최대 60 s 대기, 시운전·Wokwi 시나리오 지연용)
+  uint8_t ori[6];
+  uint16_t flips = 0, spins = 0, hoods = 0;
+  // 조정값 (시리얼 H/K/O 명령으로 바꾸고 맞으면 아래 기본값을 고친다)
+  uint8_t hoodDeg[3] = {15, 75, 135};   // CLOSE / OPEN / LOAD (후드 각 0/60/120 + 15)
+  uint8_t hoodFlipDeg = 105;            // 뒤집는 동안 후드 (90 + 15: 팔이 리프터 크로스바 뒤로 비킨다)
+  uint8_t liftUpDeg = 180;              // 리프터 최상 (크랭크 사점)
+  uint8_t overshootSteps = 2;           // 층 회전 오버슈트 (2 스텝 = 3.6°)
 
  private:
   Motors* motors = nullptr;
-  Servo servo[4];
-  bool engaged[4] = {false, false, false, false};
+  Servo hood, lift;
+  uint8_t hoodPos = HOOD_OPEN;
   bool loaded = false;
   bool virt() const { return !motors->isEnabled(); }
-  bool engage(uint8_t unit);
-  bool retract(uint8_t unit);
-  bool waitSensor(uint8_t pin, bool wantLow);
+  void setHood(uint8_t pos);
+  void sweep(Servo& s, uint8_t from, uint8_t to, uint16_t ms);
+  void resetOri();
 };
 
-// 핀 배치 (diagram.json, docs/HARDWARE_V4.md 4절) — UNO R3/R4 공통 헤더
-static const uint8_t SERVO_PINS[4] = {8, 9, 10, 11};     // F·B 서보 2개 같은 신호, R·L 2개 같은 신호, D 서보, 막대 서보
-static const uint8_t SENS_PINS[4] = {12, 13, A0, A1};    // F·B / R·L 결합 스위치 직렬 (둘 다 눌림 = LOW), D 스위치, 막대 스위치. 풀업
-static const uint8_t SERVO_ENGAGED_DEG = 0, SERVO_RETRACTED_DEG = 180;   // 크랭크 r12 → 24 mm (막대는 r15 → 30 mm)
-// 제작 보강 Rev A: 프레임/체결/가이드 보강, 막대 끝 -23.8 mm·중공 ID12.5.
-// 캐리지 행정24/30과 위 서보 각도는 동일(막대의 캐리지 내 고정 위치로 끝을 조절).
-static const uint16_t SERVO_TRAVEL_MS = 400;      // 이송 명목 시간
+// 핀 배치 (diagram.json, docs/HARDWARE_V5.md 4절) — UNO R3/R4 공통 헤더
+static const uint8_t HOOD_SERVO_PIN = 8, LIFT_SERVO_PIN = 9;
+static const uint8_t LIFT_DOWN_DEG = 0;
+static const uint16_t HOOD_MS = 300, LIFT_UP_MS = 700, LIFT_DOWN_MS = 400, FLIP_SETTLE_MS = 250;   // 뒤집기 합계 약 1.65 s

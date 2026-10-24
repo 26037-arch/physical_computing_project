@@ -20,14 +20,17 @@ tools/algs.js (OLL 57 · PLL 21, 사람 표기)      sim/cube.js (큐브 모델,
                                                        node tools/gen_wokwi_test.js <seed>
                  │                                     │  → tests/solve_seed<seed>.test.yaml
                  └──────────► scripts/simulate.ps1 -Scenario tests/solve_seed1.test.yaml
-                              (Wokwi: A4988×6 + NEMA17×6 + LCD + 버튼 + 부저, diagram.json)
+                              (Wokwi: A4988×1 + NEMA17×1 + 서보 2 + LCD + 버튼 + 부저, diagram.json; 기구 줄 flips/spins 도 비교)
                               보드 시리얼 출력 == JS 풀이 출력 ⇒ 통과
 
-tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|step, parameters.json
-  (V1: fusion/scripts/cube_robot_parts.py ──(MCP fusion_exec)──► models/*.stl)   │
-                                                     node tools/embed_models_v4.js ─► sim/models.js (헤드 STL 7종 + 매개변수)
+tools/robot_v5_params.py (치수 P) ──► tools/check_robot_v5.py (2D 운동학·힘 평형) ──► models/robot_v5/kinematic_checks.json
+                                   └──► tools/build_robot_v5.py (CadQuery) ──► models/robot_v5/print/*.stl|step, robot_assembly.step/glb, parameters.json
+                                        tools/check_robot_v5_cad.py (3D 간섭) ──► mechanical_checks.json
+                                        node tools/embed_models_v5.js ─► sim/models.js (출력 6종 STL + 매개변수)
+                                        fusion/scripts/import_robot_v5.py ──(Fusion MCP script)──► models/robot_v5/CubeRobotV5.f3d
                                                                                    │
-                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 도넛 큐브 + 측면 2핀 헤드 4 + 아래 D 헤드 + 잠금 막대, 서보 크랭크 결합/후퇴·뒤집기)
+                                            sim/index.html + sim/app.js (Three.js 3D 시뮬레이터: 시중 큐브 + 20° 컵 + 후드 + 리프터, sim/mechanism.js 동작 목록 재생)
+  (이력: V1 fusion/scripts/cube_robot_parts.py, V2/V3/V4 tools/build_robot_v*.py, models/robot_v2~v4)
 ```
 
 ## 단계별 명령
@@ -55,7 +58,7 @@ tools/build_robot_v2.py (CadQuery) ──► models/robot_v2/{cube,head}/*.stl|s
 | 도구 | 쓰임 |
 |---|---|
 | Arduino CLI | Uno / UNO R4 WiFi 두 보드 컴파일, 플래시·RAM 사용량 확인 |
-| Wokwi (CLI + MCP) | A4988·스테퍼 6세트 회로 시뮬레이션, `write-serial`/`wait-serial` 시나리오로 자동 검증 |
+| Wokwi (CLI + MCP) | A4988·스테퍼 1 + 서보 2 회로 시뮬레이션, `write-serial`/`wait-serial`/`set-control` 시나리오로 자동 검증 (풀이 교차검증 + 실제 모드 기구 절차) |
 | Fusion 360 (MCP `fusion_exec`) | Python API 로 부품 3종 생성, 치수 검사, STL 내보내기 (`CubeRobotParts` 문서로 저장) |
 | Codex 플러그인 | AVR 핫패스 최적화(solver.cpp), 3D 부품 설계 검토(`docs/DESIGN_REVIEW.md`), 시뮬레이터·보고서 리뷰 |
 

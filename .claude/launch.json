@@ -18,6 +18,15 @@
         "8766"
       ],
       "port": 8766
+    },
+    {
+      "name": "sim3",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/serve.js",
+        "8767"
+      ],
+      "port": 8767
     }
   ]
 }
