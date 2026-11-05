@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V5 큐브 로봇 배선 안내 — Arduino UNO R4 WiFi</title>
+<style>
+  :root {
+    --ink: #1d2730; --muted: #5b6770; --line: #d7dde3; --bg: #ffffff; --panel: #f4f7f9;
+    --red: #d62828; --blk: #222; --ylw: #e0a800; --grn: #2a9d3f; --blu: #1f6fd0; --org: #f26b1d; --pur: #7b3fbf; --teal: #0f7f8c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.55; }
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 36px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 16px; margin: 20px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 14.5px; }
+  th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+  td.pin, th.pin { white-space: nowrap; font-weight: 700; }
+  code, pre { font-family: Consolas, "D2Coding", monospace; }
+  code { background: var(--panel); padding: 1px 5px; border-radius: 3px; font-size: 13.5px; }
+  pre { background: #1e2a33; color: #e8eef2; padding: 12px 14px; border-radius: 6px; overflow-x: auto; font-size: 13.5px; }
+  .warn { border-left: 5px solid var(--red); background: #fff3f3; padding: 10px 14px; margin: 12px 0; }
+  .note { border-left: 5px solid var(--blu); background: #eef4fd; padding: 10px 14px; margin: 12px 0; }
+  .ok   { border-left: 5px solid var(--grn); background: #eefaf0; padding: 10px 14px; margin: 12px 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; background: #fff; }
+  .card h3 { margin-top: 0; }
+  .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid rgba(0,0,0,.2); }
+  figure { margin: 10px 0 6px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: #fff; overflow-x: auto; }
+  figcaption { color: var(--muted); font-size: 13px; padding: 4px 6px 0; }
+  svg text { font-family: "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif; }
+  ol li, ul li { margin: 3px 0; }
+  .chk li { list-style: none; }
+  .chk input { margin-right: 8px; transform: scale(1.15); }
+  @media print { main { max-width: none; padding: 0; } h2 { page-break-after: avoid; } figure { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+<main>
+<h1>V5 큐브 로봇 배선 안내 — Arduino UNO R4 WiFi</h1>
+<p class="sub">기준 문서: <code>docs/HARDWARE_V5.md</code> 4절 · <code>v5/firmware/main/motors.h</code>·<code>mechanism.h</code>·<code>main.ino</code> · <code>v5/diagram.json</code> (세 곳의 핀 번호가 같음을 확인함). UNO R3 와 헤더 핀 배치가 같으므로 배선은 동일하고, R4 에서만 달라지는 점을 6절에 적었다.</p>
+
+<h2>1. 한눈에 보는 핀 배치</h2>
+<table>
+  <thead><tr><th class="pin">UNO R4 핀</th><th>연결 대상</th><th>역할</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td class="pin">D2</td><td>A4988 <b>STEP</b></td><td>컵(홀더) 스텝모터 펄스</td><td>50 스텝 = 90°(풀스텝)</td></tr>
+    <tr><td class="pin">D7</td><td>A4988 <b>DIR</b></td><td>회전 방향</td><td><code>CW_LEVEL</code> HIGH = 위에서 봐서 시계. 반대로 돌면 <code>motors.h</code> 에서 뒤집음</td></tr>
+    <tr><td class="pin">D6</td><td>A4988 <b>ENABLE</b></td><td>드라이버 켜기 (LOW = 켬)</td><td>대기 중 유지 전류 차단용(선택)</td></tr>
+    <tr><td class="pin">D8</td><td>MG996R 신호(주황)</td><td><b>후드</b> 서보</td><td>CLOSE 15° / OPEN 75° / FLIP 105° / LOAD 135°</td></tr>
+    <tr><td class="pin">D9</td><td>SG90 신호(주황)</td><td><b>리프터</b> 서보</td><td>0° = 아래, 180° = 위</td></tr>
+    <tr><td class="pin">A2</td><td>버튼 → GND</td><td>조작 버튼 1개</td><td>내부 풀업. 짧게 = 섞기/풀기, 1.2 s 길게 = LOAD 단계</td></tr>
+    <tr><td class="pin">A3</td><td>부저(+) → 부저(−) GND</td><td>알림음 (<code>tone()</code>)</td><td>R4 는 핀당 8 mA 제한 → 직렬 100 Ω 권장 (6절)</td></tr>
+    <tr><td class="pin">A4 (SDA)</td><td>LCD1602 I2C 백팩 <b>SDA</b></td><td rowspan="2">상태 표시, I2C 주소 <code>0x27</code></td><td rowspan="2">R4 의 A4/A5 는 I2C <code>Wire</code> 와 같은 선. 옆의 Qwiic 커넥터에는 꽂지 말 것(3.3 V, <code>Wire1</code>)</td></tr>
+    <tr><td class="pin">A5 (SCL)</td><td>LCD1602 I2C 백팩 <b>SCL</b></td></tr>
+    <tr><td class="pin">5V</td><td>A4988 VDD, LCD VCC</td><td>로직 5 V</td><td>서보 전원은 여기서 뽑지 않는다</td></tr>
+    <tr><td class="pin">GND ×3</td><td>A4988 GND, LCD GND, 버튼, 부저, 서보 GND, 12 V(−), 5 V 어댑터(−)</td><td>공통 접지</td><td>모든 전원의 (−) 를 반드시 보드 GND 와 묶는다</td></tr>
+    <tr><td class="pin">USB-C</td><td>PC 또는 5 V USB 어댑터</td><td>보드 전원·시리얼(115200)</td><td>VIN 은 비워 둔다</td></tr>
+  </tbody>
+</table>
+
+<h2>2. 배선도 (신호선)</h2>
+<figure>
+<svg viewBox="0 0 1200 665" width="100%" style="min-width:900px" xmlns="http://www.w3.org/2000/svg" aria-label="UNO R4 WiFi 신호선 배선도">
+  <defs>
+    <marker id="flagR" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+  </defs>
+  <style>
+    .wire { fill: none; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+    .pin { fill: #fff; stroke: #333; stroke-width: 1.5; }
+    .lbl { font-size: 12px; fill: #1d2730; }
+    .lblb { font-size: 12px; font-weight: 700; fill: #1d2730; }
+    .box { fill: #f9fbfc; stroke: #334; stroke-width: 1.5; rx: 6; }
+    .ttl { font-size: 13px; font-weight: 700; fill: #1d2730; }
+    .flag { font-size: 11px; font-weight: 700; }
+    .grey { fill: #9aa5ad; font-size: 11px; }
+  </style>
+
+  <!-- ===== UNO R4 WiFi ===== -->
+  <rect x="420" y="100" width="260" height="440" rx="10" fill="#1e8a98" stroke="#0b4f58" stroke-width="2"/>
+  <rect x="432" y="88" width="56" height="22" rx="4" fill="#cfd8dc" stroke="#546e7a"/>
+  <text x="460" y="103" text-anchor="middle" font-size="11" fill="#1d2730">USB-C</text>
+  <text x="550" y="135" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">Arduino UNO R4 WiFi</text>
+  <text x="550" y="153" text-anchor="middle" fill="#dff3f6" font-size="11">헤더 핀 배치 = UNO R3 (5 V 로직)</text>
+  <rect x="560" y="300" width="100" height="70" rx="4" fill="#176b77" stroke="#0b4f58"/>
+  <text x="610" y="340" text-anchor="middle" fill="#9fdce6" font-size="11">LED 매트릭스</text>
+  <rect x="470" y="470" width="90" height="40" rx="4" fill="#176b77" stroke="#0b4f58"/>
+  <text x="515" y="494" text-anchor="middle" fill="#9fdce6" font-size="11">RA4M1 + ESP32</text>
+  <text x="550" y="528" text-anchor="middle" fill="#9fdce6" font-size="10">Qwiic(3.3 V, Wire1) — 사용 안 함</text>
+
+  <!-- 왼쪽 헤더: 전원 / 아날로그 -->
+  <g>
+    <circle class="pin" cx="420" cy="180" r="5"/><text class="lblb" x="430" y="184">5V</text>
+    <circle class="pin" cx="420" cy="210" r="5"/><text class="lblb" x="430" y="214">GND</text>
+    <circle class="pin" cx="420" cy="240" r="5"/><text class="lblb" x="430" y="244">GND</text>
+    <circle class="pin" cx="420" cy="270" r="5"/><text class="lbl" x="430" y="274">VIN (비움)</text>
+    <circle class="pin" cx="420" cy="320" r="5"/><text class="grey" x="430" y="324">A0</text>
+    <circle class="pin" cx="420" cy="345" r="5"/><text class="grey" x="430" y="349">A1</text>
+    <circle class="pin" cx="420" cy="370" r="5"/><text class="lblb" x="430" y="374">A2</text>
+    <circle class="pin" cx="420" cy="400" r="5"/><text class="lblb" x="430" y="404">A3</text>
+    <circle class="pin" cx="420" cy="430" r="5"/><text class="lblb" x="430" y="434">A4 / SDA</text>
+    <circle class="pin" cx="420" cy="460" r="5"/><text class="lblb" x="430" y="464">A5 / SCL</text>
+  </g>
+  <!-- 오른쪽 헤더: 디지털 -->
+  <g>
+    <circle class="pin" cx="680" cy="160" r="5"/><text class="lblb" x="670" y="164" text-anchor="end">GND</text>
+    <circle class="pin" cx="680" cy="185" r="5"/><text class="grey" x="670" y="189" text-anchor="end">D13</text>
+    <circle class="pin" cx="680" cy="208" r="5"/><text class="grey" x="670" y="212" text-anchor="end">D12</text>
+    <circle class="pin" cx="680" cy="231" r="5"/><text class="grey" x="670" y="235" text-anchor="end">D11 D10</text>
+    <circle class="pin" cx="680" cy="255" r="5"/><text class="lblb" x="670" y="259" text-anchor="end">D9</text>
+    <circle class="pin" cx="680" cy="280" r="5"/><text class="lblb" x="670" y="284" text-anchor="end">D8</text>
+    <circle class="pin" cx="680" cy="315" r="5"/><text class="lblb" x="670" y="319" text-anchor="end">D7</text>
+    <circle class="pin" cx="680" cy="340" r="5"/><text class="lblb" x="670" y="344" text-anchor="end">D6</text>
+    <circle class="pin" cx="680" cy="365" r="5"/><text class="grey" x="670" y="369" text-anchor="end">D5 D4 D3</text>
+    <circle class="pin" cx="680" cy="440" r="5"/><text class="lblb" x="670" y="444" text-anchor="end">D2</text>
+    <circle class="pin" cx="680" cy="470" r="5"/><text class="grey" x="670" y="474" text-anchor="end">D1 D0</text>
+  </g>
+  <!-- 보드 전원 핀 플래그 -->
+  <line class="wire" x1="420" y1="180" x2="385" y2="180" stroke="#d62828"/><text class="flag" x="380" y="184" text-anchor="end" fill="#d62828">UNO 5V →</text>
+  <line class="wire" x1="420" y1="210" x2="385" y2="210" stroke="#222"/><text class="flag" x="380" y="214" text-anchor="end" fill="#222">GND(공통) →</text>
+  <line class="wire" x1="680" y1="160" x2="715" y2="160" stroke="#222"/><text class="flag" x="720" y="164" fill="#222">GND(공통)</text>
+
+  <!-- ===== 서보 2 (오른쪽 위) ===== -->
+  <rect class="box" x="820" y="110" width="150" height="70"/>
+  <text class="ttl" x="895" y="128" text-anchor="middle">SG90 — 리프터</text>
+  <circle class="pin" cx="820" cy="145" r="5"/><text class="lbl" x="830" y="149">신호(주황)</text>
+  <circle class="pin" cx="970" cy="145" r="5"/><text class="lbl" x="960" y="149" text-anchor="end">V+(빨강)</text>
+  <circle class="pin" cx="970" cy="165" r="5"/><text class="lbl" x="960" y="169" text-anchor="end">GND(갈색)</text>
+  <rect class="box" x="820" y="200" width="150" height="70"/>
+  <text class="ttl" x="895" y="218" text-anchor="middle">MG996R — 후드</text>
+  <circle class="pin" cx="820" cy="235" r="5"/><text class="lbl" x="830" y="239">신호(주황)</text>
+  <circle class="pin" cx="970" cy="235" r="5"/><text class="lbl" x="960" y="239" text-anchor="end">V+(빨강)</text>
+  <circle class="pin" cx="970" cy="255" r="5"/><text class="lbl" x="960" y="259" text-anchor="end">GND(갈색)</text>
+  <!-- D9 → SG90, D8 → MG996R -->
+  <path class="wire" d="M680,255 H720 V145 H820" stroke="#1f6fd0"/>
+  <path class="wire" d="M680,280 H745 V235 H820" stroke="#2a9d3f"/>
+  <text class="lbl" x="725" y="140" fill="#1f6fd0">D9</text>
+  <text class="lbl" x="750" y="230" fill="#2a9d3f">D8</text>
+  <!-- 서보 전원: 별도 5 V 어댑터 -->
+  <rect class="box" x="1030" y="110" width="150" height="70"/>
+  <text class="ttl" x="1105" y="130" text-anchor="middle">5 V 2 A USB 어댑터</text>
+  <text class="lbl" x="1105" y="146" text-anchor="middle">(서보 전용, 별도)</text>
+  <circle class="pin" cx="1030" cy="160" r="5"/><text class="lbl" x="1040" y="164">+5 V</text>
+  <circle class="pin" cx="1030" cy="175" r="5"/><text class="lbl" x="1040" y="179">−</text>
+  <path class="wire" d="M970,145 H1000 V160 H1030" stroke="#d62828"/>
+  <path class="wire" d="M970,235 H1000 V160" stroke="#d62828"/>
+  <path class="wire" d="M970,165 H1012 V175 H1030" stroke="#222"/>
+  <path class="wire" d="M970,255 H1012 V175" stroke="#222"/>
+  <path class="wire" d="M1012,255 V290 H985" stroke="#222"/>
+  <text class="flag" x="980" y="294" text-anchor="end" fill="#222">GND → UNO GND(공통)</text>
+
+  <!-- ===== A4988 (오른쪽 아래) ===== -->
+  <rect class="box" x="820" y="330" width="130" height="260"/>
+  <text class="ttl" x="885" y="350" text-anchor="middle">A4988 드라이버</text>
+  <text class="lbl" x="885" y="365" text-anchor="middle" fill="#5b6770">(방열판 부착)</text>
+  <g>
+    <circle class="pin" cx="820" cy="385" r="5"/><text class="lbl" x="830" y="389">ENABLE</text>
+    <circle class="pin" cx="820" cy="408" r="5"/><text class="grey" x="830" y="412">MS1</text>
+    <circle class="pin" cx="820" cy="428" r="5"/><text class="grey" x="830" y="432">MS2  (셋 다 비연결 = 풀스텝)</text>
+    <circle class="pin" cx="820" cy="448" r="5"/><text class="grey" x="830" y="452">MS3</text>
+    <circle class="pin" cx="820" cy="475" r="5"/><text class="lbl" x="830" y="479">RESET</text>
+    <circle class="pin" cx="820" cy="500" r="5"/><text class="lbl" x="830" y="504">SLEEP</text>
+    <circle class="pin" cx="820" cy="535" r="5"/><text class="lbl" x="830" y="539">STEP</text>
+    <circle class="pin" cx="820" cy="565" r="5"/><text class="lbl" x="830" y="569">DIR</text>
+    <!-- RESET–SLEEP 점퍼 -->
+    <path class="wire" d="M820,475 H805 V500 H820" stroke="#e0a800"/>
+    <text class="lbl" x="800" y="492" text-anchor="end" fill="#b08500">점퍼</text>
+    <circle class="pin" cx="950" cy="385" r="5"/><text class="lblb" x="940" y="389" text-anchor="end">VMOT</text>
+    <circle class="pin" cx="950" cy="408" r="5"/><text class="lblb" x="940" y="412" text-anchor="end">GND</text>
+    <circle class="pin" cx="950" cy="445" r="5"/><text class="lbl" x="940" y="449" text-anchor="end">2B</text>
+    <circle class="pin" cx="950" cy="470" r="5"/><text class="lbl" x="940" y="474" text-anchor="end">2A</text>
+    <circle class="pin" cx="950" cy="495" r="5"/><text class="lbl" x="940" y="499" text-anchor="end">1A</text>
+    <circle class="pin" cx="950" cy="520" r="5"/><text class="lbl" x="940" y="524" text-anchor="end">1B</text>
+    <circle class="pin" cx="950" cy="552" r="5"/><text class="lblb" x="940" y="556" text-anchor="end">VDD</text>
+    <circle class="pin" cx="950" cy="575" r="5"/><text class="lblb" x="940" y="579" text-anchor="end">GND</text>
+  </g>
+  <!-- D7 → DIR, D6 → ENABLE, D2 → STEP (교차점은 점프 표시) -->
+  <path class="wire" d="M680,315 H730 V565 H820" stroke="#7b3fbf"/>
+  <path class="wire" d="M680,340 H724 A6,6 0 0 1 736,340 H770 V385 H820" stroke="#f26b1d"/>
+  <path class="wire" d="M680,440 H724 A6,6 0 0 1 736,440 H785 V535 H820" stroke="#0f7f8c"/>
+  <text class="lbl" x="735" y="310" fill="#7b3fbf">D7 DIR</text>
+  <text class="lbl" x="740" y="356" fill="#f26b1d">D6 EN</text>
+  <text class="lbl" x="745" y="458" fill="#0f7f8c">D2 STEP</text>
+  <!-- VDD / GND 플래그 -->
+  <path class="wire" d="M950,552 H985" stroke="#d62828"/><text class="flag" x="990" y="556" fill="#d62828">← UNO 5V</text>
+  <path class="wire" d="M950,575 H985" stroke="#222"/><text class="flag" x="990" y="579" fill="#222">← UNO GND</text>
+  <!-- 12 V -->
+  <rect class="box" x="1030" y="295" width="150" height="50"/>
+  <text class="ttl" x="1105" y="316" text-anchor="middle">12 V 2 A 어댑터 (DC 잭)</text>
+  <text class="lbl" x="1060" y="338" text-anchor="middle">+</text>
+  <text class="lbl" x="1150" y="338" text-anchor="middle">−</text>
+  <circle class="pin" cx="1060" cy="345" r="5"/>
+  <circle class="pin" cx="1150" cy="345" r="5"/>
+  <path class="wire" d="M950,385 H1060 V345" stroke="#7b3fbf"/>
+  <path class="wire" d="M950,408 H1150 V345" stroke="#222"/>
+  <text class="flag" x="1072" y="403" fill="#222">(−) 는 UNO GND 와 공통</text>
+  <!-- 100 µF 커패시터 (VMOT–GND) -->
+  <line x1="975" y1="385" x2="975" y2="392" stroke="#333" stroke-width="2"/>
+  <line x1="966" y1="392" x2="984" y2="392" stroke="#333" stroke-width="3"/>
+  <line x1="966" y1="399" x2="984" y2="399" stroke="#333" stroke-width="3"/>
+  <line x1="975" y1="399" x2="975" y2="408" stroke="#333" stroke-width="2"/>
+  <text x="988" y="396" font-size="11" fill="#333">+</text>
+  <text x="962" y="378" font-size="11" fill="#333">100 µF, ＋ 가 VMOT 쪽</text>
+  <!-- NEMA17 -->
+  <rect class="box" x="1030" y="420" width="150" height="130"/>
+  <text class="ttl" x="1105" y="440" text-anchor="middle">NEMA17 — 컵 회전</text>
+  <path class="wire" d="M950,445 H1030" stroke="#1f6fd0"/>
+  <path class="wire" d="M950,470 H1030" stroke="#1f6fd0"/>
+  <path class="wire" d="M950,495 H1030" stroke="#2a9d3f"/>
+  <path class="wire" d="M950,520 H1030" stroke="#2a9d3f"/>
+  <text class="lbl" x="1105" y="462" text-anchor="middle" fill="#1f6fd0">코일 2 ← 2A / 2B</text>
+  <text class="lbl" x="1105" y="480" text-anchor="middle" fill="#2a9d3f">코일 1 ← 1A / 1B</text>
+  <text class="lbl" x="1105" y="505" text-anchor="middle" fill="#5b6770">저항계로 약 2 Ω 인</text>
+  <text class="lbl" x="1105" y="520" text-anchor="middle" fill="#5b6770">두 선 = 한 코일</text>
+  <text class="lbl" x="1105" y="538" text-anchor="middle" fill="#5b6770">(짝만 맞으면 순서 무관)</text>
+
+  <!-- ===== 왼쪽: 버튼 / 부저 / LCD ===== -->
+  <rect class="box" x="140" y="195" width="140" height="50"/>
+  <text class="ttl" x="210" y="214" text-anchor="middle">버튼 (택트 스위치)</text>
+  <circle class="pin" cx="280" cy="230" r="5"/><text class="lbl" x="270" y="234" text-anchor="end">1</text>
+  <circle class="pin" cx="140" cy="230" r="5"/><text class="lbl" x="150" y="234">2</text>
+  <path class="wire" d="M420,370 H380 V230 H280" stroke="#e0a800"/>
+  <path class="wire" d="M140,230 H105" stroke="#222"/><text class="flag" x="100" y="234" text-anchor="end" fill="#222">GND</text>
+  <text class="lbl" x="300" y="226" fill="#b08500">A2 (풀업)</text>
+
+  <rect class="box" x="140" y="285" width="140" height="50"/>
+  <text class="ttl" x="210" y="304" text-anchor="middle">부저 (수동형)</text>
+  <circle class="pin" cx="280" cy="320" r="5"/><text class="lbl" x="270" y="324" text-anchor="end">+</text>
+  <circle class="pin" cx="140" cy="320" r="5"/><text class="lbl" x="150" y="324">−</text>
+  <path class="wire" d="M420,400 H360 V320 H330" stroke="#f26b1d"/>
+  <rect x="300" y="313" width="30" height="14" fill="#fff" stroke="#f26b1d" stroke-width="2"/>
+  <path class="wire" d="M300,320 H280" stroke="#f26b1d"/>
+  <text class="lbl" x="315" y="347" text-anchor="middle" fill="#c4520d">100 Ω</text>
+  <path class="wire" d="M140,320 H105" stroke="#222"/><text class="flag" x="100" y="324" text-anchor="end" fill="#222">GND</text>
+  <text class="lbl" x="365" y="392" fill="#c4520d">A3</text>
+
+  <rect class="box" x="140" y="395" width="140" height="100"/>
+  <text class="ttl" x="210" y="414" text-anchor="middle">LCD1602 + I2C 백팩</text>
+  <text class="lbl" x="210" y="429" text-anchor="middle" fill="#5b6770">주소 0x27</text>
+  <circle class="pin" cx="140" cy="445" r="5"/><text class="lbl" x="150" y="449">GND</text>
+  <circle class="pin" cx="140" cy="465" r="5"/><text class="lbl" x="150" y="469">VCC</text>
+  <circle class="pin" cx="280" cy="455" r="5"/><text class="lbl" x="270" y="459" text-anchor="end">SDA</text>
+  <circle class="pin" cx="280" cy="480" r="5"/><text class="lbl" x="270" y="484" text-anchor="end">SCL</text>
+  <path class="wire" d="M420,430 H340 V455 H280" stroke="#2a9d3f"/>
+  <path class="wire" d="M420,460 H320 V480 H280" stroke="#1f6fd0"/>
+  <text class="lbl" x="345" y="447" fill="#2a9d3f">A4</text>
+  <text class="lbl" x="325" y="497" fill="#1f6fd0">A5</text>
+  <path class="wire" d="M140,445 H105" stroke="#222"/><text class="flag" x="100" y="449" text-anchor="end" fill="#222">GND</text>
+  <path class="wire" d="M140,465 H105" stroke="#d62828"/><text class="flag" x="100" y="469" text-anchor="end" fill="#d62828">UNO 5V</text>
+
+  <!-- 범례 -->
+  <g transform="translate(20,560)">
+    <text class="ttl" x="0" y="0">범례</text>
+    <line x1="0" y1="18" x2="30" y2="18" class="wire" stroke="#d62828"/><text class="lbl" x="36" y="22">5 V (로직·서보)</text>
+    <line x1="0" y1="38" x2="30" y2="38" class="wire" stroke="#222"/><text class="lbl" x="36" y="42">GND — 모든 전원 공통</text>
+    <line x1="0" y1="58" x2="30" y2="58" class="wire" stroke="#7b3fbf"/><text class="lbl" x="36" y="62">12 V 모터 전원 / DIR</text>
+    <line x1="160" y1="18" x2="190" y2="18" class="wire" stroke="#0f7f8c"/><text class="lbl" x="196" y="22">STEP</text>
+    <line x1="160" y1="38" x2="190" y2="38" class="wire" stroke="#1f6fd0"/><text class="lbl" x="196" y="42">D9 / SCL / 코일 2</text>
+    <line x1="160" y1="58" x2="190" y2="58" class="wire" stroke="#2a9d3f"/><text class="lbl" x="196" y="62">D8 / SDA / 코일 1</text>
+    <text class="lbl" x="0" y="82" fill="#5b6770">선이 교차하는 곳의 작은 반원(⌒)은 "연결 안 됨" 표시다. "UNO 5V"·"GND" 깃발은 같은 이름끼리 이어진다는 뜻.</text>
+  </g>
+</svg>
+<figcaption>그림 1. 신호선 배선. 전원 핀은 깃발(UNO 5V / GND)로 표시했고, 전원 계통은 그림 2 에 따로 그렸다.</figcaption>
+</figure>
+
+<h2>3. 전원 계통</h2>
+<figure>
+<svg viewBox="0 0 1000 300" width="100%" style="min-width:760px" xmlns="http://www.w3.org/2000/svg" aria-label="전원 계통도">
+  <style>
+    .pb { fill: #f9fbfc; stroke: #334; stroke-width: 1.5; rx: 8; }
+    .pt { font-size: 13px; font-weight: 700; fill: #1d2730; }
+    .ps { font-size: 12px; fill: #5b6770; }
+    .pw { fill: none; stroke-width: 3; stroke-linejoin: round; }
+    .ar { fill: none; stroke-width: 3; marker-end: url(#arr); }
+  </style>
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+
+  <!-- 열 1: 보드 전원 -->
+  <rect class="pb" x="20" y="30" width="220" height="60"/>
+  <text class="pt" x="130" y="55" text-anchor="middle">PC USB-C (또는 5 V USB 어댑터)</text>
+  <text class="ps" x="130" y="74" text-anchor="middle">보드 전원 + 시리얼 115200</text>
+  <path class="ar" d="M130,90 V130" stroke="#d62828"/>
+  <rect class="pb" x="20" y="130" width="220" height="60"/>
+  <text class="pt" x="130" y="155" text-anchor="middle">UNO R4 WiFi — 5V 핀</text>
+  <text class="ps" x="130" y="174" text-anchor="middle">로직 전원만 공급</text>
+  <path class="ar" d="M80,190 V240" stroke="#d62828"/>
+  <path class="ar" d="M180,190 V240" stroke="#d62828"/>
+  <rect class="pb" x="20" y="240" width="100" height="44"/>
+  <text class="pt" x="70" y="266" text-anchor="middle">A4988 VDD</text>
+  <rect class="pb" x="140" y="240" width="100" height="44"/>
+  <text class="pt" x="190" y="266" text-anchor="middle">LCD VCC</text>
+
+  <!-- 열 2: 모터 전원 -->
+  <rect class="pb" x="300" y="30" width="220" height="60"/>
+  <text class="pt" x="410" y="55" text-anchor="middle">12 V 2 A 어댑터</text>
+  <text class="ps" x="410" y="74" text-anchor="middle">DC 잭 → 나사 터미널</text>
+  <path class="ar" d="M410,90 V130" stroke="#7b3fbf"/>
+  <rect class="pb" x="300" y="130" width="220" height="60"/>
+  <text class="pt" x="410" y="155" text-anchor="middle">A4988 VMOT (+100 µF)</text>
+  <text class="ps" x="410" y="174" text-anchor="middle">Vref 0.48 V = 코일 0.6 A</text>
+  <path class="ar" d="M410,190 V240" stroke="#7b3fbf"/>
+  <rect class="pb" x="300" y="240" width="220" height="44"/>
+  <text class="pt" x="410" y="266" text-anchor="middle">NEMA17 (1A/1B, 2A/2B)</text>
+
+  <!-- 열 3: 서보 전원 -->
+  <rect class="pb" x="580" y="30" width="220" height="60"/>
+  <text class="pt" x="690" y="55" text-anchor="middle">5 V 2 A USB 어댑터 (별도)</text>
+  <text class="ps" x="690" y="74" text-anchor="middle">USB 케이블을 잘라 +/− 를 꺼냄</text>
+  <path class="ar" d="M640,90 V130" stroke="#d62828"/>
+  <path class="ar" d="M740,90 V130" stroke="#d62828"/>
+  <rect class="pb" x="580" y="130" width="100" height="60"/>
+  <text class="pt" x="630" y="155" text-anchor="middle">MG996R V+</text>
+  <text class="ps" x="630" y="174" text-anchor="middle">후드, 최대 ~1 A</text>
+  <rect class="pb" x="700" y="130" width="100" height="60"/>
+  <text class="pt" x="750" y="155" text-anchor="middle">SG90 V+</text>
+  <text class="ps" x="750" y="174" text-anchor="middle">리프터</text>
+  <text class="ps" x="690" y="215" text-anchor="middle" fill="#d62828">보드 5V 핀에서 서보를 먹이면 안 된다</text>
+  <text class="ps" x="690" y="232" text-anchor="middle" fill="#d62828">(R4 레귤레이터 과열·리셋 원인)</text>
+
+  <!-- GND 버스 -->
+  <rect x="840" y="30" width="140" height="254" rx="8" fill="#eef1f3" stroke="#222"/>
+  <text class="pt" x="910" y="58" text-anchor="middle">공통 GND</text>
+  <text class="ps" x="910" y="84" text-anchor="middle">UNO GND ×3</text>
+  <text class="ps" x="910" y="104" text-anchor="middle">A4988 GND ×2</text>
+  <text class="ps" x="910" y="124" text-anchor="middle">12 V 어댑터 (−)</text>
+  <text class="ps" x="910" y="144" text-anchor="middle">5 V 어댑터 (−)</text>
+  <text class="ps" x="910" y="164" text-anchor="middle">서보 GND ×2</text>
+  <text class="ps" x="910" y="184" text-anchor="middle">LCD GND</text>
+  <text class="ps" x="910" y="204" text-anchor="middle">버튼 · 부저 (−)</text>
+  <text class="ps" x="910" y="240" text-anchor="middle" fill="#1d2730">세 전원의 (−) 가</text>
+  <text class="ps" x="910" y="258" text-anchor="middle" fill="#1d2730">한 점에서 만나야 한다</text>
+</svg>
+<figcaption>그림 2. 전원은 세 갈래(보드 USB · 모터 12 V · 서보 5 V)이고 접지는 하나다. 세 갈래 중 하나라도 접지가 따로 놀면 서보가 떨리거나 스텝모터가 헛돈다.</figcaption>
+</figure>
+
+<h2>4. 브레드보드 배치 — 그대로 따라 꽂기</h2>
+<p class="sub">반쪽 크기 브레드보드(400홀, 열 1~30, 행 a~j, 전원 레일 위·아래 각 2줄)를 기준으로 했다. 구멍 이름은 <b>행 글자 + 열 번호</b>(예: <code>e5</code> = e 행 5 열). 같은 열의 a~e 끼리, f~j 끼리는 속으로 이어져 있고, 레일은 한 줄 전체가 이어져 있다(긴 보드는 가운데가 끊긴 제품이 있으니 점퍼로 이어 둔다).</p>
+
+<figure>
+<svg viewBox="0 0 1000 550" width="100%" style="min-width:960px" xmlns="http://www.w3.org/2000/svg" aria-label="브레드보드 배치도">
+<style>svg text{font-family:"Malgun Gothic","Noto Sans KR",system-ui,sans-serif}</style>
+<rect x="70" y="50" width="700" height="442" rx="8" fill="#f1e9d2" stroke="#b7a97a" stroke-width="2"/>
+<rect x="70" y="266" width="700" height="10" fill="#e3d9bb"/>
+<line x1="88" y1="65" x2="752" y2="65" stroke="#d62828" stroke-width="1.2"/>
+<line x1="88" y1="87" x2="752" y2="87" stroke="#1f6fd0" stroke-width="1.2"/>
+<line x1="88" y1="433" x2="752" y2="433" stroke="#1f6fd0" stroke-width="1.2"/>
+<line x1="88" y1="455" x2="752" y2="455" stroke="#d62828" stroke-width="1.2"/>
+<circle cx="100" cy="74" r="3.2" fill="#444"/>
+<circle cx="100" cy="96" r="3.2" fill="#444"/>
+<circle cx="100" cy="442" r="3.2" fill="#444"/>
+<circle cx="100" cy="464" r="3.2" fill="#444"/>
+<circle cx="122" cy="74" r="3.2" fill="#444"/>
+<circle cx="122" cy="96" r="3.2" fill="#444"/>
+<circle cx="122" cy="442" r="3.2" fill="#444"/>
+<circle cx="122" cy="464" r="3.2" fill="#444"/>
+<circle cx="144" cy="74" r="3.2" fill="#444"/>
+<circle cx="144" cy="96" r="3.2" fill="#444"/>
+<circle cx="144" cy="442" r="3.2" fill="#444"/>
+<circle cx="144" cy="464" r="3.2" fill="#444"/>
+<circle cx="166" cy="74" r="3.2" fill="#444"/>
+<circle cx="166" cy="96" r="3.2" fill="#444"/>
+<circle cx="166" cy="442" r="3.2" fill="#444"/>
+<circle cx="166" cy="464" r="3.2" fill="#444"/>
+<circle cx="188" cy="74" r="3.2" fill="#444"/>
+<circle cx="188" cy="96" r="3.2" fill="#444"/>
+<circle cx="188" cy="442" r="3.2" fill="#444"/>
+<circle cx="188" cy="464" r="3.2" fill="#444"/>
+<circle cx="210" cy="74" r="3.2" fill="#444"/>
+<circle cx="210" cy="96" r="3.2" fill="#444"/>
+<circle cx="210" cy="442" r="3.2" fill="#444"/>
+<circle cx="210" cy="464" r="3.2" fill="#444"/>
+<circle cx="232" cy="74" r="3.2" fill="#444"/>
+<circle cx="232" cy="96" r="3.2" fill="#444"/>
+<circle cx="232" cy="442" r="3.2" fill="#444"/>
+<circle cx="232" cy="464" r="3.2" fill="#444"/>
+<circle cx="254" cy="74" r="3.2" fill="#444"/>
+<circle cx="254" cy="96" r="3.2" fill="#444"/>
+<circle cx="254" cy="442" r="3.2" fill="#444"/>
+<circle cx="254" cy="464" r="3.2" fill="#444"/>
+<circle cx="276" cy="74" r="3.2" fill="#444"/>
+<circle cx="276" cy="96" r="3.2" fill="#444"/>
+<circle cx="276" cy="442" r="3.2" fill="#444"/>
+<circle cx="276" cy="464" r="3.2" fill="#444"/>
+<circle cx="298" cy="74" r="3.2" fill="#444"/>
+<circle cx="298" cy="96" r="3.2" fill="#444"/>
+<circle cx="298" cy="442" r="3.2" fill="#444"/>
+<circle cx="298" cy="464" r="3.2" fill="#444"/>
+<circle cx="320" cy="74" r="3.2" fill="#444"/>
+<circle cx="320" cy="96" r="3.2" fill="#444"/>
+<circle cx="320" cy="442" r="3.2" fill="#444"/>
+<circle cx="320" cy="464" r="3.2" fill="#444"/>
+<circle cx="342" cy="74" r="3.2" fill="#444"/>
+<circle cx="342" cy="96" r="3.2" fill="#444"/>
+<circle cx="342" cy="442" r="3.2" fill="#444"/>
+<circle cx="342" cy="464" r="3.2" fill="#444"/>
+<circle cx="364" cy="74" r="3.2" fill="#444"/>
+<circle cx="364" cy="96" r="3.2" fill="#444"/>
+<circle cx="364" cy="442" r="3.2" fill="#444"/>
+<circle cx="364" cy="464" r="3.2" fill="#444"/>
+<circle cx="386" cy="74" r="3.2" fill="#444"/>
+<circle cx="386" cy="96" r="3.2" fill="#444"/>
+<circle cx="386" cy="442" r="3.2" fill="#444"/>
+<circle cx="386" cy="464" r="3.2" fill="#444"/>
+<circle cx="408" cy="74" r="3.2" fill="#444"/>
+<circle cx="408" cy="96" r="3.2" fill="#444"/>
+<circle cx="408" cy="442" r="3.2" fill="#444"/>
+<circle cx="408" cy="464" r="3.2" fill="#444"/>
+<circle cx="430" cy="74" r="3.2" fill="#444"/>
+<circle cx="430" cy="96" r="3.2" fill="#444"/>
+<circle cx="430" cy="442" r="3.2" fill="#444"/>
+<circle cx="430" cy="464" r="3.2" fill="#444"/>
+<circle cx="452" cy="74" r="3.2" fill="#444"/>
+<circle cx="452" cy="96" r="3.2" fill="#444"/>
+<circle cx="452" cy="442" r="3.2" fill="#444"/>
+<circle cx="452" cy="464" r="3.2" fill="#444"/>
+<circle cx="474" cy="74" r="3.2" fill="#444"/>
+<circle cx="474" cy="96" r="3.2" fill="#444"/>
+<circle cx="474" cy="442" r="3.2" fill="#444"/>
+<circle cx="474" cy="464" r="3.2" fill="#444"/>
+<circle cx="496" cy="74" r="3.2" fill="#444"/>
+<circle cx="496" cy="96" r="3.2" fill="#444"/>
+<circle cx="496" cy="442" r="3.2" fill="#444"/>
+<circle cx="496" cy="464" r="3.2" fill="#444"/>
+<circle cx="518" cy="74" r="3.2" fill="#444"/>
+<circle cx="518" cy="96" r="3.2" fill="#444"/>
+<circle cx="518" cy="442" r="3.2" fill="#444"/>
+<circle cx="518" cy="464" r="3.2" fill="#444"/>
+<circle cx="540" cy="74" r="3.2" fill="#444"/>
+<circle cx="540" cy="96" r="3.2" fill="#444"/>
+<circle cx="540" cy="442" r="3.2" fill="#444"/>
+<circle cx="540" cy="464" r="3.2" fill="#444"/>
+<circle cx="562" cy="74" r="3.2" fill="#444"/>
+<circle cx="562" cy="96" r="3.2" fill="#444"/>
+<circle cx="562" cy="442" r="3.2" fill="#444"/>
+<circle cx="562" cy="464" r="3.2" fill="#444"/>
+<circle cx="584" cy="74" r="3.2" fill="#444"/>
+<circle cx="584" cy="96" r="3.2" fill="#444"/>
+<circle cx="584" cy="442" r="3.2" fill="#444"/>
+<circle cx="584" cy="464" r="3.2" fill="#444"/>
+<circle cx="606" cy="74" r="3.2" fill="#444"/>
+<circle cx="606" cy="96" r="3.2" fill="#444"/>
+<circle cx="606" cy="442" r="3.2" fill="#444"/>
+<circle cx="606" cy="464" r="3.2" fill="#444"/>
+<circle cx="628" cy="74" r="3.2" fill="#444"/>
+<circle cx="628" cy="96" r="3.2" fill="#444"/>
+<circle cx="628" cy="442" r="3.2" fill="#444"/>
+<circle cx="628" cy="464" r="3.2" fill="#444"/>
+<circle cx="650" cy="74" r="3.2" fill="#444"/>
+<circle cx="650" cy="96" r="3.2" fill="#444"/>
+<circle cx="650" cy="442" r="3.2" fill="#444"/>
+<circle cx="650" cy="464" r="3.2" fill="#444"/>
+<circle cx="672" cy="74" r="3.2" fill="#444"/>
+<circle cx="672" cy="96" r="3.2" fill="#444"/>
+<circle cx="672" cy="442" r="3.2" fill="#444"/>
+<circle cx="672" cy="464" r="3.2" fill="#444"/>
+<circle cx="694" cy="74" r="3.2" fill="#444"/>
+<circle cx="694" cy="96" r="3.2" fill="#444"/>
+<circle cx="694" cy="442" r="3.2" fill="#444"/>
+<circle cx="694" cy="464" r="3.2" fill="#444"/>
+<circle cx="716" cy="74" r="3.2" fill="#444"/>
+<circle cx="716" cy="96" r="3.2" fill="#444"/>
+<circle cx="716" cy="442" r="3.2" fill="#444"/>
+<circle cx="716" cy="464" r="3.2" fill="#444"/>
+<circle cx="738" cy="74" r="3.2" fill="#444"/>
+<circle cx="738" cy="96" r="3.2" fill="#444"/>
+<circle cx="738" cy="442" r="3.2" fill="#444"/>
+<circle cx="738" cy="464" r="3.2" fill="#444"/>
+<text x="78" y="78" font-size="13" fill="#d62828" text-anchor="middle" font-weight="700">+</text>
+<text x="78" y="100" font-size="13" fill="#1f6fd0" text-anchor="middle" font-weight="700">−</text>
+<text x="78" y="446" font-size="13" fill="#1f6fd0" text-anchor="middle" font-weight="700">−</text>
+<text x="78" y="468" font-size="13" fill="#d62828" text-anchor="middle" font-weight="700">+</text>
+<text x="100" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">1</text>
+<text x="100" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">1</text>
+<text x="122" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">2</text>
+<text x="122" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">2</text>
+<text x="144" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">3</text>
+<text x="144" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">3</text>
+<text x="166" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">4</text>
+<text x="166" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">4</text>
+<text x="188" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">5</text>
+<text x="188" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">5</text>
+<text x="210" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">6</text>
+<text x="210" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">6</text>
+<text x="232" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">7</text>
+<text x="232" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">7</text>
+<text x="254" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">8</text>
+<text x="254" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">8</text>
+<text x="276" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">9</text>
+<text x="276" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">9</text>
+<text x="298" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">10</text>
+<text x="298" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">10</text>
+<text x="320" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">11</text>
+<text x="320" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">11</text>
+<text x="342" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">12</text>
+<text x="342" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">12</text>
+<text x="364" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">13</text>
+<text x="364" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">13</text>
+<text x="386" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">14</text>
+<text x="386" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">14</text>
+<text x="408" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">15</text>
+<text x="408" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">15</text>
+<text x="430" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">16</text>
+<text x="430" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">16</text>
+<text x="452" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">17</text>
+<text x="452" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">17</text>
+<text x="474" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">18</text>
+<text x="474" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">18</text>
+<text x="496" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">19</text>
+<text x="496" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">19</text>
+<text x="518" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">20</text>
+<text x="518" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">20</text>
+<text x="540" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">21</text>
+<text x="540" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">21</text>
+<text x="562" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">22</text>
+<text x="562" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">22</text>
+<text x="584" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">23</text>
+<text x="584" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">23</text>
+<text x="606" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">24</text>
+<text x="606" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">24</text>
+<text x="628" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">25</text>
+<text x="628" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">25</text>
+<text x="650" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">26</text>
+<text x="650" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">26</text>
+<text x="672" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">27</text>
+<text x="672" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">27</text>
+<text x="694" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">28</text>
+<text x="694" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">28</text>
+<text x="716" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">29</text>
+<text x="716" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">29</text>
+<text x="738" y="132" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">30</text>
+<text x="738" y="424" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">30</text>
+<text x="86" y="154" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">a</text>
+<text x="754" y="154" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">a</text>
+<text x="86" y="176" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">b</text>
+<text x="754" y="176" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">b</text>
+<text x="86" y="198" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">c</text>
+<text x="754" y="198" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">c</text>
+<text x="86" y="220" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">d</text>
+<text x="754" y="220" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">d</text>
+<text x="86" y="242" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">e</text>
+<text x="754" y="242" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">e</text>
+<text x="86" y="308" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">f</text>
+<text x="754" y="308" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">f</text>
+<text x="86" y="330" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">g</text>
+<text x="754" y="330" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">g</text>
+<text x="86" y="352" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">h</text>
+<text x="754" y="352" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">h</text>
+<text x="86" y="374" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">i</text>
+<text x="754" y="374" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">i</text>
+<text x="86" y="396" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">j</text>
+<text x="754" y="396" font-size="10" fill="#5b6770" text-anchor="middle" font-weight="700">j</text>
+<circle cx="100" cy="150" r="3.2" fill="#444"/>
+<circle cx="100" cy="172" r="3.2" fill="#444"/>
+<circle cx="100" cy="194" r="3.2" fill="#444"/>
+<circle cx="100" cy="216" r="3.2" fill="#444"/>
+<circle cx="100" cy="238" r="3.2" fill="#444"/>
+<circle cx="100" cy="304" r="3.2" fill="#444"/>
+<circle cx="100" cy="326" r="3.2" fill="#444"/>
+<circle cx="100" cy="348" r="3.2" fill="#444"/>
+<circle cx="100" cy="370" r="3.2" fill="#444"/>
+<circle cx="100" cy="392" r="3.2" fill="#444"/>
+<circle cx="122" cy="150" r="3.2" fill="#444"/>
+<circle cx="122" cy="172" r="3.2" fill="#444"/>
+<circle cx="122" cy="194" r="3.2" fill="#444"/>
+<circle cx="122" cy="216" r="3.2" fill="#444"/>
+<circle cx="122" cy="238" r="3.2" fill="#444"/>
+<circle cx="122" cy="304" r="3.2" fill="#444"/>
+<circle cx="122" cy="326" r="3.2" fill="#444"/>
+<circle cx="122" cy="348" r="3.2" fill="#444"/>
+<circle cx="122" cy="370" r="3.2" fill="#444"/>
+<circle cx="122" cy="392" r="3.2" fill="#444"/>
+<circle cx="144" cy="150" r="3.2" fill="#444"/>
+<circle cx="144" cy="172" r="3.2" fill="#444"/>
+<circle cx="144" cy="194" r="3.2" fill="#444"/>
+<circle cx="144" cy="216" r="3.2" fill="#444"/>
+<circle cx="144" cy="238" r="3.2" fill="#444"/>
+<circle cx="144" cy="304" r="3.2" fill="#444"/>
+<circle cx="144" cy="326" r="3.2" fill="#444"/>
+<circle cx="144" cy="348" r="3.2" fill="#444"/>
+<circle cx="144" cy="370" r="3.2" fill="#444"/>
+<circle cx="144" cy="392" r="3.2" fill="#444"/>
+<circle cx="166" cy="150" r="3.2" fill="#444"/>
+<circle cx="166" cy="172" r="3.2" fill="#444"/>
+<circle cx="166" cy="194" r="3.2" fill="#444"/>
+<circle cx="166" cy="216" r="3.2" fill="#444"/>
+<circle cx="166" cy="238" r="3.2" fill="#444"/>
+<circle cx="166" cy="304" r="3.2" fill="#444"/>
+<circle cx="166" cy="326" r="3.2" fill="#444"/>
+<circle cx="166" cy="348" r="3.2" fill="#444"/>
+<circle cx="166" cy="370" r="3.2" fill="#444"/>
+<circle cx="166" cy="392" r="3.2" fill="#444"/>
+<circle cx="188" cy="150" r="3.2" fill="#444"/>
+<circle cx="188" cy="172" r="3.2" fill="#444"/>
+<circle cx="188" cy="194" r="3.2" fill="#444"/>
+<circle cx="188" cy="216" r="3.2" fill="#444"/>
+<circle cx="188" cy="238" r="3.2" fill="#444"/>
+<circle cx="188" cy="304" r="3.2" fill="#444"/>
+<circle cx="188" cy="326" r="3.2" fill="#444"/>
+<circle cx="188" cy="348" r="3.2" fill="#444"/>
+<circle cx="188" cy="370" r="3.2" fill="#444"/>
+<circle cx="188" cy="392" r="3.2" fill="#444"/>
+<circle cx="210" cy="150" r="3.2" fill="#444"/>
+<circle cx="210" cy="172" r="3.2" fill="#444"/>
+<circle cx="210" cy="194" r="3.2" fill="#444"/>
+<circle cx="210" cy="216" r="3.2" fill="#444"/>
+<circle cx="210" cy="238" r="3.2" fill="#444"/>
+<circle cx="210" cy="304" r="3.2" fill="#444"/>
+<circle cx="210" cy="326" r="3.2" fill="#444"/>
+<circle cx="210" cy="348" r="3.2" fill="#444"/>
+<circle cx="210" cy="370" r="3.2" fill="#444"/>
+<circle cx="210" cy="392" r="3.2" fill="#444"/>
+<circle cx="232" cy="150" r="3.2" fill="#444"/>
+<circle cx="232" cy="172" r="3.2" fill="#444"/>
+<circle cx="232" cy="194" r="3.2" fill="#444"/>
+<circle cx="232" cy="216" r="3.2" fill="#444"/>
+<circle cx="232" cy="238" r="3.2" fill="#444"/>
+<circle cx="232" cy="304" r="3.2" fill="#444"/>
+<circle cx="232" cy="326" r="3.2" fill="#444"/>
+<circle cx="232" cy="348" r="3.2" fill="#444"/>
+<circle cx="232" cy="370" r="3.2" fill="#444"/>
+<circle cx="232" cy="392" r="3.2" fill="#444"/>
+<circle cx="254" cy="150" r="3.2" fill="#444"/>
+<circle cx="254" cy="172" r="3.2" fill="#444"/>
+<circle cx="254" cy="194" r="3.2" fill="#444"/>
+<circle cx="254" cy="216" r="3.2" fill="#444"/>
+<circle cx="254" cy="238" r="3.2" fill="#444"/>
+<circle cx="254" cy="304" r="3.2" fill="#444"/>
+<circle cx="254" cy="326" r="3.2" fill="#444"/>
+<circle cx="254" cy="348" r="3.2" fill="#444"/>
+<circle cx="254" cy="370" r="3.2" fill="#444"/>
+<circle cx="254" cy="392" r="3.2" fill="#444"/>
+<circle cx="276" cy="150" r="3.2" fill="#444"/>
+<circle cx="276" cy="172" r="3.2" fill="#444"/>
+<circle cx="276" cy="194" r="3.2" fill="#444"/>
+<circle cx="276" cy="216" r="3.2" fill="#444"/>
+<circle cx="276" cy="238" r="3.2" fill="#444"/>
+<circle cx="276" cy="304" r="3.2" fill="#444"/>
+<circle cx="276" cy="326" r="3.2" fill="#444"/>
+<circle cx="276" cy="348" r="3.2" fill="#444"/>
+<circle cx="276" cy="370" r="3.2" fill="#444"/>
+<circle cx="276" cy="392" r="3.2" fill="#444"/>
+<circle cx="298" cy="150" r="3.2" fill="#444"/>
+<circle cx="298" cy="172" r="3.2" fill="#444"/>
+<circle cx="298" cy="194" r="3.2" fill="#444"/>
+<circle cx="298" cy="216" r="3.2" fill="#444"/>
+<circle cx="298" cy="238" r="3.2" fill="#444"/>
+<circle cx="298" cy="304" r="3.2" fill="#444"/>
+<circle cx="298" cy="326" r="3.2" fill="#444"/>
+<circle cx="298" cy="348" r="3.2" fill="#444"/>
+<circle cx="298" cy="370" r="3.2" fill="#444"/>
+<circle cx="298" cy="392" r="3.2" fill="#444"/>
+<circle cx="320" cy="150" r="3.2" fill="#444"/>
+<circle cx="320" cy="172" r="3.2" fill="#444"/>
+<circle cx="320" cy="194" r="3.2" fill="#444"/>
+<circle cx="320" cy="216" r="3.2" fill="#444"/>
+<circle cx="320" cy="238" r="3.2" fill="#444"/>
+<circle cx="320" cy="304" r="3.2" fill="#444"/>
+<circle cx="320" cy="326" r="3.2" fill="#444"/>
+<circle cx="320" cy="348" r="3.2" fill="#444"/>
+<circle cx="320" cy="370" r="3.2" fill="#444"/>
+<circle cx="320" cy="392" r="3.2" fill="#444"/>
+<circle cx="342" cy="150" r="3.2" fill="#444"/>
+<circle cx="342" cy="172" r="3.2" fill="#444"/>
+<circle cx="342" cy="194" r="3.2" fill="#444"/>
+<circle cx="342" cy="216" r="3.2" fill="#444"/>
+<circle cx="342" cy="238" r="3.2" fill="#444"/>
+<circle cx="342" cy="304" r="3.2" fill="#444"/>
+<circle cx="342" cy="326" r="3.2" fill="#444"/>
+<circle cx="342" cy="348" r="3.2" fill="#444"/>
+<circle cx="342" cy="370" r="3.2" fill="#444"/>
+<circle cx="342" cy="392" r="3.2" fill="#444"/>
+<circle cx="364" cy="150" r="3.2" fill="#444"/>
+<circle cx="364" cy="172" r="3.2" fill="#444"/>
+<circle cx="364" cy="194" r="3.2" fill="#444"/>
+<circle cx="364" cy="216" r="3.2" fill="#444"/>
+<circle cx="364" cy="238" r="3.2" fill="#444"/>
+<circle cx="364" cy="304" r="3.2" fill="#444"/>
+<circle cx="364" cy="326" r="3.2" fill="#444"/>
+<circle cx="364" cy="348" r="3.2" fill="#444"/>
+<circle cx="364" cy="370" r="3.2" fill="#444"/>
+<circle cx="364" cy="392" r="3.2" fill="#444"/>
+<circle cx="386" cy="150" r="3.2" fill="#444"/>
+<circle cx="386" cy="172" r="3.2" fill="#444"/>
+<circle cx="386" cy="194" r="3.2" fill="#444"/>
+<circle cx="386" cy="216" r="3.2" fill="#444"/>
+<circle cx="386" cy="238" r="3.2" fill="#444"/>
+<circle cx="386" cy="304" r="3.2" fill="#444"/>
+<circle cx="386" cy="326" r="3.2" fill="#444"/>
+<circle cx="386" cy="348" r="3.2" fill="#444"/>
+<circle cx="386" cy="370" r="3.2" fill="#444"/>
+<circle cx="386" cy="392" r="3.2" fill="#444"/>
+<circle cx="408" cy="150" r="3.2" fill="#444"/>
+<circle cx="408" cy="172" r="3.2" fill="#444"/>
+<circle cx="408" cy="194" r="3.2" fill="#444"/>
+<circle cx="408" cy="216" r="3.2" fill="#444"/>
+<circle cx="408" cy="238" r="3.2" fill="#444"/>
+<circle cx="408" cy="304" r="3.2" fill="#444"/>
+<circle cx="408" cy="326" r="3.2" fill="#444"/>
+<circle cx="408" cy="348" r="3.2" fill="#444"/>
+<circle cx="408" cy="370" r="3.2" fill="#444"/>
+<circle cx="408" cy="392" r="3.2" fill="#444"/>
+<circle cx="430" cy="150" r="3.2" fill="#444"/>
+<circle cx="430" cy="172" r="3.2" fill="#444"/>
+<circle cx="430" cy="194" r="3.2" fill="#444"/>
+<circle cx="430" cy="216" r="3.2" fill="#444"/>
+<circle cx="430" cy="238" r="3.2" fill="#444"/>
+<circle cx="430" cy="304" r="3.2" fill="#444"/>
+<circle cx="430" cy="326" r="3.2" fill="#444"/>
+<circle cx="430" cy="348" r="3.2" fill="#444"/>
+<circle cx="430" cy="370" r="3.2" fill="#444"/>
+<circle cx="430" cy="392" r="3.2" fill="#444"/>
+<circle cx="452" cy="150" r="3.2" fill="#444"/>
+<circle cx="452" cy="172" r="3.2" fill="#444"/>
+<circle cx="452" cy="194" r="3.2" fill="#444"/>
+<circle cx="452" cy="216" r="3.2" fill="#444"/>
+<circle cx="452" cy="238" r="3.2" fill="#444"/>
+<circle cx="452" cy="304" r="3.2" fill="#444"/>
+<circle cx="452" cy="326" r="3.2" fill="#444"/>
+<circle cx="452" cy="348" r="3.2" fill="#444"/>
+<circle cx="452" cy="370" r="3.2" fill="#444"/>
+<circle cx="452" cy="392" r="3.2" fill="#444"/>
+<circle cx="474" cy="150" r="3.2" fill="#444"/>
+<circle cx="474" cy="172" r="3.2" fill="#444"/>
+<circle cx="474" cy="194" r="3.2" fill="#444"/>
+<circle cx="474" cy="216" r="3.2" fill="#444"/>
+<circle cx="474" cy="238" r="3.2" fill="#444"/>
+<circle cx="474" cy="304" r="3.2" fill="#444"/>
+<circle cx="474" cy="326" r="3.2" fill="#444"/>
+<circle cx="474" cy="348" r="3.2" fill="#444"/>
+<circle cx="474" cy="370" r="3.2" fill="#444"/>
+<circle cx="474" cy="392" r="3.2" fill="#444"/>
+<circle cx="496" cy="150" r="3.2" fill="#444"/>
+<circle cx="496" cy="172" r="3.2" fill="#444"/>
+<circle cx="496" cy="194" r="3.2" fill="#444"/>
+<circle cx="496" cy="216" r="3.2" fill="#444"/>
+<circle cx="496" cy="238" r="3.2" fill="#444"/>
+<circle cx="496" cy="304" r="3.2" fill="#444"/>
+<circle cx="496" cy="326" r="3.2" fill="#444"/>
+<circle cx="496" cy="348" r="3.2" fill="#444"/>
+<circle cx="496" cy="370" r="3.2" fill="#444"/>
+<circle cx="496" cy="392" r="3.2" fill="#444"/>
+<circle cx="518" cy="150" r="3.2" fill="#444"/>
+<circle cx="518" cy="172" r="3.2" fill="#444"/>
+<circle cx="518" cy="194" r="3.2" fill="#444"/>
+<circle cx="518" cy="216" r="3.2" fill="#444"/>
+<circle cx="518" cy="238" r="3.2" fill="#444"/>
+<circle cx="518" cy="304" r="3.2" fill="#444"/>
+<circle cx="518" cy="326" r="3.2" fill="#444"/>
+<circle cx="518" cy="348" r="3.2" fill="#444"/>
+<circle cx="518" cy="370" r="3.2" fill="#444"/>
+<circle cx="518" cy="392" r="3.2" fill="#444"/>
+<circle cx="540" cy="150" r="3.2" fill="#444"/>
+<circle cx="540" cy="172" r="3.2" fill="#444"/>
+<circle cx="540" cy="194" r="3.2" fill="#444"/>
+<circle cx="540" cy="216" r="3.2" fill="#444"/>
+<circle cx="540" cy="238" r="3.2" fill="#444"/>
+<circle cx="540" cy="304" r="3.2" fill="#444"/>
+<circle cx="540" cy="326" r="3.2" fill="#444"/>
+<circle cx="540" cy="348" r="3.2" fill="#444"/>
+<circle cx="540" cy="370" r="3.2" fill="#444"/>
+<circle cx="540" cy="392" r="3.2" fill="#444"/>
+<circle cx="562" cy="150" r="3.2" fill="#444"/>
+<circle cx="562" cy="172" r="3.2" fill="#444"/>
+<circle cx="562" cy="194" r="3.2" fill="#444"/>
+<circle cx="562" cy="216" r="3.2" fill="#444"/>
+<circle cx="562" cy="238" r="3.2" fill="#444"/>
+<circle cx="562" cy="304" r="3.2" fill="#444"/>
+<circle cx="562" cy="326" r="3.2" fill="#444"/>
+<circle cx="562" cy="348" r="3.2" fill="#444"/>
+<circle cx="562" cy="370" r="3.2" fill="#444"/>
+<circle cx="562" cy="392" r="3.2" fill="#444"/>
+<circle cx="584" cy="150" r="3.2" fill="#444"/>
+<circle cx="584" cy="172" r="3.2" fill="#444"/>
+<circle cx="584" cy="194" r="3.2" fill="#444"/>
+<circle cx="584" cy="216" r="3.2" fill="#444"/>
+<circle cx="584" cy="238" r="3.2" fill="#444"/>
+<circle cx="584" cy="304" r="3.2" fill="#444"/>
+<circle cx="584" cy="326" r="3.2" fill="#444"/>
+<circle cx="584" cy="348" r="3.2" fill="#444"/>
+<circle cx="584" cy="370" r="3.2" fill="#444"/>
+<circle cx="584" cy="392" r="3.2" fill="#444"/>
+<circle cx="606" cy="150" r="3.2" fill="#444"/>
+<circle cx="606" cy="172" r="3.2" fill="#444"/>
+<circle cx="606" cy="194" r="3.2" fill="#444"/>
+<circle cx="606" cy="216" r="3.2" fill="#444"/>
+<circle cx="606" cy="238" r="3.2" fill="#444"/>
+<circle cx="606" cy="304" r="3.2" fill="#444"/>
+<circle cx="606" cy="326" r="3.2" fill="#444"/>
+<circle cx="606" cy="348" r="3.2" fill="#444"/>
+<circle cx="606" cy="370" r="3.2" fill="#444"/>
+<circle cx="606" cy="392" r="3.2" fill="#444"/>
+<circle cx="628" cy="150" r="3.2" fill="#444"/>
+<circle cx="628" cy="172" r="3.2" fill="#444"/>
+<circle cx="628" cy="194" r="3.2" fill="#444"/>
+<circle cx="628" cy="216" r="3.2" fill="#444"/>
+<circle cx="628" cy="238" r="3.2" fill="#444"/>
+<circle cx="628" cy="304" r="3.2" fill="#444"/>
+<circle cx="628" cy="326" r="3.2" fill="#444"/>
+<circle cx="628" cy="348" r="3.2" fill="#444"/>
+<circle cx="628" cy="370" r="3.2" fill="#444"/>
+<circle cx="628" cy="392" r="3.2" fill="#444"/>
+<circle cx="650" cy="150" r="3.2" fill="#444"/>
+<circle cx="650" cy="172" r="3.2" fill="#444"/>
+<circle cx="650" cy="194" r="3.2" fill="#444"/>
+<circle cx="650" cy="216" r="3.2" fill="#444"/>
+<circle cx="650" cy="238" r="3.2" fill="#444"/>
+<circle cx="650" cy="304" r="3.2" fill="#444"/>
+<circle cx="650" cy="326" r="3.2" fill="#444"/>
+<circle cx="650" cy="348" r="3.2" fill="#444"/>
+<circle cx="650" cy="370" r="3.2" fill="#444"/>
+<circle cx="650" cy="392" r="3.2" fill="#444"/>
+<circle cx="672" cy="150" r="3.2" fill="#444"/>
+<circle cx="672" cy="172" r="3.2" fill="#444"/>
+<circle cx="672" cy="194" r="3.2" fill="#444"/>
+<circle cx="672" cy="216" r="3.2" fill="#444"/>
+<circle cx="672" cy="238" r="3.2" fill="#444"/>
+<circle cx="672" cy="304" r="3.2" fill="#444"/>
+<circle cx="672" cy="326" r="3.2" fill="#444"/>
+<circle cx="672" cy="348" r="3.2" fill="#444"/>
+<circle cx="672" cy="370" r="3.2" fill="#444"/>
+<circle cx="672" cy="392" r="3.2" fill="#444"/>
+<circle cx="694" cy="150" r="3.2" fill="#444"/>
+<circle cx="694" cy="172" r="3.2" fill="#444"/>
+<circle cx="694" cy="194" r="3.2" fill="#444"/>
+<circle cx="694" cy="216" r="3.2" fill="#444"/>
+<circle cx="694" cy="238" r="3.2" fill="#444"/>
+<circle cx="694" cy="304" r="3.2" fill="#444"/>
+<circle cx="694" cy="326" r="3.2" fill="#444"/>
+<circle cx="694" cy="348" r="3.2" fill="#444"/>
+<circle cx="694" cy="370" r="3.2" fill="#444"/>
+<circle cx="694" cy="392" r="3.2" fill="#444"/>
+<circle cx="716" cy="150" r="3.2" fill="#444"/>
+<circle cx="716" cy="172" r="3.2" fill="#444"/>
+<circle cx="716" cy="194" r="3.2" fill="#444"/>
+<circle cx="716" cy="216" r="3.2" fill="#444"/>
+<circle cx="716" cy="238" r="3.2" fill="#444"/>
+<circle cx="716" cy="304" r="3.2" fill="#444"/>
+<circle cx="716" cy="326" r="3.2" fill="#444"/>
+<circle cx="716" cy="348" r="3.2" fill="#444"/>
+<circle cx="716" cy="370" r="3.2" fill="#444"/>
+<circle cx="716" cy="392" r="3.2" fill="#444"/>
+<circle cx="738" cy="150" r="3.2" fill="#444"/>
+<circle cx="738" cy="172" r="3.2" fill="#444"/>
+<circle cx="738" cy="194" r="3.2" fill="#444"/>
+<circle cx="738" cy="216" r="3.2" fill="#444"/>
+<circle cx="738" cy="238" r="3.2" fill="#444"/>
+<circle cx="738" cy="304" r="3.2" fill="#444"/>
+<circle cx="738" cy="326" r="3.2" fill="#444"/>
+<circle cx="738" cy="348" r="3.2" fill="#444"/>
+<circle cx="738" cy="370" r="3.2" fill="#444"/>
+<circle cx="738" cy="392" r="3.2" fill="#444"/>
+<rect x="182" y="226" width="169" height="134" rx="4" fill="#1b2a3a" stroke="#0a1420" stroke-width="1.5"/>
+<rect x="184" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="184" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="191" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 191 296)">VMOT</text>
+<text x="191" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 191 340)">ENABLE</text>
+<rect x="206" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="206" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="213" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 213 296)">GND</text>
+<text x="213" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 213 340)">MS1</text>
+<rect x="228" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="228" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="235" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 235 296)">2B</text>
+<text x="235" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 235 340)">MS2</text>
+<rect x="250" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="250" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="257" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 257 296)">2A</text>
+<text x="257" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 257 340)">MS3</text>
+<rect x="272" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="272" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="279" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 279 296)">1A</text>
+<text x="279" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 279 340)">RESET</text>
+<rect x="294" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="294" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="301" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 301 296)">1B</text>
+<text x="301" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 301 340)">SLEEP</text>
+<rect x="316" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="316" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="323" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 323 296)">VDD</text>
+<text x="323" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 323 340)">STEP</text>
+<rect x="338" y="234" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<rect x="338" y="344" width="8" height="8" fill="#d9c58a" stroke="#333"/>
+<text x="345" y="296" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 345 296)">GND</text>
+<text x="345" y="340" font-size="8.5" fill="#fff" text-anchor="start" font-weight="400" transform="rotate(-90 345 340)">DIR</text>
+<circle cx="340" cy="300" r="5" fill="#8d9aa6" stroke="#333"/>
+<text x="340" y="316" font-size="7" fill="#cfd8dc" text-anchor="middle" font-weight="400">Vref</text>
+<line x1="188" y1="194" x2="188" y2="182" stroke="#333" stroke-width="2"/>
+<line x1="210" y1="194" x2="210" y2="182" stroke="#333" stroke-width="2"/>
+<rect x="182" y="156" width="40" height="26" rx="6" fill="#2b3a4a" stroke="#111"/>
+<rect x="214" y="156" width="6" height="26" fill="#ddd"/>
+<text x="187" y="166" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">+</text>
+<text x="200" y="178" font-size="7.5" fill="#fff" text-anchor="middle" font-weight="400">100µF</text>
+<path d="M276,370 A11,11 0 0 1 298,370" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M276,370 A11,11 0 0 1 298,370" fill="none" stroke="#e0a800" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="398" y="236" width="64" height="70" rx="6" fill="#444" stroke="#111"/>
+<circle cx="430" cy="271" r="14" fill="#8b1a1a" stroke="#400"/>
+<circle cx="408" cy="238" r="3.5" fill="#d9c58a" stroke="#333"/>
+<circle cx="452" cy="238" r="3.5" fill="#d9c58a" stroke="#333"/>
+<circle cx="408" cy="304" r="3.5" fill="#d9c58a" stroke="#333"/>
+<circle cx="452" cy="304" r="3.5" fill="#d9c58a" stroke="#333"/>
+<text x="430" y="228" font-size="9" fill="#1d2730" text-anchor="middle" font-weight="400">버튼</text>
+<line x1="474" y1="370" x2="540" y2="370" stroke="#777" stroke-width="2"/>
+<rect x="486" y="364" width="42" height="12" rx="4" fill="#e8c9a0" stroke="#7a5a30"/>
+<rect x="492" y="364" width="3" height="12" fill="#8b4513"/>
+<rect x="498" y="364" width="3" height="12" fill="#111"/>
+<rect x="504" y="364" width="3" height="12" fill="#8b4513"/>
+<rect x="518" y="364" width="3" height="12" fill="#d4af37"/>
+<text x="507" y="390" font-size="9" fill="#1d2730" text-anchor="middle" font-weight="400">100 Ω</text>
+<line x1="540" y1="304" x2="540" y2="290" stroke="#333" stroke-width="2"/>
+<line x1="606" y1="304" x2="606" y2="290" stroke="#333" stroke-width="2"/>
+<circle cx="573" cy="268" r="24" fill="#222" stroke="#000"/>
+<circle cx="573" cy="268" r="4" fill="#555"/>
+<text x="536" y="300" font-size="11" fill="#d62828" text-anchor="end" font-weight="700">+</text>
+<text x="573" y="236" font-size="9" fill="#1d2730" text-anchor="middle" font-weight="400">부저</text>
+<path d="M100,74 H60" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M100,74 H60" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="56" y="78" font-size="10" fill="#d62828" text-anchor="end" font-weight="700">UNO 5V</text>
+<path d="M100,96 H60" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M100,96 H60" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="56" y="100" font-size="10" fill="#222" text-anchor="end" font-weight="700">UNO GND</text>
+<path d="M100,442 H60" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M100,442 H60" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="56" y="446" font-size="10" fill="#222" text-anchor="end" font-weight="700">12 V (−)</text>
+<path d="M100,464 H60" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M100,464 H60" fill="none" stroke="#7b3fbf" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="56" y="468" font-size="10" fill="#7b3fbf" text-anchor="end" font-weight="700">12 V (+)</text>
+<path d="M738,96 H762 V442 H738" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M738,96 H762 V442 H738" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="772" y="270" font-size="9" fill="#1d2730" text-anchor="start" font-weight="400" transform="rotate(-90 772 270)">GND 공통</text>
+<path d="M210,150 V96" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M210,150 V96" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M320,150 V102 A6,6 0 0 1 320,90 V74" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M320,150 V102 A6,6 0 0 1 320,90 V74" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M342,150 V96" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M342,150 V96" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M188,150 V140 H177 V464 H188" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M188,150 V140 H177 V464 H188" fill="none" stroke="#7b3fbf" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M232,150 V140 H243 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M232,150 V140 H243 V46" fill="none" stroke="#1f6fd0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="243" y="38" font-size="10" fill="#1f6fd0" text-anchor="middle" font-weight="700">2B</text>
+<path d="M254,150 V140 H265 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M254,150 V140 H265 V46" fill="none" stroke="#1f6fd0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="265" y="38" font-size="10" fill="#1f6fd0" text-anchor="middle" font-weight="700">2A</text>
+<path d="M276,150 V140 H287 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M276,150 V140 H287 V46" fill="none" stroke="#2a9d3f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="287" y="38" font-size="10" fill="#2a9d3f" text-anchor="middle" font-weight="700">1A</text>
+<path d="M298,150 V140 H309 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M298,150 V140 H309 V46" fill="none" stroke="#2a9d3f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="309" y="38" font-size="10" fill="#2a9d3f" text-anchor="middle" font-weight="700">1B</text>
+<text x="276" y="24" font-size="10" fill="#1d2730" text-anchor="middle" font-weight="700">NEMA17 모터 4선 (코일 2 | 코일 1)</text>
+<path d="M408,150 V140 H419 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M408,150 V140 H419 V46" fill="none" stroke="#e0a800" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="419" y="38" font-size="10" fill="#b08500" text-anchor="middle" font-weight="700">UNO A2</text>
+<path d="M452,392 V442" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M452,392 V442" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M650,74 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M650,74 V46" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="650" y="38" font-size="10" fill="#d62828" text-anchor="middle" font-weight="700">LCD VCC</text>
+<path d="M716,96 V80 A6,6 0 0 1 716,68 V46" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M716,96 V80 A6,6 0 0 1 716,68 V46" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="716" y="38" font-size="10" fill="#222" text-anchor="middle" font-weight="700">LCD GND</text>
+<text x="683" y="24" font-size="9" fill="#5b6770" text-anchor="middle" font-weight="400">LCD SDA→A4, SCL→A5 는 UNO 에 직접</text>
+<path d="M188,392 V410 H199 V500" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M188,392 V410 H199 V500" fill="none" stroke="#f26b1d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="199" y="514" font-size="10" fill="#f26b1d" text-anchor="middle" font-weight="700">UNO D6</text>
+<path d="M320,392 V410 H309 V500" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M320,392 V410 H309 V500" fill="none" stroke="#0f7f8c" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="309" y="514" font-size="10" fill="#0f7f8c" text-anchor="middle" font-weight="700">UNO D2</text>
+<path d="M342,392 V410 H353 V522" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M342,392 V410 H353 V522" fill="none" stroke="#7b3fbf" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="353" y="536" font-size="10" fill="#7b3fbf" text-anchor="middle" font-weight="700">UNO D7</text>
+<path d="M474,392 V410 H485 V500" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M474,392 V410 H485 V500" fill="none" stroke="#c4520d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="485" y="514" font-size="10" fill="#c4520d" text-anchor="middle" font-weight="700">UNO A3</text>
+<path d="M606,392 V442" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M606,392 V442" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M672,392 V410 H661 V500" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M672,392 V410 H661 V500" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="661" y="514" font-size="10" fill="#d62828" text-anchor="middle" font-weight="700">5 V 어댑터 +</text>
+<path d="M716,392 V442" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M716,392 V442" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M738,442 V458 A6,6 0 0 0 738,470 V522" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M738,442 V458 A6,6 0 0 0 738,470 V522" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="738" y="536" font-size="10" fill="#222" text-anchor="middle" font-weight="700">5 V 어댑터 −</text>
+<path d="M672,348 H790" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M672,348 H790" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="796" y="352" font-size="10" fill="#d62828" text-anchor="start" font-weight="700">MG996R 빨강 (+5 V)</text>
+<path d="M672,370 H790" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M672,370 H790" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="796" y="374" font-size="10" fill="#d62828" text-anchor="start" font-weight="700">SG90 빨강 (+5 V)</text>
+<path d="M716,304 H790" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M716,304 H790" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="796" y="308" font-size="10" fill="#222" text-anchor="start" font-weight="700">MG996R 갈색 (GND)</text>
+<path d="M716,326 H790" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M716,326 H790" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="796" y="330" font-size="10" fill="#222" text-anchor="start" font-weight="700">SG90 갈색 (GND)</text>
+<text x="796" y="396" font-size="9" fill="#5b6770" text-anchor="start" font-weight="400">주황(신호): MG996R → UNO D8</text>
+<text x="796" y="410" font-size="9" fill="#5b6770" text-anchor="start" font-weight="400">SG90 → UNO D9 (브레드보드 안 거침)</text>
+<circle cx="144" cy="52" r="9" fill="#1d2730"/>
+<text x="144" y="56" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">1</text>
+<circle cx="144" cy="442" r="9" fill="#1d2730"/>
+<text x="144" y="446" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">1</text>
+<circle cx="366" cy="300" r="9" fill="#1d2730"/>
+<text x="366" y="304" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">2</text>
+<circle cx="164" cy="164" r="9" fill="#1d2730"/>
+<text x="164" y="168" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">3</text>
+<circle cx="170" cy="24" r="9" fill="#1d2730"/>
+<text x="170" y="28" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">4</text>
+<circle cx="430" cy="330" r="9" fill="#1d2730"/>
+<text x="430" y="334" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">5</text>
+<circle cx="573" cy="398" r="9" fill="#1d2730"/>
+<text x="573" y="402" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">6</text>
+<circle cx="694" cy="248" r="9" fill="#1d2730"/>
+<text x="694" y="252" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">7</text>
+<circle cx="683" cy="58" r="9" fill="#1d2730"/>
+<text x="683" y="62" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">8</text>
+</svg>
+<figcaption>그림 3. 브레드보드 배치도. 동그라미 번호는 아래 순서와 같다. 위·아래 레일: <span class="sw" style="background:#d62828"></span>빨강 줄(+) 위 = UNO 5V, 아래 = 12 V(+) / <span class="sw" style="background:#1f6fd0"></span>파랑 줄(−) 는 위·아래 모두 GND. 선이 레일을 건너뛰는 곳은 작은 반원으로 그렸다(그 구멍에 꽂지 않는다).</figcaption>
+</figure>
+
+<h3>레일 역할 (가장 먼저 정한다)</h3>
+<table>
+  <thead><tr><th>레일</th><th>역할</th><th>여기에 꽂는 것</th></tr></thead>
+  <tbody>
+    <tr><td class="pin">위 + (빨강)</td><td><b>UNO 5V</b> (로직)</td><td>UNO 5V 핀, A4988 VDD(a11), LCD VCC</td></tr>
+    <tr><td class="pin">위 − (파랑)</td><td>GND</td><td>UNO GND 핀, A4988 GND(a6·a12), LCD GND</td></tr>
+    <tr><td class="pin">아래 − (파랑)</td><td>GND</td><td>12 V(−), 5 V 어댑터(−), 버튼(j17), 부저(j24), 서보 GND 열(j29)</td></tr>
+    <tr><td class="pin">아래 + (빨강)</td><td><b>12 V</b> (모터만)</td><td>12 V(+), A4988 VMOT(a5 에서 온 긴 점퍼)</td></tr>
+  </tbody>
+</table>
+<div class="warn"><b>아래 + 레일은 12 V 다.</b> 여기에 5 V 부품(서보·LCD·A4988 VDD)을 꽂으면 그 자리에서 타 버린다. 위·아래 빨강 줄의 역할이 다르다는 것을 보드에 종이 테이프로 써 붙여 둔다.</div>
+
+<h3>따라 꽂기 순서</h3>
+<p class="sub">모든 전원(USB·12 V·5 V 어댑터)을 뺀 상태에서 한다. 각 단계 끝의 ✔ 는 눈으로 확인할 것.</p>
+<ol>
+  <li><b>① 레일 연결 (점퍼 5개)</b>
+    <ul>
+      <li>UNO <code>5V</code> → 위 + 레일 왼쪽 끝 구멍 / UNO <code>GND</code> → 위 − 레일 왼쪽 끝 구멍 (수-수 점퍼 2개).</li>
+      <li>위 − 레일 오른쪽 끝 ↔ 아래 − 레일 오른쪽 끝 (점퍼 1개, GND 공통).</li>
+      <li>DC 잭 터미널의 <code>+</code> → 아래 + 레일 왼쪽 끝, <code>−</code> → 아래 − 레일 왼쪽 끝 (단선 2가닥, 잭 어댑터 나사에 물린다).</li>
+      <li>✔ 아직 12 V 어댑터는 꽂지 않는다.</li>
+    </ul>
+  </li>
+  <li><b>② A4988 꽂기 + 로직 신호 (점퍼 6개)</b>
+    <ul>
+      <li>모듈 글씨 <b>VMOT 가 위(a 쪽), ENABLE 이 아래(j 쪽)</b> 가 되게 하고, 위 핀줄을 <code>e5~e12</code>, 아래 핀줄을 <code>h5~h12</code> 에 꽂는다. 핀 순서(왼→오) 위: VMOT·GND·2B·2A·1A·1B·VDD·GND, 아래: ENABLE·MS1·MS2·MS3·RESET·SLEEP·STEP·DIR. 방열판은 칩 위에 붙인다.</li>
+      <li><code>i9</code> ↔ <code>i10</code> 짧은 점퍼 (RESET–SLEEP). MS1·MS2·MS3(6~8열 아래쪽) 은 아무것도 꽂지 않는다 = 풀스텝.</li>
+      <li><code>a6</code> → 위 − 레일 / <code>a12</code> → 위 − 레일 / <code>a11</code> → 위 <b>+</b> 레일 (VDD 5 V).</li>
+      <li><code>j5</code> → UNO <code>D6</code> (ENABLE) / <code>j11</code> → UNO <code>D2</code> (STEP) / <code>j12</code> → UNO <code>D7</code> (DIR).</li>
+      <li>✔ a11 이 위 + (5 V) 에 갔는지, 아래 + (12 V) 가 아닌지 다시 본다.</li>
+    </ul>
+  </li>
+  <li><b>③ 커패시터 100 µF + VMOT (점퍼 1개)</b>
+    <ul>
+      <li>전해 커패시터의 <b>긴 다리(+)</b> 를 <code>c5</code>, 짧은 다리(−, 몸통에 흰 띠) 를 <code>c6</code> 에. 5열 = VMOT, 6열 = GND 와 같은 줄이라 바로 병렬이 된다.</li>
+      <li><code>a5</code> → 아래 <b>+</b> 레일 (12 V). 보드 왼쪽 가장자리를 따라 내려가는 긴 점퍼 1개. 이 선 하나만 12 V 가 흐른다.</li>
+      <li>✔ 커패시터 극성. 거꾸로 꽂으면 12 V 를 켜는 순간 터진다.</li>
+    </ul>
+  </li>
+  <li><b>④ NEMA17 모터 (4선)</b>
+    <ul>
+      <li>모터 선 4가닥 중 저항계로 약 2 Ω 이 나오는 두 선이 한 코일. 코일 하나 → <code>a9</code>·<code>a10</code> (1A·1B), 다른 코일 → <code>a7</code>·<code>a8</code> (2B·2A). 짝만 맞으면 순서는 상관없다(회전 방향은 펌웨어 <code>CW_LEVEL</code> 로 보정).</li>
+      <li>✔ 같은 코일의 두 선이 7·8 또는 9·10 에 함께 있는지. 섞이면 모터가 떨기만 한다.</li>
+    </ul>
+  </li>
+  <li><b>⑤ 버튼 (점퍼 2개)</b>
+    <ul>
+      <li>택트 스위치를 가운데 홈 위에 걸쳐 다리를 <code>e15</code>·<code>e17</code>·<code>f15</code>·<code>f17</code> 에 꽂는다.</li>
+      <li><code>a15</code> → UNO <code>A2</code> / <code>j17</code> → 아래 − 레일. 대각선(15열 위쪽, 17열 아래쪽)을 쓰면 스위치 방향과 상관없이 동작한다. 저항 없음(내부 풀업).</li>
+    </ul>
+  </li>
+  <li><b>⑥ 부저 + 100 Ω 저항 (점퍼 2개)</b>
+    <ul>
+      <li>저항 100 Ω(갈·검·갈·금) 다리를 <code>i18</code> 과 <code>i21</code> 에 (다리를 ㄷ자로 구부려 3칸 걸침).</li>
+      <li>부저 <b>+</b>(긴 다리 또는 윗면 + 표시) 를 <code>f21</code>, − 를 <code>f24</code> 에 (다리 간격이 다르면 21열과 그 간격에 맞는 열에 꽂고 − 쪽 점퍼만 그 열로 옮긴다).</li>
+      <li><code>j18</code> → UNO <code>A3</code> / <code>j24</code> → 아래 − 레일. 전류 경로: A3 → 18열 → 저항 → 21열 → 부저 → 24열 → GND.</li>
+    </ul>
+  </li>
+  <li><b>⑦ 서보 전원 열 (27열 = +5 V, 29열 = GND)</b>
+    <ul>
+      <li>5 V USB 어댑터 케이블을 잘라 빨강(+5 V) → <code>j27</code>, 검정(−) → 아래 − 레일 오른쪽 끝. 멀티미터로 5 V 가 맞는지 먼저 확인.</li>
+      <li><code>j29</code> → 아래 − 레일 (29열을 GND 로 만든다).</li>
+      <li>MG996R 커넥터에 수-수 점퍼 3개: 빨강 → <code>h27</code>, 갈색 → <code>f29</code>, 주황 → UNO <code>D8</code>.</li>
+      <li>SG90 커넥터에 수-수 점퍼 3개: 빨강 → <code>i27</code>, 갈색 → <code>g29</code>, 주황 → UNO <code>D9</code>.</li>
+      <li>✔ 27열에 꽂힌 것이 어댑터 + 와 서보 빨강뿐인지. 위/아래 빨강 레일과는 연결하지 않는다.</li>
+    </ul>
+  </li>
+  <li><b>⑧ LCD1602 I2C (암-수 점퍼 4개)</b>
+    <ul>
+      <li>백팩 핀 <code>GND</code> → 위 − 레일 / <code>VCC</code> → 위 + 레일 / <code>SDA</code> → UNO <code>A4</code> / <code>SCL</code> → UNO <code>A5</code>. 브레드보드 열은 쓰지 않는다.</li>
+      <li>주소는 <code>0x27</code>(펌웨어 고정). 글자가 안 보이면 백팩 뒤 파란 전위차계로 콘트라스트를 돌리고, 그래도 안 되면 I2C 스캐너로 주소(0x3F 백팩도 있음)를 확인해 <code>main.ino</code> 의 <code>LiquidCrystal_I2C lcd(0x27, 16, 2)</code> 를 고친다. R4 의 Qwiic 커넥터에는 꽂지 않는다.</li>
+    </ul>
+  </li>
+  <li><b>⑨ 켜기 전 최종 확인 (멀티미터 저항 모드, 전원 없이)</b>
+    <ul>
+      <li>위 + 레일 ↔ 아래 + 레일: <b>무한대(OL)</b> 여야 한다. 통하면 5 V 와 12 V 가 섞인 것.</li>
+      <li>위 + 레일 ↔ GND, 아래 + 레일 ↔ GND: 둘 다 수 kΩ 이상. 0 Ω 이면 단락.</li>
+      <li>이후 7절 순서(USB → Vref → 모터 → 12 V → 서보)로 켠다.</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>선 목록 (총 수-수 점퍼 약 24개, 암-수 4개, 단선 4가닥)</h3>
+<table>
+  <thead><tr><th>#</th><th>한쪽</th><th>다른 쪽</th><th>종류</th><th>색 추천</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>UNO 5V</td><td>위 + 레일</td><td>수-수</td><td>빨강</td></tr>
+    <tr><td>2</td><td>UNO GND</td><td>위 − 레일</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>3</td><td>위 − 레일 오른쪽 끝</td><td>아래 − 레일 오른쪽 끝</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>4</td><td>DC 잭 +</td><td>아래 + 레일</td><td>단선</td><td>보라/빨강(12 V 표시)</td></tr>
+    <tr><td>5</td><td>DC 잭 −</td><td>아래 − 레일</td><td>단선</td><td>검정</td></tr>
+    <tr><td>6</td><td>i9</td><td>i10</td><td>수-수(짧게)</td><td>노랑</td></tr>
+    <tr><td>7</td><td>a6</td><td>위 − 레일</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>8</td><td>a12</td><td>위 − 레일</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>9</td><td>a11</td><td>위 + 레일</td><td>수-수</td><td>빨강</td></tr>
+    <tr><td>10</td><td>a5</td><td>아래 + 레일 (12 V)</td><td>수-수(길게)</td><td>보라</td></tr>
+    <tr><td>11</td><td>j5</td><td>UNO D6</td><td>수-수</td><td>주황</td></tr>
+    <tr><td>12</td><td>j11</td><td>UNO D2</td><td>수-수</td><td>청록</td></tr>
+    <tr><td>13</td><td>j12</td><td>UNO D7</td><td>수-수</td><td>보라</td></tr>
+    <tr><td>14~17</td><td>a7·a8 / a9·a10</td><td>NEMA17 코일 2 / 코일 1</td><td>모터 선</td><td>—</td></tr>
+    <tr><td>18</td><td>a15</td><td>UNO A2</td><td>수-수</td><td>노랑</td></tr>
+    <tr><td>19</td><td>j17</td><td>아래 − 레일</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>20</td><td>j18</td><td>UNO A3</td><td>수-수</td><td>주황</td></tr>
+    <tr><td>21</td><td>j24</td><td>아래 − 레일</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>22</td><td>5 V 어댑터 +</td><td>j27</td><td>단선</td><td>빨강</td></tr>
+    <tr><td>23</td><td>5 V 어댑터 −</td><td>아래 − 레일</td><td>단선</td><td>검정</td></tr>
+    <tr><td>24</td><td>j29</td><td>아래 − 레일</td><td>수-수</td><td>검정</td></tr>
+    <tr><td>25~27</td><td>MG996R 빨강/갈색/주황</td><td>h27 / f29 / UNO D8</td><td>수-수 3</td><td>빨강/검정/초록</td></tr>
+    <tr><td>28~30</td><td>SG90 빨강/갈색/주황</td><td>i27 / g29 / UNO D9</td><td>수-수 3</td><td>빨강/검정/파랑</td></tr>
+    <tr><td>31~34</td><td>LCD GND/VCC/SDA/SCL</td><td>위 − / 위 + / UNO A4 / UNO A5</td><td>암-수 4</td><td>검정/빨강/초록/파랑</td></tr>
+  </tbody>
+</table>
+<p class="sub">부품: A4988 1, 100 µF 전해 커패시터 1, 100 Ω 저항 1(갈·검·갈·금), 택트 스위치 1, 수동 부저 1, DC 잭 터미널 어댑터 1, 반쪽 브레드보드 1.</p>
+
+<h2>5. 서보 혼 맞추기와 Vref</h2>
+<ul>
+  <li>서보에 전원을 넣으면 후드 75°·리프터 0° 로 간다. <b>혼은 그 자세를 본 뒤</b> 끼운다 (후드: 혼이 힌지 아래 15° 방향, 리프터: 크랭크가 슬롯 아래 사점).</li>
+  <li><b>Vref</b>: 모터를 빼고 12 V 만 켠 뒤 A4988 전위차계 중심–GND 전압을 <b>0.48 V</b> 로 맞춘다(0.6 A, Rs 0.1 Ω 기준). 시계 방향 = 전류 증가. 방열판 필수.</li>
+  <li>키트 부저가 능동형(DC 만 주면 삑)이면 음 높이는 한 가지지만 동작은 한다.</li>
+</ul>
+
+<h2>6. UNO R4 WiFi 에서 달라지는 점</h2>
+<table>
+  <thead><tr><th style="width:28%">항목</th><th>R3 와의 차이</th><th>이 프로젝트에서 할 일</th></tr></thead>
+  <tbody>
+    <tr><td>헤더 핀 · 로직 전압</td><td>배치 동일, 5 V 로직 동일</td><td>배선 그대로. 펌웨어 핀 번호(<code>motors.h</code>·<code>mechanism.h</code>·<code>main.ino</code>) 변경 없음</td></tr>
+    <tr><td>핀당 출력 전류</td><td>최대 <b>8 mA</b> (R3 는 20~40 mA)</td><td>부저에 직렬 100 Ω. 서보 신호·A4988 입력·I2C 는 전류가 작아 문제 없음</td></tr>
+    <tr><td>I2C</td><td>A4/A5 = <code>Wire</code>(5 V). 추가로 Qwiic = <code>Wire1</code>(3.3 V)</td><td>LCD 는 A4/A5 에. Qwiic 비사용</td></tr>
+    <tr><td>5V 핀 공급 능력</td><td>USB 또는 VIN 레귤레이터에서 나옴, 넉넉하지 않음</td><td>서보는 별도 5 V 어댑터(문서 기준 유지). 12 V 를 VIN 에 넣어 보드를 돌려도 되지만 서보까지 보드에서 뽑으면 과열·리셋</td></tr>
+    <tr><td>라이브러리</td><td><code>Servo</code>·<code>Wire</code>·<code>tone()</code> 모두 R4 코어 내장. <code>&lt;avr/pgmspace.h&gt;</code> 는 호환 매크로로 제공</td><td><code>LiquidCrystal_I2C</code> 만 설치: <code>arduino-cli lib install "LiquidCrystal I2C"</code></td></tr>
+    <tr><td>플래시·RAM</td><td>256 KB / 32 KB (R3 는 32 KB / 2 KB)</td><td>V5 펌웨어 약 30 % 사용 — 여유 있음</td></tr>
+    <tr><td>보드 패키지 · FQBN</td><td><code>arduino:renesas_uno:unor4wifi</code></td><td>빌드·업로드 스크립트에 <code>-Fqbn</code> 을 넘긴다(아래 7절)</td></tr>
+    <tr><td>시리얼</td><td>네이티브 USB-CDC. 업로드 후 포트가 잠깐 사라졌다 나타남</td><td>모니터를 열 때 1~2 초 기다렸다가 115200 으로 연다</td></tr>
+  </tbody>
+</table>
+
+<h2>7. 업로드와 점검 순서</h2>
+<ol>
+  <li><b>모터·서보 없이</b> 보드만 USB 로 연결하고 빌드·업로드한다.
+<pre>arduino-cli core install arduino:renesas_uno
+arduino-cli lib install "LiquidCrystal I2C"
+powershell -ExecutionPolicy Bypass -File v5\scripts\build.ps1  -Fqbn arduino:renesas_uno:unor4wifi
+powershell -ExecutionPolicy Bypass -File v5\scripts\upload.ps1 -Port COM3 -Fqbn arduino:renesas_uno:unor4wifi</pre>
+  COM 번호는 장치 관리자나 <code>arduino-cli board list</code> 로 확인한다.</li>
+  <li>시리얼 모니터 115200: <code>Q 1</code> → <code>S 1</code> → <code>V</code> 가 <code>SOLVED ok=1</code> 로 끝나면 풀이기 정상(가상 모드). LCD 에 글자가 나오면 I2C 정상.</li>
+  <li>12 V 를 켜고(모터 미연결) A4988 Vref 0.48 V 를 맞춘다. 전원을 끈 뒤 모터를 꽂는다.</li>
+  <li>USB → 12 V 순서로 켜고 <code>Q 0</code> → <code>Y 1</code>: 컵이 위에서 봐서 시계로 90° 돌면 정상, 반대면 <code>motors.h</code> 의 <code>CW_LEVEL</code> 을 뒤집어 다시 업로드. (<code>ERR not loaded</code> 가 나오면 <code>L</code> 두 번으로 가상 장착.)</li>
+  <li>서보 어댑터를 켜면 후드 75°·리프터 0°. 이 자세에서 혼을 끼운다.</li>
+  <li>버튼 짧게 → 섞기/풀기, 1.2 초 길게 → LOAD 단계. 부저가 울리면 A3 정상.</li>
+</ol>
+
+<div class="warn"><b>주의</b> — A4988 에 12 V 가 들어간 상태에서 모터 선을 꽂거나 뽑으면 드라이버가 즉시 망가진다. 모터 선은 반드시 12 V 를 끄고 만진다. 켤 때는 USB → 12 V → 서보 5 V, 끌 때는 역순.</div>
+<div class="note"><b>전원을 끄면 컵이 자유롭게 돈다.</b> 켜기 전에 홀더 노치 하나가 정확히 뒤(타워 쪽)를 향하게 손으로 맞춘다. 스텝모터는 켜진 자리를 0° 로 삼는다.</div>
+
+<h2>8. 배선 체크리스트</h2>
+<ul class="chk">
+  <li><label><input type="checkbox"> A4988 핀줄 e5~e12(VMOT 쪽 위)·h5~h12, j5→D6, j11→D2, j12→D7</label></li>
+  <li><label><input type="checkbox"> i9–i10 점퍼(RESET–SLEEP), MS1~3 비연결</label></li>
+  <li><label><input type="checkbox"> a11→위 +(5 V), a6·a12→위 −; 위 + 와 아래 + 가 서로 통하지 않음(OL)</label></li>
+  <li><label><input type="checkbox"> a5→아래 +(12 V), 커패시터 c5(+)·c6(−) 극성</label></li>
+  <li><label><input type="checkbox"> NEMA17 코일 짝(2 Ω) 1A/1B · 2A/2B</label></li>
+  <li><label><input type="checkbox"> Vref 0.48 V, 방열판</label></li>
+  <li><label><input type="checkbox"> D8→MG996R, D9→SG90 신호(주황)</label></li>
+  <li><label><input type="checkbox"> 27열(h/i/j) = 서보 +5 V 어댑터, 29열 = 서보 GND(j29→아래 −); 보드 5V 핀 아님</label></li>
+  <li><label><input type="checkbox"> LCD SDA→A4, SCL→A5, VCC→5V, GND→GND (Qwiic 아님)</label></li>
+  <li><label><input type="checkbox"> 버튼 e15·e17·f15·f17, a15→A2, j17→GND; 저항 i18–i21, 부저 f21/f24, j18→A3, j24→GND</label></li>
+  <li><label><input type="checkbox"> 세 전원의 (−) 가 UNO GND 에 모두 연결됨</label></li>
+  <li><label><input type="checkbox"> FQBN <code>arduino:renesas_uno:unor4wifi</code> 로 업로드, <code>V</code> → <code>SOLVED ok=1</code></label></li>
+</ul>
+
+<p class="sub" style="margin-top:30px">V5 하루 제작판 기준(2026-11-05). 핀을 바꾸면 <code>v5/diagram.json</code>, <code>motors.h</code>, <code>mechanism.h</code>, <code>main.ino</code>, <code>docs/HARDWARE_V5.md</code> 4절과 이 문서를 함께 고친다.</p>
+</main>
+</body>
+</html>
