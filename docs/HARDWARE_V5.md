@@ -1,6 +1,6 @@
 # 하드웨어 V5 — 하루에 만드는 3축 큐브 로봇 (기울어진 컵 + 후드 + 리프터)
 
-2026-10-24 · 상태: **구조 확정(Rev B) + 2D 운동학·준정적 물리 검사 통과, 펌웨어·시뮬레이터·Wokwi 교차검증 통과, CAD 3D 검사 재실행 중, 실물 출력 전**.
+2026-10-24 설계 · 2026-11-14 갱신 · 상태: **V5 로 구조 확정(Rev B). 2D 운동학·준정적 물리 검사, 3D CAD 간섭 검사, 펌웨어·시뮬레이터·Wokwi 교차검증 통과(2026-11-14 재실행). 실물 제작 중(2026-11-05 시작, UNO R4 WiFi), 조정값·실측 시간은 아직 반영 전**.
 Rev B(같은 날 오후): Codex 의 3D 간섭 검사가 찾아낸 8가지 문제(후드가 열리며 앞벽이 큐브로 들어옴, 리프터 크로스바-타워 간섭, 모터 상자 안치수, 기둥 모따기, 허브 서포트, 크랭크 지상고, 리프터 좌표 부호 오류, 크랭크 중간 행정 조건)를 치수와 검사기에 반영했다. 바뀐 값은 아래 표에 "Rev B" 로 표시.
 V4(측면 2핀 헤드 4 + 중공 D 헤드 + 잠금 막대, 스텝모터 5 + 서보 6 + 스위치 6, 출력 93개, 합판 프레임)를 대체한다.
 이 문서는 펌웨어(`firmware/main/mechanism.*`, `motors.*`), 시뮬레이터(`sim/mechanism.js`, `sim/app.js`), CAD(`tools/build_robot_v5.py`),
@@ -116,7 +116,7 @@ CAD·시뮬레이터·검사기는 모두 국소 좌표로 부품을 만들고 �
 | 동작 | 조건 | 줄 | 물리 |
 |---|---|---|---|
 | 후드 | 상태가 바뀔 때만 | `HOOD CLOSE` / `HOOD OPEN` / `HOOD LOAD` | 서보 15°/75°/135°, 이동 300 ms |
-| 컵 회전(층) | hood = CLOSE | `TURN D` / `TURN D2` / `TURN D'` | 50/100/50 스텝 + **오버슈트 2 스텝 후 복귀**(여유 1.5 mm 흡수), 램프 START 2400→MIN 1200 µs |
+| 컵 회전(층) | hood = CLOSE | `TURN D` / `TURN D2` / `TURN D'` | 50/100/50 스텝 + **오버슈트 2 스텝 후 복귀**(여유 1.5 mm 흡수), 램프 START 4000→MIN 1500 µs, 스텝마다 100 µs 가감속, 정착 150 ms (`motors.h`) |
 | 컵 회전(스핀) | hood = OPEN | `SPIN y` / `SPIN y2` / `SPIN y'` | 같은 스텝 수, 오버슈트 없음 |
 | 뒤집기 | hood = OPEN → FLIP 각 | `FLIP` | 후드 90°(서보 105°) → 리프터 0→180° (700 ms, 20 ms 간격으로 조금씩) → 정착 250 ms → 리프터 180→0° (400 ms) → 후드 60°. 합계 약 1.65 s. 큐브 x' (F→D, D→B, B→U, U→F) |
 
@@ -181,7 +181,7 @@ A4988: MS1~3 비연결(풀스텝), RESET–SLEEP 묶음, VMOT 12 V + 100 µF, Vr
 .venv-cad\Scripts\python.exe tools\build_robot_v5.py          # CAD → models/robot_v5/print/*.stl|step, robot_assembly.step/glb, parameters.json
 .venv-cad\Scripts\python.exe tools\check_robot_v5_cad.py      # 3D 간섭 검사 → mechanical_checks.json
 node tools\embed_models_v5.js                                 # → v5/sim/models.js
-node v5	ools\gen_wokwi_test.js 1 && node v5	ools\gen_mechanism_test.js
+node v5\tools\gen_wokwi_test.js 1 && node v5\tools\gen_mechanism_test.js
 powershell -ExecutionPolicy Bypass -File v5\scripts\simulate.ps1 -Scenario tests\solve_seed1.test.yaml -TimeoutMs 180000   # 시나리오 경로는 v5 기준
 ```
 
@@ -292,7 +292,7 @@ node tools/embed_models_v5.js
 
 별도 에이전트가 출력 단면 검사와 렌더·임베딩·Fusion 스크립트를 나누어 검토했다. 출력 검사 보조 모듈은 큰 외팔·떠 있는 섬은 실패하고 양쪽 지지22 mm 브리지는 통과하는 합성 사례로 확인했다. 펌웨어·시뮬레이터 코드(models.js 제외)·테스트·회로는 변경하지 않았고 커밋하지 않았다.
 
-### 8.5 Fusion 360 (2026-10-24, Fusion 2705.1.30, MCP `fusion_mcp_execute` script)
+### 8.7 Fusion 360 (2026-10-24, Fusion 2705.1.30, MCP `fusion_mcp_execute` script)
 
 `fusion/scripts/import_robot_v5.py` 의 `import_design()` 을 Fusion MCP(127.0.0.1:27182) 로 실행해 `robot_assembly.step`(Rev B, OPEN 60°)을 새 문서 `CubeRobotV5`(DirectDesign) 로 가져오고 `models/robot_v5/CubeRobotV5.f3d`(327 KB)로 내보냈다. 이 Fusion 버전은 루트 컴포넌트 이름 변경과 직접 설계의 사용자 매개변수를 허용하지 않아, 매개변수 JSON 은 루트 컴포넌트 속성(`cube_robot_v5/parameters_json`)으로 남긴다. 가져온 BRep 에는 타임라인·조인트가 없다.
 

@@ -9,7 +9,16 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 | 컴파일·라이브러리·업로드 | Arduino CLI | `.\scripts\build.ps1`, `.\scripts\upload.ps1 -Port COM3` |
 | 3D 하우징 설계 | Fusion 360 API (MCP `fusion`) | `fusion_exec` 도구로 Python 실행, 스크립트는 `fusion/scripts/` |
 
-## 두 버전 공존 (2026-10-24 병합)
+## 현재 기준: V5 확정 (2026-11-14)
+
+**제작·제출 대상은 V5 (`v5/`) 하나다.** 새 작업(펌웨어·시뮬레이터·CAD·문서·실물 조정)은 모두 V5 트리에서 한다. V4 Rev D(최상위 `firmware/main`·`sim/`·`tests/`·`docs/*_V4*.md`)는 이력·참고용으로 보존하며, 요청이 없으면 고치지 않는다.
+- 계약 문서는 `docs/HARDWARE_V5.md`, 보고서는 `docs/REPORT_V5.md`, 제작·조정 절차는 `docs/BUILD_V5.md`, 배선은 `docs/WIRING_V5_R4.html` 이다.
+- 빌드·시뮬레이션·업로드는 `v5\scripts\*.ps1` 을 쓴다 (기본 UNO R3, 실물은 `-Fqbn arduino:renesas_uno:unor4wifi`).
+- 핀 배치를 바꾸면 `v5/diagram.json`, `v5/firmware/main/motors.h`(STEP/DIR/EN), `mechanism.h`(서보), `main.ino`(버튼·부저), `docs/HARDWARE_V5.md` 4절, `docs/WIRING_V5_R4.html` 을 함께 바꾼다.
+- 실물 조정값(`H`/`K`/`O` 명령으로 찾은 후드 각·리프터 각·오버슈트)은 `v5/firmware/main/mechanism.h` 기본값에 적고 커밋한다.
+- 아래 "V4 Rev D" 절과 "프로젝트"·"폴더 구조"·"불변 조건"의 V4 항목은 V4 트리를 만질 때만 적용한다.
+
+## 두 버전의 위치 (2026-10-24 병합)
 
 | | V4 Rev D (최상위) | **V5 하루 제작판 (`v5/`)** |
 |---|---|---|
@@ -25,13 +34,13 @@ V5 의 `cube/solver/tables` 는 병합 전(일반 18수 섞기·크로스 18수)
 V5 불변 조건: `v5/sim/mechanism.js` == `v5/firmware/main/mechanism.cpp`(HOOD/SPIN/FLIP/TURN 줄, flips/spins), 치수 변경은 `tools/robot_v5_params.py` → `check_robot_v5.py` → `build_robot_v5.py` → `check_robot_v5_cad.py` → `embed_models_v5.js` 순서. 검증: `v5\scripts\simulate.ps1 -Scenario tests\mechanism_v5.test.yaml -TimeoutMs 240000` (시나리오 경로는 v5 기준), `... -Scenario tests\solve_seed1.test.yaml`.
 Codex 는 검토뿐 아니라 분업에 쓴다: 작업 지시서를 `docs/*_BRIEF.md` 로 쓰고 `codex:rescue`(`task --background --write`)로 넘긴다.
 
-## 현재 기준: Rev D 물리 보완
+## V4 Rev D 물리 보완 (이력·참고 — V4 트리 전용)
 
 `docs/PHYSICS_V4.md`가 이전 뒤집기 운전 설명보다 우선한다. 흰색 U를 아래로 두고 논리 D(물리 상단)를 고정한다. 크로스 탐색·OLL/PLL·로봇 섞기는 D를 제외한15수를 쓰고 실제/가상 모두 FLIP을 거부한다. 큐브 모델의 일반18수 섞기는 회귀 입력용으로 유지한다.
 입력은74HC165 두 개와 개별 결합/후퇴 스위치12개이며 DATA=D12,CLK=D13,PL=A0이다. P13/P29의 긴 레버용 바깥 받침을 사용한다. 서보는1도/4ms, 전체720ms 지령이다. 힘 제한 기능은 아니다.
 변경 검증에 `node tools/check_five_face_solver.js`와 `python tools/check_robot_v4_physics.py`를 포함하고, 후자는 해석 계산과 실물 합격을 분리한다.
 
-## 프로젝트: 3×3 큐브 풀이 로봇 (V4: 측면 2핀 헤드 4 + 아래 D 헤드 + 승강 잠금 막대, 서보 크랭크 이송, 상단 고정 5면 운전, 보드 내 CFOP 풀이)
+## V4 프로젝트 설명 (이력·참고): 3×3 큐브 풀이 로봇 (V4: 측면 2핀 헤드 4 + 아래 D 헤드 + 승강 잠금 막대, 서보 크랭크 이송, 상단 고정 5면 운전, 보드 내 CFOP 풀이)
 전체 흐름은 `docs/PIPELINE.md`, 보고서는 `docs/REPORT.md`, **현재 기구 기준은 `docs/HARDWARE_V4.md`** (장치 목록·좌표·치수·절차·핀 배치. 펌웨어·시뮬레이터·CAD 가 공유하는 계약).
 
 ## 폴더 구조

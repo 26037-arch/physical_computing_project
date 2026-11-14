@@ -18,7 +18,7 @@ class Mechanism {
  public:
   void begin(Motors* m);
   bool doMove(uint8_t logicalMove);     // 재배향(+HOOD CLOSE) → TURN. 실패(장착 안 됨)면 false
-  bool flip();                          // 큐브 x' (후드 OPEN → 70° → 리프터 올렸다 내림 → 60°)
+  bool flip();                          // 큐브 x' (후드 OPEN → 90° → 리프터 올렸다 내림 → 60°)
   bool spin(uint8_t k);                 // 큐브 전체 y^k (k 1..3), 후드 OPEN
   bool load();                          // LOAD 버튼 한 단계 (비어 있음→후드 LOAD·큐브 대기 / 넣음→후드 OPEN·장착 / 장착됨→배출)
   bool eject();

@@ -58,7 +58,7 @@ bool Mechanism::spin(uint8_t k) {
   return true;
 }
 
-// 뒤집기 x': 후드 70° → 리프터가 뒤쪽 아래 모서리를 끌어올려 큐브가 앞으로 넘어진다 → 리프터 내림 → 후드 60°
+// 뒤집기 x': 후드 90°(서보 105°) → 리프터가 뒤쪽 아래 모서리를 끌어올려 큐브가 앞으로 넘어진다 → 리프터 내림 → 후드 60°
 bool Mechanism::flip() {
   if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
   setHood(HOOD_OPEN);
