@@ -1,0 +1,44 @@
+{
+  "note": "Kit reference models placed by build_robot_v5.purchased(); robot local frame, mm. Cables omitted.",
+  "parts": {
+    "nema17": {
+      "bbox_min_mm": [
+        -21.15,
+        -26.1,
+        -65.0
+      ],
+      "bbox_max_mm": [
+        21.15,
+        21.15,
+        -0.9969
+      ],
+      "volume_mm3": 71368.56
+    },
+    "mg996r": {
+      "bbox_min_mm": [
+        36.7964,
+        -106.75,
+        30.0
+      ],
+      "bbox_max_mm": [
+        79.5,
+        -52.75,
+        50.0
+      ],
+      "volume_mm3": 31185.32
+    },
+    "sg90": {
+      "bbox_min_mm": [
+        -85.8,
+        -104.382,
+        74.9758
+      ],
+      "bbox_max_mm": [
+        -55.497,
+        -72.082,
+        87.1758
+      ],
+      "volume_mm3": 7191.59
+    }
+  }
+}

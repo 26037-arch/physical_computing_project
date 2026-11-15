@@ -4,8 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V5 큐브 로봇 3D 제작 설명서</title><link rel="icon" href="data:,">
 <style>
-:root{--bg:#f6f8fa;--panel:#ffffff;--line:#d5dde3;--ink:#1c2730;--muted:#5a6872;--accent:#0f8f72;--accent-ink:#ffffff;--warn-bg:#fff4e5;--warn-line:#e08a00;--ok-bg:#eaf7f1;--stage:#e6ecf0;--chip:#eef2f5;--label:#ffffffee}
-@media (prefers-color-scheme:dark){:root{--bg:#10171c;--panel:#192329;--line:#314148;--ink:#e6efed;--muted:#a0b5b7;--accent:#83dfbe;--accent-ink:#102b24;--warn-bg:#3a2c14;--warn-line:#f4be69;--ok-bg:#173229;--stage:#142028;--chip:#22313a;--label:#192329ee}}
+:root{--bg:#f6f8fa;--panel:#ffffff;--line:#d5dde3;--ink:#1c2730;--muted:#5a6872;--accent:#0f8f72;--accent-ink:#ffffff;--warn-bg:#fff4e5;--warn-line:#e08a00;--ok-bg:#eaf7f1;--stage:#e6ecf0;--chip:#eef2f5;--label:#ffffffee;--row:#f1f6f4;--bad:#c9372c;--bad-bg:#fdecea}
+@media (prefers-color-scheme:dark){:root{--bg:#10171c;--panel:#192329;--line:#314148;--ink:#e6efed;--muted:#a0b5b7;--accent:#83dfbe;--accent-ink:#102b24;--warn-bg:#3a2c14;--warn-line:#f4be69;--ok-bg:#173229;--stage:#142028;--chip:#22313a;--label:#192329ee;--row:#1f2d33;--bad:#ff8f84;--bad-bg:#3b1d1a}}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,'Malgun Gothic','Apple SD Gothic Neo',sans-serif}
@@ -54,6 +54,25 @@ td:last-child,th:last-child{text-align:right;white-space:nowrap}
 .warn,.ok{border-left:4px solid var(--warn-line);background:var(--warn-bg);padding:8px 12px;margin:12px 0 0;border-radius:0 6px 6px 0;font-size:13.5px}
 .ok{border-left-color:var(--accent);background:var(--ok-bg)}
 .demo{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+#stepNav button.group{margin-left:10px}
+#content ul.dir{list-style:none;padding:8px 12px;border:1px solid var(--line);border-left:4px solid #ff5a1f;border-radius:0 6px 6px 0;font-size:13.5px}
+#content ul.dir li{margin:3px 0}
+.arrowkey{color:#ff5a1f;font-weight:700;letter-spacing:0;text-transform:none;margin-left:6px}
+.arrowkey::before{content:"➜ "}
+table.wires{font-size:13px}
+tr.wire{cursor:pointer}
+tr.wire:hover{background:var(--row)}
+tr.wire.sel{background:var(--ok-bg);font-weight:700}
+td.n{color:var(--muted);width:26px;text-align:right;font-variant-numeric:tabular-nums}
+td.t{color:var(--muted);font-size:12px}
+.bad{border-left:4px solid var(--bad);background:var(--bad-bg);padding:8px 12px;margin:12px 0 0;border-radius:0 6px 6px 0;font-size:13.5px}
+table.find td{font-size:12.5px}
+table.find tr[data-i]{cursor:pointer}
+table.find tr[data-i]:hover{background:var(--row)}
+.pill{display:inline-block;border-radius:10px;padding:0 7px;font-size:11.5px;font-weight:700;border:1px solid var(--line);white-space:nowrap}
+.pill.bad1{color:var(--bad);border-color:var(--bad)}
+.pill.ok1{color:var(--accent);border-color:var(--accent)}
+.tools label{background:var(--label);padding:3px 8px;border-radius:6px}
 code{font-family:Consolas,'D2Coding',ui-monospace,monospace;background:var(--chip);padding:1px 5px;border-radius:4px;font-size:13px}
 footer{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line);flex:none;align-items:center}
 footer .grow{flex:1;text-align:center;color:var(--muted);font-size:12.5px}
@@ -62,7 +81,7 @@ footer .grow{flex:1;text-align:center;color:var(--muted);font-size:12.5px}
 </head>
 <body>
 <header>
-  <div><h1>V5 큐브 로봇 3D 제작 설명서</h1><p>기울어진 컵 · ㄷ자 후드 · 리프터 — 출력 7종, 구동기 3개. 화면을 끌어 돌려 보고, 단계 버튼으로 조립 순서를 따라간다.</p></div>
+  <div><h1>V5 큐브 로봇 3D 제작 설명서</h1><p>기구 조립 ①~⑧ → 배선 ⑨~⑯ → 동작 확인 ⑰. 주황 화살표가 끼우는 방향이다. 화면을 끌어 돌려 보고, 단계 버튼으로 순서를 따라간다.</p></div>
   <nav><a href="../../docs/WIRING_V5_R4.html">배선 안내</a><a href="wiring.html">최종 모습 3D(배선)</a><a href="index.html">동작 시뮬레이터</a><a href="../../docs/BUILD_V5.md">제작 설명서(글)</a></nav>
 </header>
 <main>
@@ -75,7 +94,9 @@ footer .grow{flex:1;text-align:center;color:var(--muted);font-size:12.5px}
       <label>진행 <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="조립 진행"></label>
       <label><input id="chkGhost" type="checkbox">베이스 투명</label>
       <label><input id="chkLabels" type="checkbox" checked>이름표</label>
+      <label><input id="chkArrows" type="checkbox" checked>방향 화살표</label>
       <button id="btnView">시점 되돌리기</button>
+      <button id="btnCheck">겹침 점검</button>
     </div>
     <div class="error" id="error" role="alert" hidden></div>
   </div>
@@ -87,6 +108,10 @@ footer .grow{flex:1;text-align:center;color:var(--muted);font-size:12.5px}
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="models.js" onerror="window.CubeModels={params:{},parts:{}}"></script>
+<script src="kit_models.js" onerror="window.KitModels=null"></script>
+<script src="wiring_data.js" onerror="window.WiringV5=null"></script>
+<script src="electronics.js"></script>
+<script src="overlap.js"></script>
 <script src="build.js"></script>
 </body>
 </html>

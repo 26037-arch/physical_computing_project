@@ -12,13 +12,14 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 ## 현재 기준: V5 확정 (2026-11-14)
 
 **제작·제출 대상은 V5 (`v5/`) 하나다.** 새 작업(펌웨어·시뮬레이터·CAD·문서·실물 조정)은 모두 V5 트리에서 한다. V4 Rev D(최상위 `firmware/main`·`sim/`·`tests/`·`docs/*_V4*.md`)는 이력·참고용으로 보존하며, 요청이 없으면 고치지 않는다.
-- 계약 문서는 `docs/HARDWARE_V5.md`, 보고서는 `docs/REPORT_V5.md`, 제작·조정 절차는 `docs/BUILD_V5.md`(3D 단계별 조립은 `v5/sim/build.html`, `node tools/serve.js` → `/v5/sim/build.html`), 배선은 `docs/WIRING_V5_R4.html` 이다.
-- 배선 그림·선 목록은 `tools/make_wiring_v5.js` 가 생성한다(830홀 브레드보드, 표 하나가 원본). 배선을 바꾸면 스크립트의 표를 고치고 `node tools/make_wiring_v5.js` → `--check`(넷 검사, 종료코드 0)를 실행한다. HTML 의 `WIRING-FIG`/`WIRING-LIST` 마커 사이는 직접 고치지 않는다. 같은 스크립트가 `v5/sim/wiring_data.js`(생성 파일, 수정 금지)도 쓰며, 3D 최종 모습 `v5/sim/wiring.html`·`wiring.js`(로봇 + UNO + 브레드보드 + 점퍼선, `/v5/sim/wiring.html`)는 이 데이터만 읽는다 — 부품 자리(`BB`·`UNO`·커넥터 좌표)는 `wiring.js` 에서, 선의 양 끝은 표에서 고친다.
+- 계약 문서는 `docs/HARDWARE_V5.md`, 보고서는 `docs/REPORT_V5.md`, 제작·조정 절차는 `docs/BUILD_V5.md`(3D 제작 설명서는 `v5/sim/build.html` — 기구 조립 ①~⑧ + 배선 ⑨~⑯ + 동작 확인 ⑰, 끼우는 방향 화살표 포함, `node tools/serve.js` → `/v5/sim/build.html`), 배선은 `docs/WIRING_V5_R4.html` 이다.
+- 배선 그림·선 목록은 `tools/make_wiring_v5.js` 가 생성한다(830홀 브레드보드, 표 하나가 원본). 배선을 바꾸면 스크립트의 표를 고치고 `node tools/make_wiring_v5.js` → `--check`(넷 검사, 종료코드 0)를 실행한다. HTML 의 `WIRING-FIG`/`WIRING-LIST` 마커 사이는 직접 고치지 않는다. 같은 스크립트가 `v5/sim/wiring_data.js`(생성 파일, 수정 금지)도 쓰며, 3D 최종 모습 `v5/sim/wiring.html`·`wiring.js`(로봇 + UNO + 브레드보드 + 점퍼선, `/v5/sim/wiring.html`)와 3D 제작 설명서 `build.js` 는 이 데이터만 읽는다 — 전자부 장면은 두 화면이 함께 쓰는 `v5/sim/electronics.js` 하나이고, 부품 자리(`BB`·`UNO`·커넥터 좌표)·케이블 길·방향 설명(`note`)은 거기서, 선의 양 끝은 표에서 고친다.
 - 빌드·시뮬레이션·업로드는 `v5\scripts\*.ps1` 을 쓴다 (기본 UNO R3, 실물은 `-Fqbn arduino:renesas_uno:unor4wifi`).
 - 핀 배치를 바꾸면 `v5/diagram.json`, `v5/firmware/main/motors.h`(STEP/DIR/EN), `mechanism.h`(서보), `main.ino`(버튼·부저), `docs/HARDWARE_V5.md` 4절, `docs/WIRING_V5_R4.html` 을 함께 바꾼다.
 - 실물 조정값(`H`/`K`/`O` 명령으로 찾은 후드 각·리프터 각·오버슈트·컵 여유)은 `v5/firmware/main/mechanism.h` 기본값에 적고 커밋한다. 컵 영점은 전원을 켤 때마다 `J` 로 맞춘다(저장하지 않는다).
 - 컵 모터는 1/4 마이크로스텝(`motors.h` `MICROSTEP`, A4988 MS2 → 5 V)·등가속 램프다. 운전 상수(가속도·오버슈트·컵 여유·지연)를 바꾸면 `tools/check_robot_v5.py` 의 `MOTION`, `v5/sim/mechanism.js` `durationMs`, `docs/HARDWARE_V5.md` 3.2·3.5·5절을 함께 맞춘다.
 - 키트·구매 부품의 참고 3D 모델은 `tools/build_kit_parts_v5.py` → `models/kit_parts_v5/` 이고 목록·치수 근거는 `docs/KIT_PARTS.md` 다. `build_robot_v5.py` 의 `purchased()` 가 이 모델(NEMA17·MG996R·SG90)을 장착 기준면에 놓아 `check_robot_v5_cad.py` 가 끼워 맞춤을 검사하므로, 실물을 재서 값이 바뀌면 키트 스크립트와 `robot_v5_params.py` 의 `sg90_*`·`mg996r_*`·`motor_*` 를 함께 고치고 V5 CAD 순서를 다시 돈다.
+- 겹침 점검: `node tools/check_overlap_v5.js`(헤드리스 Chrome/Edge 로 `build.html` 장면을 `v5/sim/overlap.js` 로 검사 → `models/robot_v5/overlap_checks.json`, 겹치면 종료코드 1, `--shots` 는 단계별 화면을 `docs/images/v5_build3d/` 에 남긴다). 방법·결과·한계는 `docs/OVERLAP_V5.md`. `build.js` 의 조립 경로(`from`)·`electronics.js` 의 자리·케이블 길을 바꾸면 다시 돌린다. 설명서의 구매품은 `tools/export_purchased_v5.py` → `node tools/embed_kit_v5.js` 가 만든 `v5/sim/kit_models.js`(생성 파일, 수정 금지)이므로 V5 CAD 순서 끝(`embed_models_v5.js` 다음)에 이 둘과 겹침 점검을 잇는다.
 - 아래 "V4 Rev D" 절과 "프로젝트"·"폴더 구조"·"불변 조건"의 V4 항목은 V4 트리를 만질 때만 적용한다.
 
 ## 두 버전의 위치 (2026-10-24 병합)
