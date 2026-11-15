@@ -54,6 +54,7 @@ class Mechanism {
   uint8_t hoodNow = 0;                  // 후드 서보에 마지막으로 쓴 각 (가상 모드에서는 바뀌지 않는다)
   bool loaded = false;
   bool virt() const { return !motors->isEnabled(); }
+  bool ready();                         // 장착돼 있거나 가상 모드면 true, 아니면 "ERR not loaded"
   void setHood(uint8_t pos);
   void hoodTo(uint8_t deg, uint16_t ms);
   void cupMove(uint16_t steps, bool cw, uint8_t over);

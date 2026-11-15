@@ -14,7 +14,13 @@ static const uint8_t REORIENT[6][3] = {
   {2, 9, 0},   // B: SPIN y2, FLIP
 };
 
-void Mechanism::resetOri() { for (uint8_t i = 0; i < 6; i++) ori[i] = ORI_START[i]; }
+void Mechanism::resetOri() { memcpy(ori, ORI_START, 6); }
+
+bool Mechanism::ready() {
+  if (virt() || loaded) return true;
+  Serial.println(F("ERR not loaded"));
+  return false;
+}
 
 void Mechanism::begin(Motors* m) {
   motors = m;
@@ -63,7 +69,7 @@ void Mechanism::cupMove(uint16_t steps, bool cw, uint8_t over) {
 
 // 큐브 전체 y^k: 후드를 열고 컵을 위에서 봐서 시계 방향으로 k×90° (y' 는 반시계 1회)
 bool Mechanism::spin(uint8_t k) {
-  if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
+  if (!ready()) return false;
   setHood(HOOD_OPEN);
   for (uint8_t i = 0; i < k; i++) {                      // y: F←R, L←F, B←L, R←B
     uint8_t r = ori[1], f = ori[2], l = ori[4], b = ori[5];
@@ -71,15 +77,14 @@ bool Mechanism::spin(uint8_t k) {
   }
   spins++;
   Serial.print(F("SPIN ")); Serial.println(SPIN_NAME[k]);
-  if (k == 3) cupMove(STEPS_PER_QUARTER, false, playSteps);
-  else cupMove(STEPS_PER_QUARTER * k, true, playSteps);
+  cupMove(k == 3 ? STEPS_PER_QUARTER : STEPS_PER_QUARTER * k, k != 3, playSteps);
   return true;
 }
 
 // 뒤집기 x': 후드 90°(서보 105°) → 리프터가 뒤쪽 아래 모서리를 끌어올려 큐브가 앞으로 넘어진다 → 리프터 내림
 //   → 후드가 60° 로 돌아오는 동안 컵을 ±play 왕복해 착지한 큐브를 기둥 사이 가운데로 민다
 bool Mechanism::flip() {
-  if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
+  if (!ready()) return false;
   setHood(HOOD_OPEN);
   uint8_t u = ori[0], f = ori[2], d = ori[3], b = ori[5];
   ori[3] = f; ori[5] = d; ori[0] = b; ori[2] = u;
@@ -98,7 +103,7 @@ bool Mechanism::flip() {
 }
 
 bool Mechanism::doMove(uint8_t m) {
-  if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
+  if (!ready()) return false;
   uint8_t f = m / 3, k = m % 3;
   uint8_t p = 0;
   while (p < 6 && ori[p] != f) p++;
@@ -110,8 +115,7 @@ bool Mechanism::doMove(uint8_t m) {
   setHood(HOOD_CLOSE);
   Serial.print(F("TURN ")); Serial.println(TURN_NAME[k]);
   // D = 아래에서 봐서 시계 = 컵을 위에서 봐서 반시계. k 0: 1/4 반시계, 1: 1/2, 2: 1/4 시계
-  bool cw = (k == 2);
-  cupMove((k == 1) ? 2 * STEPS_PER_QUARTER : STEPS_PER_QUARTER, cw, overshootSteps);
+  cupMove((k == 1) ? 2 * STEPS_PER_QUARTER : STEPS_PER_QUARTER, k == 2, overshootSteps);
   return true;
 }
 
