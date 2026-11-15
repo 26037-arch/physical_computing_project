@@ -282,11 +282,40 @@ rec('F_lifter_servo_torque', lift_torque_kgcm < 1.8 / 2.0, crank_r_mm=round(cran
 hood_com_r = abs(P['hinge_y_mm'])
 hood_torque_kgcm = P['hood_mass_kg'] * P['g'] * hood_com_r / 1000 / P['g'] * 100
 rec('F_hood_servo_torque', hood_torque_kgcm < 9.0 / 3.0, torque_kgcm=round(hood_torque_kgcm, 2), mg996r_kgcm=9.4)
-# 스텝모터: 층 회전 ≤ 0.3 N·m(뻑뻑한 큐브) vs NEMA17 0.4 N·m; 스핀 가속 시 위 두 층이 따라오는 조건
+# 스텝모터·여유 보정: 펌웨어 운전 상수(v5/firmware/main/motors.h, mechanism.h)의 근거. 치수 P 가 아니라 운전 조건이므로 여기 둔다.
+MOTION = dict(microstep=4, accel_steps_s2=20000, max_steps_s=2000,                   # motors.h MICROSTEP / ACCEL_SPS2 / MAX_SPS
+              overshoot_steps=12, play_steps=5,                                      # mechanism.h overshootSteps / playSteps 기본값
+              motor_hold_Nm=0.40, motor_rated_A=1.5, driver_trip_A=1.0,              # NEMA17 정격, A4988 Vref 0.80 V (Rs 0.1 옴)
+              speed_derate=0.7, layer_turn_Nm=0.05, cup_mass_kg=0.03, torque_margin=2.0)
+step_deg = 1.8 / MOTION['microstep']
+alpha = MOTION['accel_steps_s2'] * math.radians(step_deg)                             # 등가속 램프의 각가속도 rad/s²
 I_top = (2 * P['cube_mass_kg'] / 3) * (C / 1000) ** 2 / 6
-alpha = 2 * (math.pi / 2) / 0.4 ** 2
-rec('F_spin_upper_layers_follow', I_top * alpha < 0.03, inertial_torque_Nm=round(I_top * alpha, 5), cube_internal_friction_Nm=0.03)
-rec('F_stepper_torque', 0.3 < 0.4, layer_turn_Nm=0.3, nema17_Nm=0.4)
+rec('F_spin_upper_layers_follow', I_top * alpha < 0.03, inertial_torque_Nm=round(I_top * alpha, 5), cube_internal_friction_Nm=0.03, alpha_rad_s2=round(alpha, 1))
+# 낼 수 있는 토크: A4988 은 두 코일을 트립 전류의 70.7 % 로 구동(벡터 합 일정) → 정격 유지 토크 × (0.707·I_trip / I_rated) × 속도 감소 계수
+I_spin = P['cube_mass_kg'] * (C / 1000) ** 2 / 6 + MOTION['cup_mass_kg'] * 2 * (P['plate_mm'] / 1000) ** 2 / 12
+avail = MOTION['motor_hold_Nm'] * 0.7071 * MOTION['driver_trip_A'] / MOTION['motor_rated_A'] * MOTION['speed_derate']
+need = MOTION['layer_turn_Nm'] + I_spin * alpha
+max_layer = avail / MOTION['torque_margin'] - I_spin * alpha                          # 이 값보다 뻑뻑한 큐브는 탈조 위험
+rec('F_stepper_torque', avail >= MOTION['torque_margin'] * need, available_Nm=round(avail, 3), layer_turn_Nm=MOTION['layer_turn_Nm'],
+    inertial_Nm=round(I_spin * alpha, 4), margin=round(avail / need, 2), driver_trip_A=MOTION['driver_trip_A'],
+    max_cube_layer_torque_Nm=round(max_layer, 3), max_push_force_at_edge_N=round(max_layer / (H / 1000), 2))
+# 여유각: 한 변 C 인 정사각형이 안치수 2·half 인 자리 안에서 돌 수 있는 각. 오버슈트 = 컵 여유 + 후드 여유, 중심 맞춤 진폭 = 컵 여유
+def play_deg(half): return math.degrees(math.asin(2 * half / (C * math.sqrt(2))) - math.pi / 4)
+cup_play, hood_play = play_deg(POST_IN), play_deg(HOOD_IN)
+rec('F_play_compensation_matches_geometry',
+    abs(MOTION['play_steps'] * step_deg - cup_play) <= step_deg / 2 + 1e-9 and abs(MOTION['overshoot_steps'] * step_deg - (cup_play + hood_play)) <= step_deg + 1e-9,
+    cup_play_deg=round(cup_play, 2), hood_play_deg=round(hood_play, 2), step_deg=step_deg,
+    play_steps=MOTION['play_steps'], play_cmd_deg=round(MOTION['play_steps'] * step_deg, 2),
+    overshoot_steps=MOTION['overshoot_steps'], overshoot_cmd_deg=round(MOTION['overshoot_steps'] * step_deg, 2), overshoot_ideal_deg=round(cup_play + hood_play, 2))
+# 기울기만으로 자리잡기: 큐브가 뒤 기둥으로 미끄러지려면 tan(기울기) > 판 마찰. 여유가 거의 없으므로 중력에 기대지 않고 컵 왕복으로 가운데에 놓는다
+slide_margin = math.tan(TILT) - P['mu_floor']
+rec('F_gravity_seating_margin', True, tan_tilt=round(math.tan(TILT), 3), mu_floor=P['mu_floor'], margin=round(slide_margin, 3),
+    reliable=bool(slide_margin > 0.1), relies_on='firmware cupMove centering strokes (mechanism.h)')
+# 후드가 닫힐 때 벽과 큐브 사이 최악 여유: 큐브는 틀어지고 치우쳐도 기둥 안(±POST_IN)에 있다. 중심 맞춤 뒤 남는 틀어짐만 고려한 값도 함께 적는다
+skew_left = abs(MOTION['play_steps'] * step_deg - cup_play) + step_deg / 2
+half_centered = H * (math.cos(math.radians(skew_left)) + math.sin(math.radians(skew_left)))
+rec('F_hood_close_margin', HOOD_IN - POST_IN >= 0.4, worst_case_mm=round(HOOD_IN - POST_IN, 2),
+    after_centering_rotation_only_mm=round(HOOD_IN - half_centered, 2), residual_skew_deg=round(skew_left, 2), lateral_offset_not_removed_mm=P['post_clearance_mm'])
 
 OUT.mkdir(parents=True, exist_ok=True)
 (OUT / 'kinematic_checks.json').write_text(json.dumps(dict(parameters=P, passed=not fails, failures=fails, checks=results, flip_trace=sim[::10]), ensure_ascii=False, indent=1), encoding='utf-8')

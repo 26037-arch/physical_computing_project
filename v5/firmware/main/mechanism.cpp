@@ -21,13 +21,15 @@ void Mechanism::begin(Motors* m) {
   resetOri();
   hood.attach(HOOD_SERVO_PIN);
   lift.attach(LIFT_SERVO_PIN);
-  hood.write(hoodDeg[HOOD_OPEN]);
+  hoodNow = hoodDeg[HOOD_OPEN];
+  hood.write(hoodNow);
   lift.write(LIFT_DOWN_DEG);
   hoodPos = HOOD_OPEN;
 }
 
 // 서보를 20 ms 간격으로 조금씩 옮겨 준정적으로 움직인다 (리프터가 큐브를 천천히 끌어올리도록)
 void Mechanism::sweep(Servo& s, uint8_t from, uint8_t to, uint16_t ms) {
+  if (from == to) return;
   uint8_t n = ms / 20; if (n == 0) n = 1;
   for (uint8_t i = 1; i <= n; i++) {
     s.write(from + ((int16_t)to - from) * i / n);
@@ -35,12 +37,28 @@ void Mechanism::sweep(Servo& s, uint8_t from, uint8_t to, uint16_t ms) {
   }
 }
 
+void Mechanism::hoodTo(uint8_t deg, uint16_t ms) { sweep(hood, hoodNow, deg, ms); hoodNow = deg; }
+
+void Mechanism::rehood() { if (!virt()) hoodTo(hoodDeg[hoodPos], HOOD_MS); }
+
+// 줄·횟수는 논리 상태(hoodPos)가 바뀔 때만 낸다(sim/mechanism.js 와 같다). 서보는 실제 각(hoodNow)이 다르면 항상 옮긴다 —
+// 가상 모드(Q 1)에서 논리 상태만 CLOSE 가 된 뒤 Q 0 으로 돌아와도 실물 후드가 열린 채 층 회전하지 않게.
 void Mechanism::setHood(uint8_t pos) {
-  if (hoodPos == pos) return;
-  Serial.print(F("HOOD ")); Serial.println(HOOD_NAME[pos]);
-  hoods++;
-  if (!virt()) { hood.write(hoodDeg[pos]); delay(HOOD_MS); }
-  hoodPos = pos;
+  if (hoodPos != pos) {
+    Serial.print(F("HOOD ")); Serial.println(HOOD_NAME[pos]);
+    hoods++;
+    hoodPos = pos;
+  }
+  if (!virt() && hoodNow != hoodDeg[pos]) { hoodTo(hoodDeg[pos], HOOD_MS); delay(HOOD_SETTLE_MS); }
+}
+
+// 컵 회전 + 여유 보정 (mechanism.h 머리말): steps+over 전진 → over+play 후진 → play 전진. 스텝 합 = steps.
+void Mechanism::cupMove(uint16_t steps, bool cw, uint8_t over) {
+  if (virt()) return;
+  motors->rotate(steps + over, cw);
+  if (over + playSteps) { delay(REVERSE_MS); motors->rotate(over + playSteps, !cw); }
+  if (playSteps) { delay(REVERSE_MS); motors->rotate(playSteps, cw); }
+  delay(SETTLE_MS);
 }
 
 // 큐브 전체 y^k: 후드를 열고 컵을 위에서 봐서 시계 방향으로 k×90° (y' 는 반시계 1회)
@@ -53,12 +71,13 @@ bool Mechanism::spin(uint8_t k) {
   }
   spins++;
   Serial.print(F("SPIN ")); Serial.println(SPIN_NAME[k]);
-  if (k == 3) motors->rotate(STEPS_PER_QUARTER, false);
-  else motors->rotate(STEPS_PER_QUARTER * k, true);
+  if (k == 3) cupMove(STEPS_PER_QUARTER, false, playSteps);
+  else cupMove(STEPS_PER_QUARTER * k, true, playSteps);
   return true;
 }
 
-// 뒤집기 x': 후드 90°(서보 105°) → 리프터가 뒤쪽 아래 모서리를 끌어올려 큐브가 앞으로 넘어진다 → 리프터 내림 → 후드 60°
+// 뒤집기 x': 후드 90°(서보 105°) → 리프터가 뒤쪽 아래 모서리를 끌어올려 큐브가 앞으로 넘어진다 → 리프터 내림
+//   → 후드가 60° 로 돌아오는 동안 컵을 ±play 왕복해 착지한 큐브를 기둥 사이 가운데로 민다
 bool Mechanism::flip() {
   if (!virt() && !loaded) { Serial.println(F("ERR not loaded")); return false; }
   setHood(HOOD_OPEN);
@@ -67,11 +86,13 @@ bool Mechanism::flip() {
   flips++;
   Serial.println(F("FLIP"));
   if (!virt()) {
-    hood.write(hoodFlipDeg); delay(HOOD_MS / 2);
+    hoodTo(hoodFlipDeg, HOOD_MS / 2);
     sweep(lift, LIFT_DOWN_DEG, liftUpDeg, LIFT_UP_MS);
-    delay(FLIP_SETTLE_MS);                                 // 큐브가 자리에 떨어질 시간
-    sweep(lift, liftUpDeg, LIFT_DOWN_DEG, LIFT_DOWN_MS);
-    hood.write(hoodDeg[HOOD_OPEN]); delay(HOOD_MS / 2);
+    delay(FLIP_SETTLE_MS);                                 // 큐브가 자리에 떨어져 튐이 멎을 시간
+    sweep(lift, liftUpDeg, LIFT_DOWN_DEG, LIFT_DOWN_MS);   // 리프터가 판 아래로 완전히 내려온 뒤에만 컵을 움직인다
+    hoodNow = hoodDeg[HOOD_OPEN]; hood.write(hoodNow);     // 30° 복귀는 아래 중심 맞춤 동안 끝난다
+    cupMove(0, true, playSteps);
+    delay(HOOD_MS / 2 - SETTLE_MS);
   }
   return true;
 }
@@ -90,11 +111,7 @@ bool Mechanism::doMove(uint8_t m) {
   Serial.print(F("TURN ")); Serial.println(TURN_NAME[k]);
   // D = 아래에서 봐서 시계 = 컵을 위에서 봐서 반시계. k 0: 1/4 반시계, 1: 1/2, 2: 1/4 시계
   bool cw = (k == 2);
-  uint16_t steps = (k == 1) ? 2 * STEPS_PER_QUARTER : STEPS_PER_QUARTER;
-  if (!virt()) {
-    motors->rotate(steps + overshootSteps, cw);
-    if (overshootSteps) motors->rotate(overshootSteps, !cw);
-  }
+  cupMove((k == 1) ? 2 * STEPS_PER_QUARTER : STEPS_PER_QUARTER, cw, overshootSteps);
   return true;
 }
 

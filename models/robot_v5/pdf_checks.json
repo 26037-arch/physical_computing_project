@@ -1,8 +1,8 @@
 {
   "pdf": "docs/BUILD_V5_제작설명서.pdf",
-  "generated_on": "2026-10-24",
+  "generated_on": "2026-11-14",
   "source_date": "2026-10-24",
-  "base_commit": "83ade39",
+  "base_commit": "7778f00",
   "source_scope": "Current working tree; includes uncommitted V5 source data.",
   "passed": true,
   "checks": {
@@ -66,7 +66,7 @@
       "page": 11
     },
     {
-      "title": "11  조정 | 일곱 단계와 LCD",
+      "title": "11  조정 | 아홉 단계와 LCD",
       "page": 12
     },
     {
@@ -170,6 +170,7 @@
       "embedded": true,
       "subtype": "/TrueType",
       "used_pages": [
+        11,
         12,
         13,
         14,
@@ -325,7 +326,7 @@
     },
     {
       "page": 4,
-      "content_bottom_mm": 125.72
+      "content_bottom_mm": 117.7
     },
     {
       "page": 5,
@@ -333,11 +334,11 @@
     },
     {
       "page": 6,
-      "content_bottom_mm": 83.49
+      "content_bottom_mm": 71.28
     },
     {
       "page": 7,
-      "content_bottom_mm": 87.19
+      "content_bottom_mm": 82.43
     },
     {
       "page": 8,
@@ -353,19 +354,19 @@
     },
     {
       "page": 11,
-      "content_bottom_mm": 70.33
+      "content_bottom_mm": 65.58
     },
     {
       "page": 12,
-      "content_bottom_mm": 137.08
+      "content_bottom_mm": 80.64
     },
     {
       "page": 13,
-      "content_bottom_mm": 75.51
+      "content_bottom_mm": 53.53
     },
     {
       "page": 14,
-      "content_bottom_mm": 104.62
+      "content_bottom_mm": 62.01
     },
     {
       "page": 15,
@@ -450,11 +451,11 @@
   },
   "source_hashes_sha256": {
     "docs/MANUAL_V5_BRIEF.md": "fefb0443ec14de974d4670311d9626db3bc1b7c4a3915ade5a2cdbd627aeee1c",
-    "docs/BUILD_V5.md": "e1119431c1bcb88e262bfcea434ae80e804c882ed4654e2eb9cdb9fed1774621",
-    "docs/HARDWARE_V5.md": "c585ef0787d8b9252d4edf17f9ae82c1cb82b64037b06ebdb01cad8a54887bce",
+    "docs/BUILD_V5.md": "4b4f09c688ecb60b924bee96128aecf92d4033a8ffa8694fefaab9311f6c7609",
+    "docs/HARDWARE_V5.md": "44463a020e291aea77ad9e087292417ef9500bb9dc3fef289c58b95acd377061",
     "models/robot_v5/parameters.json": "df493b47df369994d7218d766dd1ff2f399a77a591279e2859f49f2f53a83cca",
     "models/robot_v5/manufacturing.json": "b07660e81bedbbc281c94a064bef3c6ad587f28d2d7d9cda25c31dda11e116f1",
-    "models/robot_v5/kinematic_checks.json": "63a5306e89cc5a2655606f65f05e4e3d29739feb5b42b095f55025be68332ad1",
+    "models/robot_v5/kinematic_checks.json": "12ece186aa689b4a605aa141f567e933624e1e1c386347c02314d89dc8d9da50",
     "models/robot_v5/mechanical_checks.json": "b70f9563bc8cf9f626f78526a81aa8cb5f79ce47e5b4235bf3f00e5df731bafe",
     "models/robot_v5/print/cube_holder.step": "f818f791c5cf7ebb3170b9e33ec33399542c3fdc0127db36cb18e01297e66e2c",
     "models/robot_v5/print/hub.step": "16d0139e2065d94dccb6594fdbc02485a9bc2725b6b760f0037942fb34ec6c18",

@@ -21,7 +21,9 @@
 //   F / Y <k>  시연용 뒤집기 / 스핀 y^k (k 1..3)
 //   P          현재 상태 54 스티커 출력 (STATE URRF...) + MECH 상태      R  모델을 풀린 상태로 리셋
 //   Q 0|1      가상 모드(1=모터·서보 생략, 절차는 출력)
-//   H c o l    후드 서보 각 CLOSE/OPEN/LOAD 조정 (기본 15 75 165)   K <각> 리프터 최상 각 (기본 180)   O <스텝> 층 오버슈트 (기본 2)
+//   H c o l    후드 서보 각 CLOSE/OPEN/LOAD 조정 (기본 15 75 135, 지금 자세에 바로 적용)   K <각> 리프터 최상 각 (기본 180)
+//   O <o> [p]  층 회전 오버슈트 o 스텝 (기본 12 = 5.4°) / 컵 한쪽 여유 p 스텝 (기본 5 = 2.25°, 0 = 중심 맞춤 끔). 1 스텝 = 0.45°
+//   J <±n>     컵을 n 스텝 미세 회전(+ = 위에서 봐서 시계). 큐브 모델·자세는 그대로 — 전원을 켠 뒤 컵 영점(노치가 정확히 뒤)을 맞출 때
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "cube.h"
@@ -193,15 +195,28 @@ void handleLine(char* s) {
       char* e; long c = strtol(arg, &e, 10), o = strtol(e, &e, 10), l = strtol(e, &e, 10);
       if (c > 0) mech.hoodDeg[0] = c; if (o > 0) mech.hoodDeg[1] = o; if (l > 0) mech.hoodDeg[2] = l;
       Serial.print(F("HOOD DEG ")); Serial.print(mech.hoodDeg[0]); Serial.print(' '); Serial.print(mech.hoodDeg[1]); Serial.print(' '); Serial.println(mech.hoodDeg[2]);
+      mech.rehood();
       break;
     }
     case 'K': case 'k': mech.liftUpDeg = strtoul(arg, nullptr, 10); Serial.print(F("LIFT DEG ")); Serial.println(mech.liftUpDeg); break;
-    case 'O': case 'o': mech.overshootSteps = strtoul(arg, nullptr, 10); Serial.print(F("OVERSHOOT ")); Serial.println(mech.overshootSteps); break;
+    case 'O': case 'o': {
+      char* e; mech.overshootSteps = min(strtoul(arg, &e, 10), 255UL);   // uint8_t 로 줄어들며 0 이 되지 않게
+      while (*e == ' ') e++;
+      if (*e) mech.playSteps = min(strtoul(e, nullptr, 10), 255UL);
+      Serial.print(F("OVERSHOOT ")); Serial.print(mech.overshootSteps); Serial.print(F(" PLAY ")); Serial.println(mech.playSteps);
+      break;
+    }
+    case 'J': case 'j': {
+      long n = constrain(strtol(arg, nullptr, 10), -800L, 800L);   // ±1 회전까지 (AVR int abs 넘침·R4 uint16_t 잘림 방지)
+      motors.rotate(n < 0 ? -n : n, n > 0);
+      Serial.print(F("JOG ")); Serial.println(n);
+      break;
+    }
     case 'P': case 'p': printState(); break;
     case 'R': case 'r': cube.reset(); Serial.println(F("RESET")); lcdShowF(F("CUBE ROBOT"), "reset"); break;
     case 'Q': case 'q': motors.setEnabled(*arg != '1'); Serial.print(F("MOTORS ")); Serial.println(motors.isEnabled() ? F("ON") : F("OFF")); break;
     case 0: break;
-    default: Serial.println(F("ERR unknown command (S V M L E F Y P R Q H K O)"));
+    default: Serial.println(F("ERR unknown command (S V M L E F Y P R Q H K O J)"));
   }
 }
 
@@ -238,7 +253,7 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcdShowF(F("CUBE ROBOT V5"), "hold=LOAD tap=GO");
-  Serial.println(F("READY cube-robot v5 (S [seed] | V | M <moves> | L | E | F | Y k | P | R | Q 0|1 | H | K | O)"));
+  Serial.println(F("READY cube-robot v5 (S [seed] | V | M <moves> | L | E | F | Y k | P | R | Q 0|1 | H | K | O | J)"));
 }
 
 void loop() {

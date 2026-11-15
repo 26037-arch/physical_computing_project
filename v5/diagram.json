@@ -19,7 +19,7 @@
     [ "uno:2", "drvCup:STEP", "green", [] ],
     [ "uno:7", "drvCup:DIR", "orange", [] ],
     [ "uno:6", "drvCup:ENABLE", "gray", [] ],
-    [ "drvCup:RESET", "drvCup:SLEEP", "gray", [] ], [ "drvCup:GND", "uno:GND.1", "black", [] ], [ "drvCup:VDD", "uno:5V", "red", [] ],
+    [ "drvCup:RESET", "drvCup:SLEEP", "gray", [] ], [ "drvCup:MS2", "uno:5V", "red", [] ], [ "drvCup:GND", "uno:GND.1", "black", [] ], [ "drvCup:VDD", "uno:5V", "red", [] ],
     [ "drvCup:1A", "motCup:B+", "blue", [] ], [ "drvCup:1B", "motCup:B-", "blue", [] ], [ "drvCup:2A", "motCup:A+", "purple", [] ], [ "drvCup:2B", "motCup:A-", "purple", [] ],
 
     [ "uno:8", "srvHood:PWM", "orange", [] ], [ "srvHood:V+", "uno:5V", "red", [] ], [ "srvHood:GND", "uno:GND.3", "black", [] ],

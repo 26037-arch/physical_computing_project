@@ -96,7 +96,7 @@ SCREW_TOTAL = sum(int(row[2]) for row in SCREWS[1:] if row[1].startswith('M'))
 SCREW_LABEL = int(re.search(r'나사·소모품 \((?:나사 )?(\d+)개', BUILD).group(1))
 ASSEMBLY = re.findall(r'^\d+\. (.+)$', section(BUILD, '## 3.'), re.M)
 PREP = re.findall(r'^\d+\. (.+)$', section(BUILD, '## 2.'), re.M)
-assert len(NAMES) == 7 and len(ASSEMBLY) == 7 and len(CALIB) == 8
+assert len(NAMES) == 7 and len(ASSEMBLY) == 7 and len(CALIB) == 10   # 머리줄 + 0·1·2·3·4a·4b·5·6·7 단계
 assert len(KIT) == 8 and len(SCREWS) == 12
 assert K['passed'] and C['passed'] and C['revision'] == 'B'
 for key in M['parameters']:
@@ -508,7 +508,7 @@ def write_manual():
     w.section('운전 안전', section(BUILD, '## 7.'))
     w.para('볼트 머리·너트·혼의 실제 외형은 단순 구매품 CAD에 모두 들어 있지 않습니다. 조립 중 걸리면 억지로 구동하지 말고 끼움과 체결 깊이를 확인합니다.', size=8.6)
 
-    w.start('11  조정 | 일곱 단계와 LCD')
+    w.start('11  조정 | 아홉 단계와 LCD')
     w.para('BUILD_V5.md 4절 원표입니다. 아래 각도는 서보 명령값입니다. CAD 후드 개방각은 이 값과 구분합니다. 조정값 저장은 실물 확인 후의 별도 펌웨어 작업입니다.', size=8.6)
     w.table(CALIB, [10, 34, 69, 65], size=7.8, padding=4)
     w.para('장착·배출 시 LCD / HARDWARE_V5.md 3.4절', bold=True)
@@ -519,8 +519,8 @@ def write_manual():
     w.image('assembly_world', 85, '앞·좌·우가 열린 구조. 후드 지붕 구멍으로 윗면을 봅니다.')
     w.section('리허설', section(BUILD, '## 5.'))
     w.section('관중 배치', section(BUILD, '## 6.'))
-    w.table([['실패 유형', '대처'], ['층 어긋남', CALIB[4][3]], ['스핀 때 위 층 뒤처짐', CALIB[5][3]],
-             ['뒤집기 실패 / 착지 이탈', CALIB[6][3]], ['기둥에 걸림', '큐브 윤활과 기둥 안쪽 표면 확인. 홀더 노치가 뒤를 향하는지 재확인']], [43, 135], size=8.3, padding=3)
+    w.table([['실패 유형', '대처'], ['층 어긋남', CALIB[6][3]], ['컵 어긋남(탈조)', CALIB[7][3]],
+             ['뒤집기 실패 / 착지 이탈', CALIB[8][3]], ['기둥에 걸림', '큐브 윤활과 기둥 안쪽 표면 확인. 홀더 노치가 뒤를 향하는지 재확인']], [43, 135], size=8.3, padding=3)
     w.para('성공 판정은 LCD SOLVED!와 시리얼 SOLVED ok=1을 함께 확인합니다. R은 논리 모델 리셋이므로 실제 큐브도 풀린 상태로 맞춰야 합니다.', size=8.5)
 
     w.start('13  설계 근거 | 검사값과 뒤집기 궤적')
@@ -528,7 +528,7 @@ def write_manual():
     w.table(CHECK_TABLE, [89, 89], size=7.15, padding=2.3)
     w.image('flip_trace', 47, 'flip_trace에서 균등하게 고른 다섯 기록으로 실제 큐브 BRep를 변환했습니다. 점선은 선반 끝 Q의 경로입니다.')
     ft, ht = KC['F_lifter_servo_torque'], KC['F_hood_servo_torque']
-    w.para(f"토크: 리프터 {fmt(ft['peak_force_N'])} N × {fmt(ft['crank_r_mm'])} mm / g 환산 ≈ {fmt(ft['torque_kgcm'])} kg·cm (SG90 {fmt(ft['sg90_kgcm'])}).\n후드: 질량 {fmt(P['hood_mass_kg'])} kg의 준정적 요구 {fmt(ht['torque_kgcm'])} kg·cm (MG996R {fmt(ht['mg996r_kgcm'])}).\n컵: 층 회전 요구 {fmt(KC['F_stepper_torque']['layer_turn_Nm'])} N·m / 모터 기준 {fmt(KC['F_stepper_torque']['nema17_Nm'])} N·m.", size=7.7, leading=10.6)
+    w.para(f"토크: 리프터 {fmt(ft['peak_force_N'])} N × {fmt(ft['crank_r_mm'])} mm / g 환산 ≈ {fmt(ft['torque_kgcm'])} kg·cm (SG90 {fmt(ft['sg90_kgcm'])}).\n후드: 질량 {fmt(P['hood_mass_kg'])} kg의 준정적 요구 {fmt(ht['torque_kgcm'])} kg·cm (MG996R {fmt(ht['mg996r_kgcm'])}).\n컵: 층 회전 요구 {fmt(KC['F_stepper_torque']['layer_turn_Nm'])} N·m + 가속 관성 / 낼 수 있는 토크 {fmt(KC['F_stepper_torque']['available_Nm'])} N·m (A4988 {fmt(KC['F_stepper_torque']['driver_trip_A'])} A, 여유 {fmt(KC['F_stepper_torque']['margin'])}배).", size=7.7, leading=10.6)
     w.para(section(HARD, '### 2.5').split('\n\n')[-1], size=7.8, leading=11)
 
     w.start('14  Rev B | CAD 결과와 제작 전 확인')

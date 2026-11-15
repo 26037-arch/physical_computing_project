@@ -322,7 +322,7 @@
         orientation.quaternion.copy(c.q).premultiply(new THREE.Quaternion().setFromAxisAngle(Z,angle));
       }
       if(a.type==='turn'){
-        const target=(a.k===0?1:a.k===1?2:-1)*Math.PI/2,over=Math.sign(target)*deg(7.2);
+        const target=(a.k===0?1:a.k===1?2:-1)*Math.PI/2,over=Math.sign(target)*deg(5.4);
         const angle=t<.82?(target+over)*ease(t/.82):mix(target+over,target,ease((t-.82)/.18));
         layer.rotation.z=angle;visual.cup=c.cup+angle;cup.rotation.z=visual.cup;
       }

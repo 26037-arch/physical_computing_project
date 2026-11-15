@@ -15,7 +15,8 @@ Claude Code와 Codex가 함께 쓰는 공용 규칙 (CLAUDE.md는 이 파일을 
 - 계약 문서는 `docs/HARDWARE_V5.md`, 보고서는 `docs/REPORT_V5.md`, 제작·조정 절차는 `docs/BUILD_V5.md`, 배선은 `docs/WIRING_V5_R4.html` 이다.
 - 빌드·시뮬레이션·업로드는 `v5\scripts\*.ps1` 을 쓴다 (기본 UNO R3, 실물은 `-Fqbn arduino:renesas_uno:unor4wifi`).
 - 핀 배치를 바꾸면 `v5/diagram.json`, `v5/firmware/main/motors.h`(STEP/DIR/EN), `mechanism.h`(서보), `main.ino`(버튼·부저), `docs/HARDWARE_V5.md` 4절, `docs/WIRING_V5_R4.html` 을 함께 바꾼다.
-- 실물 조정값(`H`/`K`/`O` 명령으로 찾은 후드 각·리프터 각·오버슈트)은 `v5/firmware/main/mechanism.h` 기본값에 적고 커밋한다.
+- 실물 조정값(`H`/`K`/`O` 명령으로 찾은 후드 각·리프터 각·오버슈트·컵 여유)은 `v5/firmware/main/mechanism.h` 기본값에 적고 커밋한다. 컵 영점은 전원을 켤 때마다 `J` 로 맞춘다(저장하지 않는다).
+- 컵 모터는 1/4 마이크로스텝(`motors.h` `MICROSTEP`, A4988 MS2 → 5 V)·등가속 램프다. 운전 상수(가속도·오버슈트·컵 여유·지연)를 바꾸면 `tools/check_robot_v5.py` 의 `MOTION`, `v5/sim/mechanism.js` `durationMs`, `docs/HARDWARE_V5.md` 3.2·3.5·5절을 함께 맞춘다.
 - 아래 "V4 Rev D" 절과 "프로젝트"·"폴더 구조"·"불변 조건"의 V4 항목은 V4 트리를 만질 때만 적용한다.
 
 ## 두 버전의 위치 (2026-10-24 병합)

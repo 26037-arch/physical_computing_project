@@ -5,6 +5,8 @@
 //     D: 없음 / F: FLIP / R: SPIN y → FLIP / L: SPIN y' → FLIP / B: SPIN y2 → FLIP / U: FLIP → FLIP
 //   SPIN y = 큐브 전체가 위에서 봐서 시계 방향(U 와 같은 방향), FLIP = x' (F→D, D→B, B→U, U→F: 앞으로 넘어감).
 //   스핀·뒤집기 앞에는 HOOD OPEN, 층 회전 앞에는 HOOD CLOSE 가 자동으로 들어간다(상태가 바뀔 때만 줄을 낸다).
+//   펌웨어는 TURN·SPIN·FLIP 끝에 컵을 몇 스텝 왕복해 큐브를 컵·후드 가운데에 다시 놓는다(mechanism.h cupMove). 스텝 합이 0 이고
+//   줄을 내지 않으므로 여기 상태·출력에는 나타나지 않는다 (durationMs 에만 반영).
 //   plan(m) 은 한 논리 수에 필요한 동작 목록을 돌려주고 상태를 갱신한다. 시뮬레이터는 목록을 애니메이션하고,
 //   tools/gen_wokwi_test.js 는 flips/spins 횟수를, tools/gen_mechanism_test.js 는 출력 줄을 기대값으로 쓴다.
 (function (global) {
@@ -79,12 +81,14 @@
     }
     manualFlip() { const out = []; this.flip(out); return out; }
     manualSpin(k) { const out = []; this.spin(out, ((k % 4) + 4) % 4 || 1); return out; }
-    // 시간 추정(ms, HARDWARE_V5.md 5절 상수) — 시뮬레이터 표시·보고서용
+    // 시간 추정(ms, HARDWARE_V5.md 5절 상수) — 시뮬레이터 표시·보고서용.
+    //   펌웨어 motors.h(1/4 스텝 등가속: 90° 200 ms, 180° 300 ms)·mechanism.h(여유 보정 왕복, 후드 300+60, 뒤집기) 상수에서 계산한 값.
+    //   여유 보정 왕복(오버슈트·중심 맞춤)은 줄을 내지 않는 펌웨어 내부 동작이라 동작 목록에는 없고 시간에만 들어 있다.
     static durationMs(a) {
-      if (a.type === 'hood') return 300;
-      if (a.type === 'spin') return a.k === 2 ? 500 : 300;
-      if (a.type === 'turn') return a.k === 1 ? 600 : 400;
-      if (a.type === 'flip') return 1650;
+      if (a.type === 'hood') return 360;                       // 완속 300 + 정착 60
+      if (a.type === 'spin') return a.k === 2 ? 520 : 420;     // 회전 + 중심 맞춤 왕복(10·5 스텝) + 정착 120
+      if (a.type === 'turn') return a.k === 1 ? 540 : 440;     // 회전(+오버슈트 12) + 복귀 17 + 전진 5 + 정착 120
+      if (a.type === 'flip') return 1870;                      // 후드 150 + 상승 700 + 낙하 350 + 하강 400 + 중심 맞춤 270
       return 0;
     }
   }

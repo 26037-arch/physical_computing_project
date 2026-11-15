@@ -261,13 +261,45 @@
   },
   "F_spin_upper_layers_follow": {
    "ok": true,
-   "inertial_torque_Nm": 0.00071,
-   "cube_internal_friction_Nm": 0.03
+   "inertial_torque_Nm": 0.00567,
+   "cube_internal_friction_Nm": 0.03,
+   "alpha_rad_s2": 157.1
   },
   "F_stepper_torque": {
    "ok": true,
-   "layer_turn_Nm": 0.3,
-   "nema17_Nm": 0.4
+   "available_Nm": 0.132,
+   "layer_turn_Nm": 0.05,
+   "inertial_Nm": 0.0124,
+   "margin": 2.12,
+   "driver_trip_A": 1.0,
+   "max_cube_layer_torque_Nm": 0.054,
+   "max_push_force_at_edge_N": 1.88
+  },
+  "F_play_compensation_matches_geometry": {
+   "ok": true,
+   "cup_play_deg": 2.05,
+   "hood_play_deg": 3.1,
+   "step_deg": 0.45,
+   "play_steps": 5,
+   "play_cmd_deg": 2.25,
+   "overshoot_steps": 12,
+   "overshoot_cmd_deg": 5.4,
+   "overshoot_ideal_deg": 5.15
+  },
+  "F_gravity_seating_margin": {
+   "ok": true,
+   "tan_tilt": 0.364,
+   "mu_floor": 0.35,
+   "margin": 0.014,
+   "reliable": false,
+   "relies_on": "firmware cupMove centering strokes (mechanism.h)"
+  },
+  "F_hood_close_margin": {
+   "ok": true,
+   "worst_case_mm": 0.5,
+   "after_centering_rotation_only_mm": 1.29,
+   "residual_skew_deg": 0.43,
+   "lateral_offset_not_removed_mm": 1.0
   }
  },
  "flip_trace": [
