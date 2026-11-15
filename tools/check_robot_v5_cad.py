@@ -208,9 +208,10 @@ def main():
         overlap_mm3=round(servo_crank_overlap, 6),
         note='Simplified SG90 output envelope seats at the horn-pocket floor; screw/horn hardware still needs physical fit validation.')
     fit_hits = collisions({'sg90': bought['sg90'], 'mg996r': bought['mg996r']}, {'base': parts['base']})
-    fit_hits += collisions({'nema17': bought['nema17']}, {'hub': parts['hub'], 'cube_holder': parts['cube_holder']})
+    fit_hits += collisions({'nema17': bought['nema17']}, {'hub': parts['hub'], 'cube_holder': parts['cube_holder'], 'base': parts['base']})
+    fit_hits += collisions({'mg996r': bought['mg996r']}, {'hood': parts['hood']})
     rec('extra_purchased_mounts_fit', not fit_hits, collisions=fit_hits,
-        shaft='5 mm D profile, flat at x=2 mm; SG90 envelope includes output horn to pocket floor')
+        shaft='5 mm D profile, flat at x=2 mm; purchased parts are the kit reference models (ears, spline, motor connector) from tools/build_kit_parts_v5.py')
     ground = {n: s.rotate((0, 0, 0), (1, 0, 0), d.P['tilt_deg']).BoundingBox().zmin
               for n, s in d.assembly_items(parts, bought)}
     rec('extra_assembly_above_desk', all(z >= d.P['table_zw_mm']-.01 for z in ground.values()), minimum_world_z_mm=ground)

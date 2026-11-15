@@ -1,8 +1,8 @@
 {
   "pdf": "docs/BUILD_V5_제작설명서.pdf",
-  "generated_on": "2026-11-14",
+  "generated_on": "2026-11-15",
   "source_date": "2026-10-24",
-  "base_commit": "7778f00",
+  "base_commit": "4b0960f",
   "source_scope": "Current working tree; includes uncommitted V5 source data.",
   "passed": true,
   "checks": {
@@ -170,6 +170,7 @@
       "embedded": true,
       "subtype": "/TrueType",
       "used_pages": [
+        10,
         11,
         12,
         13,
@@ -342,7 +343,7 @@
     },
     {
       "page": 8,
-      "content_bottom_mm": 88.46
+      "content_bottom_mm": 83.7
     },
     {
       "page": 9,
@@ -408,7 +409,7 @@
       ],
       [
         "MG996R → 오른쪽 타워",
-        "M3×16 + 너트",
+        "M3×12 (Ø2.8 구멍에 셀프탭, 귀 밑에 4.7 mm 스페이서 = M3 너트 2개 겹침)",
         "4"
       ],
       [
@@ -451,19 +452,19 @@
   },
   "source_hashes_sha256": {
     "docs/MANUAL_V5_BRIEF.md": "fefb0443ec14de974d4670311d9626db3bc1b7c4a3915ade5a2cdbd627aeee1c",
-    "docs/BUILD_V5.md": "4b4f09c688ecb60b924bee96128aecf92d4033a8ffa8694fefaab9311f6c7609",
-    "docs/HARDWARE_V5.md": "44463a020e291aea77ad9e087292417ef9500bb9dc3fef289c58b95acd377061",
-    "models/robot_v5/parameters.json": "df493b47df369994d7218d766dd1ff2f399a77a591279e2859f49f2f53a83cca",
-    "models/robot_v5/manufacturing.json": "b07660e81bedbbc281c94a064bef3c6ad587f28d2d7d9cda25c31dda11e116f1",
-    "models/robot_v5/kinematic_checks.json": "12ece186aa689b4a605aa141f567e933624e1e1c386347c02314d89dc8d9da50",
-    "models/robot_v5/mechanical_checks.json": "b70f9563bc8cf9f626f78526a81aa8cb5f79ce47e5b4235bf3f00e5df731bafe",
-    "models/robot_v5/print/cube_holder.step": "f818f791c5cf7ebb3170b9e33ec33399542c3fdc0127db36cb18e01297e66e2c",
-    "models/robot_v5/print/hub.step": "16d0139e2065d94dccb6594fdbc02485a9bc2725b6b760f0037942fb34ec6c18",
-    "models/robot_v5/print/hood.step": "b024021a86ac890f198c91e0fa9be71f66eb2602e65d08a24d44dcfd752e3347",
-    "models/robot_v5/print/lifter.step": "a1c48d5117f705ebd08d718133dc29cd95bebf407e17c4c8ea32da1bc9202469",
-    "models/robot_v5/print/base.step": "6cfbe02b53a7d8030282b0d3dc9c32ed5ca35a5af4e02623960b9569d28ff2bd",
-    "models/robot_v5/print/crank.step": "fa5eb2f1549e6b1387416c3ca5f576b12cc708dde47315f160976baa0b6f0d11",
-    "models/robot_v5/print/link.step": "f082d57673ecb67840bb080dc40f0bdbedbcfaa4a47df18ac72251e8ba0d45ef"
+    "docs/BUILD_V5.md": "0e80a1dbfd1d415db9a1b5f005e0cc27943d30c02276138b22e633762c1af51e",
+    "docs/HARDWARE_V5.md": "3d70234aef93a9eaa6bfc99021c16a2f1ec12a67c13f08e12161517625fd58d9",
+    "models/robot_v5/parameters.json": "01406152b13ae36ecd4ee79ef464578c0475582dca1d0b7cdc2cc5b0e873260b",
+    "models/robot_v5/manufacturing.json": "f9b325a3a8b933127e8da7f9ad0f7ad7243d1567f1736ab48cdbe76da89a5da8",
+    "models/robot_v5/kinematic_checks.json": "f02979c8b73ee7aeff331f0564cb7b9d17d01cdf0565a1faa0299d6679a383ce",
+    "models/robot_v5/mechanical_checks.json": "67fcd83c9c575f19dcf843d81a06dd0b1bbd25700f2dc2b18e18828874f99857",
+    "models/robot_v5/print/cube_holder.step": "5ee7f555f2b5d2a241cb109273835a3481de7f1a26be4ad97bdfcb3aac15662a",
+    "models/robot_v5/print/hub.step": "aa402075941a83c56a3c1817097e3474e9b5f0507371d7c5b8192cbea8b49cc6",
+    "models/robot_v5/print/hood.step": "dbda6efc0132a19739229c3b81f0e657a2d70c9ea3b526e6c8cb56da120370af",
+    "models/robot_v5/print/lifter.step": "3d5a7d73e0fdb1bf5437b9215c4c69ed33091bc2cdf2613915890a67beb5f822",
+    "models/robot_v5/print/base.step": "082815bad70b0596158f3d9548ae8642fbd4da1bdea90dcab2d2023088ed2b7e",
+    "models/robot_v5/print/crank.step": "90cb383c2b184455fb030af4098fddcc00cfeafcbf7114e4bc8fc6ccbb49d224",
+    "models/robot_v5/print/link.step": "bc91b13d4665c252bccff84a154242709ec42d3885b31d33e3f29e9adf4c6486"
   },
   "visual_review": {
     "status": "pending",

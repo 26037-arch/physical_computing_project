@@ -27,7 +27,7 @@
       lift_bottom_z_mm:-6.5,lift_stroke_mm:66,lift_dir_deg:26,shelf_len_mm:3.5,
       shelf_t_mm:2.5,lip_h_mm:1.5,lip_t_mm:3,hook_w_mm:16,cube_edge_r_mm:1.5,
       slider_bar_dy_mm:-14,slider_bar_dz_mm:-5,slider_bar_mm:4,slider_bar_half_x_mm:38.5,
-      crank_r_mm:33,link_mm:70,sg90_mount_outer_x_mm:-61.5,sg90_mount_bottom_offset_mm:50,cube_mass_kg:.10,
+      crank_r_mm:33,link_mm:70,sg90_mount_outer_x_mm:-63.3,sg90_mount_bottom_offset_mm:50,cube_mass_kg:.10,
       hood_mass_kg:.05,mu_floor:.35,mu_ledge:.8,g:9.81
     };
     // crank/link also exist in V4; require the V5 parameter signature.
@@ -179,17 +179,18 @@
       }
       // SG90 pocket outside the left tower; lower gusset reaches the tower.
       const sy=crankAxis[1],sz=crankAxis[2],mount=P.sg90_mount_outer_x_mm;
-      mesh(towers,yzGeometry([[sy-17,sz-50],[sy+17,sz-50],[sy+17,sz+10],[sy-17,sz+10]],mount-3,3,
-        [[[sy-11.25,sz-6.1],[sy+11.25,sz-6.1],[sy+11.25,sz+6.1],[sy-11.25,sz+6.1]]]),towerMat);
+      const fy=sy-5.25; // SG90 축은 몸통 끝에서 6.1 — 포켓 판은 몸통 중심 기준
+      mesh(towers,yzGeometry([[fy-17,sz-50],[fy+17,sz-50],[fy+17,sz+10],[fy-17,sz+10]],mount-3,3,
+        [[[sy-16.9,sz-6.4],[sy+6.4,sz-6.4],[sy+6.4,sz+6.4],[sy-16.9,sz+6.4]]]),towerMat);
       const gusset=new THREE.Shape([new THREE.Vector2(-45.5,sz-50),new THREE.Vector2(mount,sz-50),new THREE.Vector2(-45.5,sz-50-(Math.abs(mount)-45.5))]);
-      const g=new THREE.ExtrudeGeometry(gusset,{depth:34,bevelEnabled:false});g.rotateX(Math.PI/2);g.translate(0,sy+17,0);mesh(towers,g,towerMat);
+      const g=new THREE.ExtrudeGeometry(gusset,{depth:34,bevelEnabled:false});g.rotateX(Math.PI/2);g.translate(0,fy+17,0);mesh(towers,g,towerMat);
       box(towers,[6,3,25],[42.5,-106.5,40.5],towerMat);
     }
     for(const s of [-1,1])cylinder(hardware,2,14,[s*43,hinge[1],hinge[2]],[1,0,0],metal);
     const purchased=P.purchased||{
       nema17:{size:[P.motor_mm,P.motor_mm,P.motor_len_mm+22],center:[0,0,P.motor_face_z_mm+(22-P.motor_len_mm)/2]},
-      mg996r:{size:[44,40.5,20.5],center:[58.5,P.hinge_y_mm+10,P.hinge_z_mm]},
-      sg90:{size:[28.7,22.5,12.2],center:[P.sg90_mount_outer_x_mm-8.35,crankAxis[1],crankAxis[2]]}
+      mg996r:{size:[42.7,40.9,20],center:[58.15,P.hinge_y_mm+10.25,P.hinge_z_mm]},
+      sg90:{size:[30.3,22.7,12.2],center:[P.sg90_mount_outer_x_mm-7.35,crankAxis[1]-5.25,crankAxis[2]]}
     };
     for(const [name,p] of Object.entries(purchased))if(Array.isArray(p.size)&&Array.isArray(p.center)){
       // NEMA envelope includes its shaft: draw body and shaft separately so

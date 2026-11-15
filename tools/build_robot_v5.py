@@ -12,6 +12,7 @@ from pathlib import Path
 import cadquery as cq
 from robot_v5_params import P
 from build_robot_v2 import box, cyl, fuse
+import build_kit_parts_v5 as kit
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'models' / 'robot_v5'
@@ -101,7 +102,8 @@ def cube_holder():
         plate = plate.cut(relief.rotate((0, 0, 0), (0, 0, 1), angle))
     for x in (-11, 11):
         plate = plate.cut(cyl(3.2, -t-1, 1, origin=(x, 0, 0)))
-    plate = plate.cut(cyl(P['plate_shaft_relief_d_mm'], -t-1, -t+P['plate_shaft_relief_depth_mm']))
+    relief = P['plate_shaft_relief_depth_mm']
+    plate = plate.cut(cyl(P['plate_shaft_relief_d_mm'], -t-1, 1 if relief >= t else -t+relief))
     return plate.clean()
 
 
@@ -190,6 +192,10 @@ def base():
     void = rect(-inner, inner, -inner, inner, -150, face+.01)
     motor_box = outer.cut(void).fuse(rect(-half, half, -half, half, face, face+P['motor_plate_t_mm']))
     motor_box = motor_box.cut(cyl(23, -26, -19))
+    # Rear-wall window for the motor connector/cable; the deck slab refills its lowest 4 mm.
+    slot = P['motor_cable_slot_w_mm']/2
+    motor_box = motor_box.cut(rect(-slot, slot, -half-.01, -inner+.01, -150,
+                                   face-P['motor_len_mm']+P['motor_cable_slot_h_mm']))
     for x in (-15.5, 15.5):
         for y in (-15.5, 15.5):
             motor_box = motor_box.cut(cyl(3.4, -26, -19, origin=(x, y, 0)))
@@ -215,25 +221,35 @@ def base():
             lug = yz([(-105, 21), (rear, 28), (rear, 53), (-102, 53), (-102, 21)], x0, x1)
             profile = fuse(profile, lug)
             profile = profile.cut(bore_x(24, x0-.1, x0+6, HINGE, print_up))
-            profile = profile.cut(rect(x1-3, x1+1, HINGE[0]-10.25, HINGE[0]+30.25,
-                                       HINGE[1]-10.25, top+1 if P['mg996r_pocket_open_top'] else HINGE[1]+10.25))
-            for y in (HINGE[0]+10-24.75, HINGE[0]+10+24.75):
-                for z in (HINGE[1]-5, HINGE[1]+5):
-                    profile = profile.cut(bore_x(3.2, x0-1, x1+1, (y, z), print_up))
+            c, end = P['mg996r_fit_clear_mm'], P['mg996r_axis_to_end_mm']
+            half_w = P['mg996r_body_w_mm']/2+c+.1
+            profile = profile.cut(rect(x1-3, x1+1, HINGE[0]-end-c, HINGE[0]+P['mg996r_body_l_mm']-end+c,
+                                       HINGE[1]-half_w, top+1 if P['mg996r_pocket_open_top'] else HINGE[1]+half_w))
+            mid = HINGE[0]+P['mg996r_body_l_mm']/2-end
+            for y in (mid-P['mg996r_hole_pitch_l_mm']/2, mid+P['mg996r_hole_pitch_l_mm']/2):
+                for z in (HINGE[1]-P['mg996r_hole_pitch_w_mm']/2, HINGE[1]+P['mg996r_hole_pitch_w_mm']/2):
+                    profile = profile.cut(bore_x(P['mg996r_hole_d_mm'], x0-1, x1+1, (y, z), print_up))
         else:
             sy, sz = SERVO
             mount = P['sg90_mount_outer_x_mm']
             bottom = sz-P['sg90_mount_bottom_offset_mm']
-            frame = rect(mount-3, mount, sy-17, sy+17, bottom, sz+10)
+            # The SG90 shaft is 6.1 mm from one end of the body: the pocket is
+            # referenced to the axis and the frame is centred on the body (fy).
+            c, end = P['sg90_fit_clear_mm'], P['sg90_axis_to_end_mm']
+            way = P['sg90_body_dir']
+            fy = sy+way*(P['sg90_body_l_mm']/2-end)
+            near, far = sorted((sy-way*(end+c), sy+way*(P['sg90_body_l_mm']-end+c)))
+            frame = rect(mount-3, mount, fy-17, fy+17, bottom, sz+10)
             # Outside both lever planes: the lower web reaches the tower
             # entirely behind the crank's swept half-disc.
-            web = (cq.Workplane('XZ', origin=(0, sy+17, 0))
+            web = (cq.Workplane('XZ', origin=(0, fy+17, 0))
                    .polyline([(x0, bottom-(x0-(mount-3))), (x0, bottom+1),
                               (mount-3, bottom+1), (mount-3, bottom)])
                    .close().extrude(34).val())
             frame = fuse(frame, web)
-            frame = frame.cut(rect(mount-4, mount+1, sy-11.25, sy+11.25, sz-6.1, sz+6.1))
-            for y in (sy-14, sy+14):
+            frame = frame.cut(rect(mount-4, mount+1, near, far,
+                                   sz-P['sg90_body_w_mm']/2-c, sz+P['sg90_body_w_mm']/2+c))
+            for y in (fy-P['sg90_hole_pitch_mm']/2, fy+P['sg90_hole_pitch_mm']/2):
                 frame = frame.cut(bore_x(2, mount-4, mount+1, (y, sz), print_up))
             profile = fuse(profile, frame)
             profile = profile.cut(bore_x(6, x0-1, x1+1, (sy, sz), print_up))
@@ -260,29 +276,39 @@ def linkage(theta):
 
 def lever(a, b, x0, x1, boss=False):
     part = capsule(a, b, 8, x0, x1)
+    boss_len = P['crank_boss_len_mm']
     if boss:
-        part = fuse(part, cyl(6, x0-2, x0, (1, 0, 0), (0, *a)))
+        part = fuse(part, cyl(P['crank_boss_d_mm'], x0-boss_len, x0, (1, 0, 0), (0, *a)))
     for p in (a, b):
-        part = part.cut(cyl(3.2 if p == b or not boss else 2, x0-3, x1+1, (1, 0, 0), (0, *p)))
+        part = part.cut(cyl(3.2 if p == b or not boss else 2, x0-boss_len-1, x1+1, (1, 0, 0), (0, *p)))
     if boss:
-        # Six-mm boss, 4.8-mm horn/shaft envelope recess, M2 through-hole.
-        part = part.cut(cyl(4.8, x0-2.1, x0-.5, (1, 0, 0), (0, *a)))
+        # Boss around the 4.8-mm SG90 spline (3.2 long); pocket floor at x0-0.5, M2 through-hole.
+        part = part.cut(cyl(4.8, x0-boss_len-.1, x0-.5, (1, 0, 0), (0, *a)))
     return part.clean()
 
 
+def kit_solid(name, skip=('cable',)):
+    """One shape from the kit reference model (tools/build_kit_parts_v5.py), in its own frame."""
+    return fuse(*[body.val() for sub, body, _ in getattr(kit, name)() if sub not in skip])
+
+
 def purchased():
-    motor_bottom = P['motor_face_z_mm']-P['motor_len_mm']
-    shaft = cyl(5, P['motor_face_z_mm'], P['motor_face_z_mm']+22).intersect(
-        rect(-3, 2, -3, 3, P['motor_face_z_mm']-1, P['motor_face_z_mm']+23))
-    nema = fuse(box(P['motor_mm'], P['motor_mm'], P['motor_len_mm'],
-                    (0, 0, (motor_bottom+P['motor_face_z_mm'])/2)),
-                shaft)
-    mg = fuse(rect(42.5, 80.5, HINGE[0]-10.25, HINGE[0]+30.25, HINGE[1]-10.25, HINGE[1]+10.25),
-              cyl(6, 36.5, 43, (1, 0, 0), (0, *HINGE)))
-    sy, sz = SERVO
-    mount = P['sg90_mount_outer_x_mm']
-    sg = fuse(rect(mount-22.7, mount, sy-11.25, sy+11.25, sz-6.1, sz+6.1),
-              cyl(4.8, mount, CRANK_X[0]-.5, (1, 0, 0), (0, sy, sz)))
+    """Kit reference models placed at their mounting datums (not simplified boxes)."""
+    o = (0, 0, 0)
+    nema = kit_solid('nema17').translate((0, 0, P['motor_face_z_mm']))
+    bb = nema.BoundingBox()
+    assert abs(bb.zmax-P['motor_face_z_mm']-P['motor_shaft_len_mm']) < .01 and abs(bb.xlen-P['motor_mm']) < .01
+    # MG996R: shaft on the hinge pointing -x, case top seated on the pocket floor (x 42.5), body towards +y.
+    mg = kit_solid('mg996r')
+    bb = mg.BoundingBox()
+    assert abs(bb.ylen-P['mg996r_body_w_mm']) < .01 and abs(bb.zlen-42.7) < .01
+    mg = mg.rotate(o, (0, 0, 1), 90).rotate(o, (0, 1, 0), -90).translate((42.5+37.0, *HINGE))
+    # SG90: ear top face on the frame's outer face, shaft on the crank axis pointing +x, body towards sg90_body_dir (rear).
+    sg = kit_solid('sg90')
+    bb = sg.BoundingBox()
+    assert abs(bb.ylen-P['sg90_body_w_mm']) < .01 and abs(bb.xlen-32.3) < .01
+    sg = sg.rotate(o, (0, 0, 1), 90*P['sg90_body_dir']).rotate(o, (0, 1, 0), 90).translate((P['sg90_mount_outer_x_mm']-3-19.5, *SERVO))
+    assert abs(sg.BoundingBox().xmax-(CRANK_X[0]-.5)) < .01, 'SG90 spline tip must reach the crank pocket floor'
     return dict(nema17=nema, mg996r=mg, sg90=sg)
 
 

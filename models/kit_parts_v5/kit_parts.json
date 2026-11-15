@@ -1,0 +1,260 @@
+{
+  "note": "Reference envelopes of kit/purchased parts for V5; not printable parts. Units mm.",
+  "cadquery": "2.7.0",
+  "parts": {
+    "uno_r4_wifi": {
+      "code": "K01",
+      "title": "Arduino UNO R4 WiFi",
+      "size_mm": [
+        70.38,
+        53.34,
+        12.6
+      ],
+      "bbox_min_mm": [
+        -1.8,
+        0.0,
+        0.0
+      ],
+      "origin": "원점: 기판 왼쪽 아래 모서리(USB 쪽이 x=0), 기판 밑면 z=0.",
+      "bodies": [
+        "pcb",
+        "headers",
+        "icsp_pins",
+        "usb_c",
+        "dc_jack",
+        "esp32",
+        "ra4m1",
+        "led_matrix",
+        "reset"
+      ],
+      "source": "Arduino ABX00087 datasheet 13절 (Mounting Holes And Board Outline)",
+      "measure_before_fit": false
+    },
+    "lcd1602_i2c": {
+      "code": "K02",
+      "title": "LCD1602 + I2C 백팩",
+      "size_mm": [
+        82.9,
+        36.0,
+        17.7
+      ],
+      "bbox_min_mm": [
+        -2.9,
+        0.0,
+        -8.9
+      ],
+      "origin": "원점: 기판 왼쪽 아래 모서리, 기판 밑면 z=0, 화면이 +z. 백팩은 z<0.",
+      "bodies": [
+        "pcb",
+        "bezel",
+        "glass",
+        "backlight",
+        "header16",
+        "i2c_backpack",
+        "contrast_pot",
+        "pcf8574",
+        "i2c_header",
+        "i2c_pins"
+      ],
+      "source": "HD44780 1602A 모듈 도면 (80×36, 구멍 75×31) · 판매처 표기 80×36×18",
+      "measure_before_fit": true
+    },
+    "tact_switch_12": {
+      "code": "K03",
+      "title": "택트 스위치 12×12 + 캡",
+      "size_mm": [
+        12.8,
+        12.0,
+        15.4
+      ],
+      "bbox_min_mm": [
+        -6.4,
+        -6.0,
+        -3.5
+      ],
+      "origin": "원점: 가운데, 몸통 밑면 z=0 (브레드보드 윗면). 다리 x=±6.25, y=±2.54.",
+      "bodies": [
+        "body",
+        "plate",
+        "stem",
+        "cap",
+        "legs"
+      ],
+      "source": "12×12×7.3 택트 스위치 (리드 5.08×12.5) + 원형 캡",
+      "measure_before_fit": true
+    },
+    "buzzer_12": {
+      "code": "K04",
+      "title": "능동 부저 Ø12",
+      "size_mm": [
+        12.0,
+        12.0,
+        16.0
+      ],
+      "bbox_min_mm": [
+        -6.0,
+        -6.0,
+        -6.5
+      ],
+      "origin": "원점: 가운데, 밑면 z=0. 핀 x=±3.8 (7.6 mm — 브레드보드에서는 3칸에 벌려 꽂는다).",
+      "bodies": [
+        "body",
+        "legs"
+      ],
+      "source": "12095 능동 부저 (Ø12×9.5, 핀 간격 7.6)",
+      "measure_before_fit": false
+    },
+    "sg90": {
+      "code": "K05",
+      "title": "SG90 9 g 서보",
+      "size_mm": [
+        32.3,
+        12.2,
+        30.3
+      ],
+      "bbox_min_mm": [
+        -10.9,
+        -6.1,
+        0.0
+      ],
+      "origin": "원점: 출력축 중심, 몸통 밑면 z=0. 귀 밑면 z=17, 케이스 윗면 z=27, 축 끝 z=30.3.",
+      "bodies": [
+        "case",
+        "spline",
+        "cable"
+      ],
+      "source": "TowerPro 공식 제품 표 SG90: A 30.3 B 22.7 C 27 D 12.2 E 32.3 F 17 (귀 두께·축 위치는 가정)",
+      "measure_before_fit": true
+    },
+    "breadboard_830": {
+      "code": "K06",
+      "title": "브레드보드 830홀 (키트 밖)",
+      "size_mm": [
+        165.1,
+        54.6,
+        8.5
+      ],
+      "bbox_min_mm": [
+        -82.55,
+        -27.3,
+        0.0
+      ],
+      "origin": "원점: 가운데, 밑면 z=0. 열은 x, 가운데 홈은 x 축.",
+      "bodies": [
+        "body"
+      ],
+      "source": "MB-102 830 tie-point (165×55×8.5) · 구멍 격자는 tools/make_wiring_v5.js 와 같음",
+      "measure_before_fit": false
+    },
+    "breadboard_mini_170": {
+      "code": "K06",
+      "title": "미니 브레드보드 170홀 (키트)",
+      "size_mm": [
+        47.0,
+        35.0,
+        8.5
+      ],
+      "bbox_min_mm": [
+        -23.5,
+        -17.5,
+        0.0
+      ],
+      "origin": "원점: 가운데, 밑면 z=0. 열은 x, 가운데 홈은 x 축.",
+      "bodies": [
+        "body"
+      ],
+      "source": "SYB-170 미니 브레드보드 (47×35×8.5)",
+      "measure_before_fit": false
+    },
+    "nema17": {
+      "code": "B01",
+      "title": "NEMA17 스텝모터 40 mm",
+      "size_mm": [
+        42.3,
+        47.25,
+        64.0
+      ],
+      "bbox_min_mm": [
+        -21.15,
+        -26.1,
+        -40.0
+      ],
+      "origin": "원점: 축 중심, 장착면 z=0. 몸통은 z<0 (길이 40), 축은 z>0.",
+      "bodies": [
+        "body",
+        "shaft",
+        "connector"
+      ],
+      "source": "NEMA 17 규격 (42.3 각, 구멍 31, 보스 Ø22) · 17HS4401 (길이 40, 축 Ø5 D컷)",
+      "measure_before_fit": false
+    },
+    "a4988": {
+      "code": "B02",
+      "title": "A4988 드라이버 + 방열판",
+      "size_mm": [
+        20.32,
+        15.24,
+        16.1
+      ],
+      "bbox_min_mm": [
+        -10.16,
+        -7.62,
+        -8.6
+      ],
+      "origin": "원점: 기판 가운데, 기판 밑면 z=0. 핀 줄은 y=±6.35, 긴 변이 x.",
+      "bodies": [
+        "pcb",
+        "spacers",
+        "pins",
+        "driver_ic",
+        "heatsink",
+        "vref_pot"
+      ],
+      "source": "Pololu A4988 carrier dimension diagram (0.6×0.8 in)",
+      "measure_before_fit": false
+    },
+    "mg996r": {
+      "code": "B03",
+      "title": "MG996R 서보",
+      "size_mm": [
+        54.0,
+        20.0,
+        42.7
+      ],
+      "bbox_min_mm": [
+        -16.75,
+        -10.0,
+        0.0
+      ],
+      "origin": "원점: 출력축 중심, 몸통 밑면 z=0. 귀 밑면 z=26.8, 케이스 윗면 z=37, 축 끝 z=42.7.",
+      "bodies": [
+        "case",
+        "spline_25t",
+        "cable"
+      ],
+      "source": "TowerPro 공식 제품 표 MG996R: A 42.7 B 40.9 C 37 D 20 E 54 F 26.8 (귀 두께·축 위치는 가정)",
+      "measure_before_fit": true
+    },
+    "cap_100uf": {
+      "code": "B05",
+      "title": "100 µF 전해 커패시터",
+      "size_mm": [
+        6.3,
+        6.3,
+        26.2
+      ],
+      "bbox_min_mm": [
+        -3.15,
+        -3.15,
+        -15.0
+      ],
+      "origin": "원점: 가운데, 밑면 z=0. 리드 x=±1.25.",
+      "bodies": [
+        "can",
+        "legs"
+      ],
+      "source": "100 µF 25 V 전해 커패시터 (Ø6.3×11, 리드 간격 2.5)",
+      "measure_before_fit": false
+    }
+  }
+}
