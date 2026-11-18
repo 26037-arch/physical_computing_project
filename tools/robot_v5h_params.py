@@ -5,8 +5,24 @@ V5 의 `P` 를 복사해 7.2~7.7절 값으로 덮어쓴 `PH` 를 만든다. 1.2�
 "가정" 이라 적힌 값은 실물을 잰 뒤 이 파일만 고치고 build/check 를 다시 돈다.
 """
 import math
+import os
 
 from robot_v5_params import P
+
+# 문서 숫자와 계산값 비교: 기본은 어긋나면 멈춘다. 실측값(가정 갱신)으로 다시 만들 때는
+# V5H_ALLOW_DOC_DRIFT=1 로 실행하면 멈추지 않고 DOC_DRIFT 에 모아 pieces.json 에 남긴다.
+ALLOW_DOC_DRIFT = os.environ.get('V5H_ALLOW_DOC_DRIFT') == '1'
+DOC_DRIFT = []
+
+
+def doc_check(what, value, expect, tol=2e-3):
+    a = value if isinstance(value, (tuple, list)) else (value,)
+    e = expect if isinstance(expect, (tuple, list)) else (expect,)
+    if len(a) != len(e) or any(abs(x - y) > tol for x, y in zip(a, e)):
+        DOC_DRIFT.append(dict(what=what, computed=[round(float(x), 4) for x in a], doc=list(e)))
+        if not ALLOW_DOC_DRIFT:
+            raise AssertionError(f'{what}: computed {value} != doc {expect} (실측값이면 V5H_ALLOW_DOC_DRIFT=1)')
+    return value
 
 PH = dict(P)
 
@@ -174,7 +190,5 @@ DOC_VALUES = dict(coupler_top_z_mm=-16.0, bolt_tip_z_mm=-25.0, e_bolt_mm=9.0, sh
                   mg996r_ear_top_x_mm=50.2, ear_shim_mm=1.7, post_relief_x_mm=28.6)
 DOC_POINTS = dict(lift_Q0=(-23.830, -6.500), lift_B0=(-37.830, -11.500), lift_F0=(-31.693, -24.083),
                   lift_B1=(-66.762, 47.820), servo_yz=(-82.982, 81.076), crank_pin0_yz=(-68.516, 51.416))
-for _k, _v in DOC_VALUES.items():
-    assert abs(PH[_k] - _v) < 2e-3, (_k, PH[_k], _v)
-for _k, _v in DOC_POINTS.items():
-    assert math.dist(PH[_k], _v) < 2e-3, (_k, PH[_k], _v)
+for _k, _v in list(DOC_VALUES.items()) + list(DOC_POINTS.items()):
+    doc_check(_k, PH[_k], _v)

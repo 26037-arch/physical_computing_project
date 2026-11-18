@@ -1,0 +1,909 @@
+{
+ "source": "docs/V5H_DESIGN.md 6.2·6.3절",
+ "passed": false,
+ "failures": [
+  "A3"
+ ],
+ "volume_tolerance_mm3": 0.02,
+ "length_tolerance_mm": 0.01,
+ "checks": [
+  {
+   "id": "A1",
+   "value": 0.0,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm (8면 |x|·|y| − 29.5 최대)",
+   "faces": {
+    "rot0_y": 29.5,
+    "rot0_x": 29.5,
+    "rot90_y": 29.5,
+    "rot90_x": 29.5,
+    "rot180_y": 29.5,
+    "rot180_x": 29.5,
+    "rot270_y": 29.5,
+    "rot270_x": 29.5
+   },
+   "cube_space_intrusion_mm3": 0.0,
+   "target": 29.5
+  },
+  {
+   "id": "A2",
+   "value": 0.0,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm",
+   "post_top_z": 15.0,
+   "top_land_mm": 1.0,
+   "probes": [
+    {
+     "kind": "A",
+     "x": 34.0,
+     "y": 29.6,
+     "z": 11.1,
+     "want": 11.1,
+     "err": 0.0
+    },
+    {
+     "kind": "A",
+     "x": 34.0,
+     "y": 30.5,
+     "z": 12.0,
+     "want": 12.0,
+     "err": 0.0
+    },
+    {
+     "kind": "A",
+     "x": 34.0,
+     "y": 31.5,
+     "z": 13.0,
+     "want": 13.0,
+     "err": 0.0
+    },
+    {
+     "kind": "A",
+     "x": 34.0,
+     "y": 32.5,
+     "z": 14.0,
+     "want": 14.0,
+     "err": 0.0
+    },
+    {
+     "kind": "A",
+     "x": 34.0,
+     "y": 33.4,
+     "z": 14.9,
+     "want": 14.9,
+     "err": 0.0
+    },
+    {
+     "kind": "B",
+     "x": 29.6,
+     "y": 34.0,
+     "z": 11.1,
+     "want": 11.1,
+     "err": 0.0
+    },
+    {
+     "kind": "B",
+     "x": 30.5,
+     "y": 34.0,
+     "z": 12.0,
+     "want": 12.0,
+     "err": 0.0
+    },
+    {
+     "kind": "B",
+     "x": 31.5,
+     "y": 34.0,
+     "z": 13.0,
+     "want": 13.0,
+     "err": 0.0
+    },
+    {
+     "kind": "B",
+     "x": 32.5,
+     "y": 34.0,
+     "z": 14.0,
+     "want": 14.0,
+     "err": 0.0
+    },
+    {
+     "kind": "B",
+     "x": 33.4,
+     "y": 34.0,
+     "z": 14.9,
+     "want": 14.9,
+     "err": 0.0
+    },
+    {
+     "kind": "land",
+     "x": 33.6,
+     "y": 33.6,
+     "z": 15.0,
+     "want": 15.0,
+     "err": 0.0
+    },
+    {
+     "kind": "land",
+     "x": 34.4,
+     "y": 34.4,
+     "z": 15.0,
+     "want": 15.0,
+     "err": 0.0
+    },
+    {
+     "kind": "land",
+     "x": 33.6,
+     "y": 34.4,
+     "z": 15.0,
+     "want": 15.0,
+     "err": 0.0
+    },
+    {
+     "kind": "land",
+     "x": 34.4,
+     "y": 33.6,
+     "z": 15.0,
+     "want": 15.0,
+     "err": 0.0
+    }
+   ],
+   "chamfer_points": [
+    [
+     29.5,
+     11.0
+    ],
+    [
+     33.5,
+     15.0
+    ]
+   ]
+  },
+  {
+   "id": "A3",
+   "value": {
+    "v5h_minus_v5_mm3": 0.5295,
+    "v5_minus_v5h_mm3": 33.7092,
+    "outside_allowed_mm3": 0.0
+   },
+   "limit": {
+    "v5h_minus_v5_mm3": 0.02,
+    "v5_minus_v5h_mm3": 40.0,
+    "outside_allowed_mm3": 0.02
+   },
+   "ok": false,
+   "allowed_regions": "|x| 또는 |y| ∈ [28.6, 29.5] 띠, z ≥ 12 (8절 D6, 문서 계산 34 mm³)",
+   "v5h_outside_v5": [
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      28.5,
+      28.6,
+      33.606,
+      34.5,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      33.606,
+      34.5,
+      28.5,
+      28.6,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      33.606,
+      34.5,
+      -28.6,
+      -28.5,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      28.5,
+      28.6,
+      -34.5,
+      -33.606,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      -28.6,
+      -28.5,
+      -34.5,
+      -33.606,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      -34.5,
+      -33.606,
+      -28.6,
+      -28.5,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      -34.5,
+      -33.606,
+      28.5,
+      28.6,
+      11.0,
+      12.0
+     ]
+    },
+    {
+     "volume_mm3": 0.0662,
+     "bbox": [
+      -28.6,
+      -28.5,
+      33.606,
+      34.5,
+      11.0,
+      12.0
+     ]
+    }
+   ],
+   "cause": "V5 cube_holder() 의 모따기 쐐기는 안쪽면보다 1 mm 더(28.5 부터) 그려져 |x| 28.5~28.6 띠를 z 11 위로 잘라 낸다. 그 띠는 V5H 경사 조각(P02, x 17.5~28.6) 끝에 걸리는데 문서 2.2절은 경사 조각 끝을 자르지 않는다 → 경사 조각 8개 끝마다 0.1 × 0.89 × 1 mm 가 V5 밖에 남는다."
+  },
+  {
+   "id": "A4",
+   "value": 0.0044,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm",
+   "plate_z": [
+    -3.0,
+    0.0
+   ],
+   "outer": [
+    70.0,
+    70.0
+   ],
+   "notch_widths": [
+    20.0,
+    20.0,
+    20.0,
+    20.0
+   ],
+   "notch_inner_edge": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "corner_r": 1.5044,
+   "solid_vs_outline_volume_err_mm3": 0.0,
+   "note": "모서리 R1.5 는 호를 16 마디로 나눈 다각형 (꼭짓점 처짐 0.002)"
+  },
+  {
+   "id": "A5",
+   "value": 0.0,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm",
+   "inside_x": 60.0,
+   "front_inner_y": 30.0,
+   "wall_bottom_z": 21.0,
+   "roof_z": [
+    58.5,
+    61.5
+   ],
+   "roof_hole": [
+    44.0,
+    44.0
+   ],
+   "arm_hinge": [
+    [
+     -90.0,
+     40.0
+    ],
+    [
+     -90.0,
+     40.0
+    ]
+   ],
+   "inside_depth_note": "앞벽 안쪽 y 30, 뒤는 열림 (뒷벽 없음, V5 와 같음)"
+  },
+  {
+   "id": "A6",
+   "value": {
+    "outside_v5_mm3": 0.0,
+    "pad_top_err_mm": 0.0
+   },
+   "limit": {
+    "outside_v5_mm3": 0.02,
+    "pad_top_err_mm": 0.01
+   },
+   "ok": true,
+   "region": "y ≥ −30.33 이고 z ≥ −9.0 (선반·입술 부분; 몸통 아래쪽은 V5 에 없는 새 구조라 제외)",
+   "pad_top_z": -6.5,
+   "Q0z": -6.5,
+   "width_mm": 15.0
+  },
+  {
+   "id": "A7",
+   "value": 0.0,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm (σ 0~66, 0.1 간격)",
+   "Q0_from_geometry": [
+    -23.8297,
+    -6.5
+   ],
+   "B0_hole": [
+    -37.8297,
+    -11.5
+   ],
+   "F0_hole": [
+    -31.6925,
+    -24.0831
+   ],
+   "pin_hardware_centre": [
+    -37.8297,
+    -11.5
+   ]
+  },
+  {
+   "id": "A8",
+   "value": 0.0002,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm",
+   "servo": [
+    -82.982,
+    81.0758
+   ],
+   "crank_r": 33.0,
+   "link_centres": 70.0,
+   "stroke_endpoints": [
+    0.0,
+    66.0
+   ]
+  },
+  {
+   "id": "A9",
+   "value": 0.0,
+   "limit": 0.01,
+   "ok": true,
+   "unit": "mm",
+   "left_inner_x": -39.5,
+   "right_inner_x": 39.5
+  },
+  {
+   "id": "A10",
+   "value": 19.4831,
+   "limit": 20.8,
+   "ok": true,
+   "unit": "mm (z −16~−3 회전체 최대 반경)",
+   "octagon_r": 19.4831,
+   "nut_r": 4.6188,
+   "head_r": 4.75,
+   "coupler_r": 9.0,
+   "coupler_limit": 9.0
+  },
+  {
+   "id": "A11",
+   "value": {
+    "e_bolt": 9.0,
+    "e_shaft": 15.0,
+    "bolt_shaft_gap": 1.0,
+    "coupler_boss_gap": 7.0,
+    "coupler_plate_gap": 3.0
+   },
+   "limit": {
+    "e_bolt": 8.0,
+    "e_shaft": 10.0,
+    "bolt_shaft_gap": 0.5,
+    "coupler_boss_gap": 0.5,
+    "coupler_plate_gap": 2.0
+   },
+   "ok": true,
+   "material_above_plate_except_posts": [],
+   "params_formula": {
+    "e_bolt": 9.0,
+    "e_shaft": 15.0,
+    "boss_gap": 7.0,
+    "plate_gap": 3.0
+   },
+   "z": {
+    "coupler": [
+     -41.0,
+     -16.0
+    ],
+    "bolt_tip": -25.0,
+    "shaft_tip": -26.0,
+    "boss_top": -48.0,
+    "motor_plate_top": -44.0
+   }
+  },
+  {
+   "id": "A12",
+   "value": -91.8061,
+   "limit": -92.0,
+   "ok": true,
+   "unit": "월드 mm (모터 몸체·커넥터 최저점 ≥ 책상 + 3)",
+   "table_zw": -95.0,
+   "margin_mm": 3.1939
+  },
+  {
+   "id": "I1",
+   "value": {
+    "items": 36,
+    "failed": 0,
+    "unexpected": 0
+   },
+   "limit": {
+    "items": 36,
+    "failed": 0,
+    "unexpected": 0
+   },
+   "ok": true,
+   "failures": [],
+   "unexpected_items": [],
+   "items": {
+    "A_open_clears_spin_sweep": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "A_open_side_walls_clear_spin_sweep": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "A_opening_sweep_clears_cube": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "A_lifter_bottom_clears_spin_sweep": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "A_load_drop_path_clear": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "A_load_hood_above_table": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "B_close_clears_bottom_layer_and_posts": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "B_close_does_not_touch_cube": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "B_layer_misalignment_tolerance": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "B_close_arm_clears_posts_sweep": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "C_lifter_bottom_below_plate": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "C_shelf_under_flat_bottom": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "C_shelf_inside_notch": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "C_hook_width_fits_notch": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "D_flip_no_interference": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "D_flip_topples_forward": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "D_ledge_friction_or_lip": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "D_landing_inside_posts": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "D_lift_stroke_enough": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "D_topple_sweep_clears_hood_and_lifter": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": "6.5절: gap_lifter ≥ 0.32 (V5H 몸통 2D 0.463 은 I9)."
+    },
+    "D_topple_sweep_clears_arm": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "E_return_brush_within_edge_radius": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "E_lifter_path_clears_seated_cube_above_3mm": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "E_lifter_top_clears_hood_arm": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": "V5 검사기의 리프터 단면(4×4 바)으로는 V5 값 9.06 그대로. 6.5절 기대값 \"끝판 6.57 (막대 11.69)\" 은 V5H 조각으로 I4 에서 잰다."
+    },
+    "E_lifter_top_clears_hood": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "G_motor_box_fit": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "G_motor_plate_above_motor_face": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "G_crank_axis_and_pin_above_table": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "G_crank_stroke_endpoints": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_lifter_servo_torque": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_hood_servo_torque": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_spin_upper_layers_follow": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_stepper_torque": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_play_compensation_matches_geometry": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_gravity_seating_margin": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    },
+    "F_hood_close_margin": {
+     "ok": true,
+     "matches_expected": true,
+     "diffs": {},
+     "note": null
+    }
+   },
+   "output": "models/robot_v5h/kinematic_checks.json"
+  },
+  {
+   "id": "I2",
+   "value": 2.2695,
+   "limit": 2.0,
+   "ok": true,
+   "unit": "mm",
+   "at_sigma": 2.9,
+   "expected": 2.27,
+   "target": "판 H01 + 기둥 P01·P02 (컵 0°, 노치 정렬)"
+  },
+  {
+   "id": "I3",
+   "value": {
+    "bar": 4.2695,
+    "body": 2.5
+   },
+   "limit": 2.0,
+   "ok": true,
+   "unit": "mm",
+   "at_sigma": {
+    "bar": 14.7,
+    "body": 4.7
+   },
+   "expected": {
+    "bar": 4.27,
+    "body": 2.72
+   },
+   "body_yz_section_to_notch_end": 2.7185,
+   "note": "body 3D 값은 노치 옆변(|x| 10)과의 거리 2.5 가 먼저 걸린다 (몸통 반폭 7.5). 문서 2.72 는 yz 단면값."
+  },
+  {
+   "id": "I4",
+   "value": {
+    "endplate": 6.5722,
+    "pin_head": 8.3561,
+    "bar": 12.51
+   },
+   "limit": 5.0,
+   "ok": true,
+   "unit": "mm (FLIP 90° 팔 ↔ 리프터, σ 0~66)",
+   "at_sigma": {
+    "endplate": 66.0,
+    "pin_head": 66.0,
+    "bar": 66.0
+   },
+   "expected": {
+    "endplate": 6.57,
+    "pin_head": 8.36,
+    "bar": 11.69
+   },
+   "note": "pin_head 는 핀 모형 전체(머리·와셔 r 3.5, 너트 r 3.2)"
+  },
+  {
+   "id": "I5",
+   "value": {
+    "mg996r": 3.7483,
+    "pad_P1F": 2.2378
+   },
+   "limit": 2.0,
+   "ok": true,
+   "unit": "mm (오른쪽 B·F 핀 모형 ↔ MG996R 키트 모형 / 패드)",
+   "at_sigma": {
+    "mg996r": 66.0,
+    "pad_P1F": 66.0
+   },
+   "expected": {
+    "mg996r": 3.29,
+    "pad_P1F": 2.54
+   },
+   "note": "3D 거리: 너트(x 46.0~48.4)와 귀(x 50.2~52.7)는 x 로도 떨어져 있어 문서의 yz 값보다 크게 나올 수 있다"
+  },
+  {
+   "id": "I6",
+   "value": {
+    "crank": 8.6145,
+    "link": 6.3576
+   },
+   "limit": 5.0,
+   "ok": true,
+   "unit": "mm (θ 0~180)",
+   "at_theta": {
+    "crank": 180.0,
+    "link": 0.0
+   },
+   "expected": {
+    "crank": 10.61,
+    "link": 6.36
+   }
+  },
+  {
+   "id": "I7",
+   "value": {
+    "link_F_nut": 5.5,
+    "link_hinge_head": 15.8142,
+    "crank_BF_nuts": 26.6693
+   },
+   "limit": {
+    "link_F_nut": 3.0,
+    "link_hinge_head": 5.0,
+    "crank_BF_nuts": 5.0
+   },
+   "ok": true,
+   "unit": "mm (θ 0~180)",
+   "at_theta": {
+    "link_F_nut": 0.0,
+    "link_hinge_head": 0.0,
+    "crank_BF_nuts": 180.0
+   },
+   "expected": {
+    "link_F_nut": 5.8,
+    "link_hinge_head": 15.82,
+    "crank_BF_nuts": 25.81
+   }
+  },
+  {
+   "id": "I8",
+   "value": 15.5823,
+   "limit": 10.0,
+   "ok": true,
+   "unit": "mm (후드·팔·혼 0~120° ↔ 리어월)",
+   "at_deg": 80.0,
+   "expected": 15.58
+  },
+  {
+   "id": "I9",
+   "value": 0.4632,
+   "limit": 0.3,
+   "ok": true,
+   "unit": "mm (넘어지는 큐브 65.1° ↔ 몸통·고무, σ 66)",
+   "body_only": 0.4632,
+   "with_pad": 0.4632,
+   "expected": 0.463
+  },
+  {
+   "id": "I10",
+   "value": 2.0296,
+   "limit": 2.051,
+   "ok": true,
+   "unit": "mm (복귀하는 몸통이 앉은 큐브와 겹치는 가장 높은 z)",
+   "with_pad": 2.0296,
+   "expected": 2.03,
+   "v5_shelf": 2.05,
+   "note": "고무는 무른 재료라 판정에서 뺀다 (with_pad 는 참고)"
+  },
+  {
+   "id": "I11",
+   "value": {
+    "deck_window": 0.85,
+    "table": 3.1939
+   },
+   "limit": {
+    "deck_window": 0.5,
+    "table": 3.0
+   },
+   "ok": true,
+   "unit": "mm",
+   "expected": {
+    "deck_window": 0.9,
+    "table": 3.19
+   }
+  },
+  {
+   "id": "I12",
+   "value": {
+    "F04_end": -26.0,
+    "F05_end": 41.2,
+    "F08_past_nut_min": 0.9,
+    "F09_end": -46.7
+   },
+   "limit": {
+    "F04_end": -26.0,
+    "F05_end": [
+     40.0,
+     43.1
+    ],
+    "F08_past_nut_min": 0.5,
+    "F09_end": "< -46.0"
+   },
+   "ok": true,
+   "F08_past_nut": {
+    "pin_B_R": 4.4,
+    "pin_F_R": 4.4,
+    "pin_B_L": 0.9,
+    "pin_F_L": 4.4
+   },
+   "note": "철물 모형은 3절 쌓임 순서로 만든다 (너트 위치는 표의 값)"
+  },
+  {
+   "id": "I13",
+   "value": {
+    "link_T2L": 0.5,
+    "horn_T1R": 0.5
+   },
+   "limit": 0.3,
+   "ok": true,
+   "unit": "mm",
+   "expected": {
+    "link_T2L": 0.5,
+    "horn_T1R": 0.5
+   }
+  },
+  {
+   "id": "I14",
+   "value": 0.0,
+   "limit": 0.0,
+   "ok": true,
+   "unit": "mm³ (멈춤나사 앞 y 9~60, |x| ≤ 5, z ±1.5 에 든 재료)",
+   "hits": {},
+   "setscrew_z": [
+    -21.0,
+    -36.0
+   ]
+  },
+  {
+   "id": "I15",
+   "value": 0.0,
+   "limit": 0.02,
+   "ok": true,
+   "unit": "mm³ (가장 큰 겹침)",
+   "collisions": [],
+   "excluded": [],
+   "pair_tests": 78516,
+   "bundle": "후드 0~120 (2.5°/5°) · 리프터 0~66 (2 mm, 후드 FLIP) · 크랭크 0~180 (5°) · FLIP 큐브 · 구매품 끼움",
+   "limitations": "이산 표본, 단순 철물 모형. 마찰·강도·백래시는 다루지 않는다."
+  }
+ ]
+}

@@ -29,7 +29,7 @@ from pathlib import Path
 
 import cadquery as cq
 
-from robot_v5h_params import PH
+from robot_v5h_params import PH, DOC_DRIFT, doc_check
 import build_robot_v5 as v5
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,16 +144,9 @@ def world_yw(y, z):
     return y * CT - z * SN
 
 
-def near(a, b, tol=2e-3):
-    a = a if isinstance(a, (tuple, list)) else (a,)
-    b = b if isinstance(b, (tuple, list)) else (b,)
-    return all(abs(x - y) <= tol for x, y in zip(a, b))
-
-
 def doc(value, expect, what, tol=2e-3):
-    """문서에 적힌 숫자와 파라미터 계산값이 같은지 확인한다 (어긋나면 문서 오류 → 멈춤)."""
-    assert near(value, expect, tol), f'{what}: computed {value} != doc {expect}'
-    return value
+    """문서에 적힌 숫자와 파라미터 계산값이 같은지 확인한다 (어긋나면 멈춤, V5H_ALLOW_DOC_DRIFT=1 이면 기록만)."""
+    return doc_check(what, value, expect, tol)
 
 
 # ---------------------------------------------------------------- 조각 목록
@@ -296,7 +289,7 @@ def make_pieces():
     es, en = PH['endplate_s_mm'], PH['endplate_n_mm']
     endp = [sn(es[0], en[0]), sn(es[1], en[0]), sn(es[1], en[1]), sn(es[0], en[1])]
     for e in ((-42.959, -10.108), (-35.769, -6.601), (-26.563, -25.475), (-33.753, -28.982)):
-        assert any(near(p, e) for p in endp), ('L03 vertex', e)
+        doc(min(endp, key=lambda p: math.dist(p, e)), e, 'L03 vertex')
     ex = PH['endplate_x_mm']
     lholes = [drill(B0[0], B0[1], 3.2, note='B 핀, 조립 뒤 지그 4D'), drill(F0[0], F0[1], 3.2, note='F 핀, 조립 뒤 지그 4D'),
               window(mortise, method='knife')]
@@ -835,6 +828,8 @@ def place(shape, motion, hood_deg=0.0, theta=0.0):
 
 def assembly(pose):
     """pose ∈ open/close/flip/load → [(이름, 솔리드, 색 키)] (포맥스 조각 + 구매품 + 철물 + 큐브)."""
+    if pose not in POSES:
+        raise ValueError(f'pose must be one of {sorted(POSES)}: {pose!r}')
     hood_deg, theta = POSES[pose]
     items = [(n, place(s, mot, hood_deg, theta), col) for n, (s, mot, col, _) in solids().items()]
     items.append(('cube', cube_solid(pose), 'cube'))
@@ -893,7 +888,7 @@ def summary():
     per_id = {i: sum(p['count'] for p in main if p['id'] == i) for i in ids}
     spare = [p for p in PIECES if p['group'] == 'spare']
     return dict(types=len(ids), sheets=sum(per_id.values()), per_id=per_id,
-                blanks=[p['id'] for p in PIECES if p.get('blank')],
+                blanks=[p['id'] for p in PIECES if p.get('blank') and p['group'] != 'spare'],
                 spare_pieces=sum(p['count'] for p in spare), spare_per_id={p['id']: sum(q['count'] for q in spare if q['id'] == p['id']) for p in spare})
 
 
@@ -909,7 +904,7 @@ def build(per_piece_step=False):
                                  panel='C01~C04: 자체 좌표 (2.7절)', holes='d=드릴 비트 (method=knife 면 칼), poly=칼로 따는 창'),
                 lift=dict(D=pts6([D])[0], N=pts6([N])[0], Q0=pts6([Q0])[0], B0=pts6([B0])[0], F0=pts6([F0])[0], B1=pts6([B1])[0],
                           servo=pts6([SERVO])[0], pin0=pts6([PIN0])[0]),
-                summary=info, pieces=PIECES)
+                summary=info, doc_drift=DOC_DRIFT, pieces=PIECES)
     (OUT / 'pieces.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
     print('pieces.json:', info['types'], 'types,', info['sheets'], 'sheets, spare', info['spare_pieces'], flush=True)
     sol = solids()
