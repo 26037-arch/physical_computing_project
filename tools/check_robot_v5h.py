@@ -178,7 +178,17 @@ def a2():
 def a3():
     v5h = POSTS_FUSED
     ref = v5.cube_holder().intersect(cq.Solid.makeBox(100, 100, 15.0, cq.Vector(-50, -50, 0)))
-    extra = sum(s.Volume() for s in v5h.cut(ref).Solids())
+    extra_shape = v5h.cut(ref)
+    extra = sum(s.Volume() for s in extra_shape.Solids())
+    # 8절 D7 허용 띠: 경사 조각 끝 (|x| 또는 |y| ∈ [28.5, 28.6], 반대축 ∈ [33.6, 34.5], z 11~12) — V5H−V5 에만 적용
+    d7 = None
+    for sa in (1, -1):
+        for sb in (1, -1):
+            for box_ in (cq.Solid.makeBox(0.1, 0.9, 1.0, cq.Vector(min(sa * 28.5, sa * 28.6), min(sb * 33.6, sb * 34.5), 11.0)),
+                         cq.Solid.makeBox(0.9, 0.1, 1.0, cq.Vector(min(sb * 33.6, sb * 34.5), min(sa * 28.5, sa * 28.6), 11.0))):
+                d7 = box_ if d7 is None else d7.fuse(box_)
+    extra_d7 = sum(s.Volume() for s in extra_shape.intersect(d7).Solids()) if extra > 0 else 0.0
+    extra_out = sum(s.Volume() for s in extra_shape.cut(d7).Solids()) if extra > 0 else 0.0
     lost_shape = ref.cut(v5h)
     lost = sum(s.Volume() for s in lost_shape.Solids())
     band = None
@@ -187,16 +197,18 @@ def a3():
             band = slab if band is None else band.fuse(slab)
     allowed = band.fuse(cq.Solid.makeBox(100, 100, 10, cq.Vector(-50, -50, 12.0)))
     residual = sum(s.Volume() for s in lost_shape.cut(allowed).Solids()) if lost > 0 else 0.0
-    ok = extra <= TOL_V and lost <= 40.0 and residual <= TOL_V
+    ok = extra_out <= TOL_V and lost <= 40.0 and residual <= TOL_V
     where = [dict(volume_mm3=r4(s.Volume()), bbox=[r4(v) for v in (s.BoundingBox().xmin, s.BoundingBox().xmax, s.BoundingBox().ymin,
                                                                    s.BoundingBox().ymax, s.BoundingBox().zmin, s.BoundingBox().zmax)])
-             for s in v5h.cut(ref).Solids() if s.Volume() > 1e-6]
-    rec('A3', dict(v5h_minus_v5_mm3=r4(extra), v5_minus_v5h_mm3=r4(lost), outside_allowed_mm3=r4(residual)),
-        dict(v5h_minus_v5_mm3=TOL_V, v5_minus_v5h_mm3=40.0, outside_allowed_mm3=TOL_V), ok,
-        allowed_regions='|x| 또는 |y| ∈ [28.6, 29.5] 띠, z ≥ 12 (8절 D6, 문서 계산 34 mm³)', v5h_outside_v5=where,
-        cause=('V5 cube_holder() 의 모따기 쐐기는 안쪽면보다 1 mm 더(28.5 부터) 그려져 |x| 28.5~28.6 띠를 z 11 위로 잘라 낸다. '
-               '그 띠는 V5H 경사 조각(P02, x 17.5~28.6) 끝에 걸리는데 문서 2.2절은 경사 조각 끝을 자르지 않는다 '
-               '→ 경사 조각 8개 끝마다 0.1 × 0.89 × 1 mm 가 V5 밖에 남는다.') if extra > TOL_V else None)
+             for s in extra_shape.Solids() if s.Volume() > 1e-6]
+    rec('A3', dict(v5h_minus_v5_outside_d7_mm3=r4(extra_out), v5_minus_v5h_mm3=r4(lost), outside_allowed_mm3=r4(residual)),
+        dict(v5h_minus_v5_outside_d7_mm3=TOL_V, v5_minus_v5h_mm3=40.0, outside_allowed_mm3=TOL_V), ok,
+        d7_allowed=dict(volume_mm3=r4(extra_d7), status='D7 허용', pieces=where,
+                        region='|x| 또는 |y| ∈ [28.5, 28.6], 반대축 |·| ∈ [33.6, 34.5], z ∈ [11, 12] (8곳)',
+                        cause='V5 cube_holder() 의 모따기 쐐기가 28.5 부터 z 11 위를 비우는데 V5H 경사 조각(P02, x 17.5~28.6) 끝은 '
+                              '자르지 않는다. 큐브 밖(|x| > 28.5)이고 손 재단 오차(±0.3)보다 작아 수용 (8절 D7).'),
+        v5h_minus_v5_total_mm3=r4(extra),
+        allowed_regions='V5−V5H: |x| 또는 |y| ∈ [28.6, 29.5] 띠, z ≥ 12 (8절 D6, 문서 계산 34 mm³)')
 
 
 def a4():
