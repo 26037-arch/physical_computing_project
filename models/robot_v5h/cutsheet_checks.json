@@ -1,0 +1,77 @@
+{
+  "checks": [
+    {
+      "detail": {
+        "inside_[2,298]x[2,448]": true,
+        "main": 50,
+        "rects": 63,
+        "spare": 13,
+        "tightest_pair": [
+          "B06 왼타워1",
+          "B06 왼타워2"
+        ]
+      },
+      "id": "M1",
+      "limit": 2.0,
+      "ok": true,
+      "value": 2.0
+    },
+    {
+      "detail": {
+        "bad": [],
+        "pages": 46,
+        "pages_with_one_ruler": 46
+      },
+      "id": "M2",
+      "limit": 0.01,
+      "ok": true,
+      "value": 0.0
+    },
+    {
+      "detail": {
+        "fail": [],
+        "pieces_checked": 43,
+        "text_missing": []
+      },
+      "id": "M3",
+      "limit": 0.01,
+      "ok": true,
+      "value": 0.0
+    },
+    {
+      "detail": {
+        "cover_pages": 1,
+        "fail": [],
+        "limit_note": "value = 인쇄 여백 10 mm 안쪽 최소 여유(mm)",
+        "overview_pages": 2,
+        "piece_pages": 43,
+        "pieces": 43,
+        "total_pages": 46
+      },
+      "id": "M4",
+      "limit": 0.0,
+      "ok": true,
+      "value": 30.0
+    }
+  ],
+  "layout_rect_slack_over_0.15mm": {
+    "A": [],
+    "B": [
+      "C03 거싯1 (+4.72)",
+      "C03 거싯2 (+4.72)"
+    ]
+  },
+  "layout_size_mismatch_rows": {
+    "A": [],
+    "B": []
+  },
+  "pages": 46,
+  "pdf": "docs/V5H_재단도면.pdf",
+  "rotated_pieces": {
+    "L03": 64.0,
+    "V01": 64.0,
+    "V02": 64.0,
+    "V03": 64.0
+  },
+  "text_overflow_pieces": []
+}
