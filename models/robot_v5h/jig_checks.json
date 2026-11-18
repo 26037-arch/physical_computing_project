@@ -1,0 +1,1974 @@
+{
+ "source": "docs/V5H_DESIGN.md 6.1절",
+ "stl_files": 28,
+ "prints": 30,
+ "passed": 17,
+ "failed": [],
+ "manual": [
+  "J18"
+ ],
+ "checks": [
+  {
+   "id": "J1",
+   "value": 187.011475,
+   "limit": "세 축 모두 ≤ 250.0",
+   "ok": true,
+   "files": 28,
+   "prints": 30,
+   "sizes": [
+    {
+     "file": "J1a_holder_base.stl",
+     "size": [
+      110.0,
+      110.0,
+      26.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J1b_post_gauge.stl",
+     "size": [
+      59.0,
+      59.0,
+      23.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J1c_bolt_bridge.stl",
+     "size": [
+      42.0,
+      120.0,
+      16.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J1d_center_plug.stl",
+     "size": [
+      43.572899,
+      43.586448,
+      24.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J2_post_bevel.stl",
+     "size": [
+      140.0,
+      82.0,
+      36.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J3a_hood_shim.stl",
+     "size": [
+      76.0,
+      76.0,
+      44.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J3b_arm_locator.stl",
+     "size": [
+      62.0,
+      78.0,
+      12.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4A1_tower_drill.stl",
+     "size": [
+      111.0,
+      187.011475,
+      16.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4A2_t2r_window.stl",
+     "size": [
+      57.5,
+      40.0,
+      11.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4B_octagon_plug.stl",
+     "size": [
+      68.542191,
+      35.599998,
+      21.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4C_motor_plate.stl",
+     "size": [
+      62.0,
+      62.0,
+      14.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4D_lifter_drill.stl",
+     "size": [
+      89.0,
+      25.0,
+      30.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4E_hood_arm.stl",
+     "size": [
+      27.0,
+      39.5,
+      14.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4F1_m3_nut_plug.stl",
+     "size": [
+      14.0,
+      49.751953,
+      24.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4F2_m5_nut_plug.stl",
+     "size": [
+      14.0,
+      49.643555,
+      24.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4F3_head_pocket_plug.stl",
+     "size": [
+      14.0,
+      49.6875,
+      24.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4F4_t1r_square_plug.stl",
+     "size": [
+      23.6,
+      54.189648,
+      24.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4G_deck.stl",
+     "size": [
+      103.0,
+      178.0,
+      12.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4H1_sg90_plate.stl",
+     "size": [
+      40.231968,
+      65.924209,
+      14.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4H2a_crank_plug.stl",
+     "size": [
+      57.194861,
+      39.2536,
+      15.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4H2b_hub_plug.stl",
+     "size": [
+      63.17603,
+      31.771205,
+      15.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4H2c_link_plug.stl",
+     "size": [
+      64.882853,
+      72.508982,
+      15.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J4H3_panel.stl",
+     "size": [
+      106.0,
+      76.0,
+      14.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J5_wedge20.stl",
+     "size": [
+      72.0,
+      70.0,
+      60.0
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J6a_corner.stl",
+     "size": [
+      50.0,
+      40.0,
+      50.0
+     ],
+     "qty": 2
+    },
+    {
+     "file": "J6b_spacer79.stl",
+     "size": [
+      79.0,
+      30.0,
+      30.0
+     ],
+     "qty": 2
+    },
+    {
+     "file": "J6c_slot_align.stl",
+     "size": [
+      112.0,
+      87.903526,
+      121.307457
+     ],
+     "qty": 1
+    },
+    {
+     "file": "J7_slot_guide.stl",
+     "size": [
+      110.0,
+      55.0,
+      8.0
+     ],
+     "qty": 1
+    }
+   ],
+   "note": "문서 6.1 \"STL 15 + 1·2·3·5·6·7\" 기준. 4H-2 플러그 3개를 따로 출력해 JIG-4 는 16, 6a·6b 는 같은 STL 을 2개씩 출력"
+  },
+  {
+   "id": "J2",
+   "value": 28,
+   "limit": "28 개 모두 닫힌 단일 솔리드 + JIG- 각인 (깊이 0.6)",
+   "ok": true,
+   "failed": [],
+   "rows": [
+    {
+     "file": "J1a_holder_base.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 6686,
+     "stl_volume": 251909.64311,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-1 HOLDER",
+       "depth": 0.6,
+       "volume": 55.979719,
+       "ok": true
+      },
+      {
+       "text": "JIG-1 HOLDER",
+       "depth": 0.6,
+       "volume": 55.979719,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J1b_post_gauge.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 5534,
+     "stl_volume": 49693.79947,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-1 GAUGE",
+       "depth": 0.6,
+       "volume": 50.063689,
+       "ok": true
+      },
+      {
+       "text": "29.5/15",
+       "depth": 0.6,
+       "volume": 28.301427,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J1c_bolt_bridge.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3836,
+     "stl_volume": 23573.148703,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-1 BRIDGE",
+       "depth": 0.6,
+       "volume": 55.035527,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J1d_center_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2872,
+     "stl_volume": 34172.095385,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-1 PLUG",
+       "depth": 0.6,
+       "volume": 41.233337,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J2_post_bevel.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 9234,
+     "stl_volume": 328660.488529,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-2 POST 65.1 / 45 / 15.00",
+       "depth": 0.6,
+       "volume": 94.929995,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J3a_hood_shim.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 7968,
+     "stl_volume": 102835.858983,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-3 HOOD",
+       "depth": 0.6,
+       "volume": 47.176671,
+       "ok": true
+      },
+      {
+       "text": "60x60 z21",
+       "depth": 0.6,
+       "volume": 40.639914,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J3b_arm_locator.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2812,
+     "stl_volume": 17554.501464,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-3 ARM",
+       "depth": 0.6,
+       "volume": 40.978165,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4A1_tower_drill.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 8532,
+     "stl_volume": 174057.492178,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "LR",
+       "depth": 0.6,
+       "volume": 4.752899,
+       "ok": true
+      },
+      {
+       "text": "LR",
+       "depth": 0.6,
+       "volume": 4.752899,
+       "ok": true
+      },
+      {
+       "text": "LR",
+       "depth": 0.6,
+       "volume": 4.752899,
+       "ok": true
+      },
+      {
+       "text": "R",
+       "depth": 0.6,
+       "volume": 2.987027,
+       "ok": true
+      },
+      {
+       "text": "R",
+       "depth": 0.6,
+       "volume": 2.987027,
+       "ok": true
+      },
+      {
+       "text": "L",
+       "depth": 0.6,
+       "volume": 1.765871,
+       "ok": true
+      },
+      {
+       "text": "L",
+       "depth": 0.6,
+       "volume": 1.765871,
+       "ok": true
+      },
+      {
+       "text": "L",
+       "depth": 0.6,
+       "volume": 1.765871,
+       "ok": true
+      },
+      {
+       "text": "JIG-4A1 TOWER",
+       "depth": 0.6,
+       "volume": 63.23888,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4A2_t2r_window.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3476,
+     "stl_volume": 11111.490123,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4A2 T2R",
+       "depth": 0.6,
+       "volume": 46.890797,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4B_octagon_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2802,
+     "stl_volume": 9538.486608,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4B HD",
+       "depth": 0.6,
+       "volume": 40.710662,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4C_motor_plate.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 4838,
+     "stl_volume": 29343.755554,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4C MOTOR",
+       "depth": 0.6,
+       "volume": 58.134154,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4D_lifter_drill.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3584,
+     "stl_volume": 20269.580725,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4D",
+       "depth": 0.6,
+       "volume": 26.459953,
+       "ok": true
+      },
+      {
+       "text": "JIG-4D",
+       "depth": 0.6,
+       "volume": 26.459953,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4E_hood_arm.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3506,
+     "stl_volume": 9226.528932,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "LR",
+       "depth": 0.6,
+       "volume": 4.752899,
+       "ok": true
+      },
+      {
+       "text": "R",
+       "depth": 0.6,
+       "volume": 2.987027,
+       "ok": true
+      },
+      {
+       "text": "JIG-4E",
+       "depth": 0.6,
+       "volume": 25.543113,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4F1_m3_nut_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 1678,
+     "stl_volume": 3479.37742,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4F1",
+       "depth": 0.6,
+       "volume": 28.731513,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4F2_m5_nut_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2018,
+     "stl_volume": 3675.313236,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4F2",
+       "depth": 0.6,
+       "volume": 29.468435,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4F3_head_pocket_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2552,
+     "stl_volume": 3981.048254,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4F3",
+       "depth": 0.6,
+       "volume": 29.591474,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4F4_t1r_square_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 1682,
+     "stl_volume": 6684.440659,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4F4",
+       "depth": 0.6,
+       "volume": 29.746315,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4G_deck.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3932,
+     "stl_volume": 79856.463734,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4G DECK",
+       "depth": 0.6,
+       "volume": 50.473787,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4H1_sg90_plate.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 1686,
+     "stl_volume": 20852.666622,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4H1",
+       "depth": 0.6,
+       "volume": 30.641147,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4H2a_crank_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3342,
+     "stl_volume": 3810.972971,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4H2a",
+       "depth": 0.6,
+       "volume": 36.192321,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4H2b_hub_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2994,
+     "stl_volume": 4645.627214,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4H2b",
+       "depth": 0.6,
+       "volume": 37.254032,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4H2c_link_plug.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 2982,
+     "stl_volume": 5298.894566,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4H2c",
+       "depth": 0.6,
+       "volume": 34.770758,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J4H3_panel.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 3670,
+     "stl_volume": 51590.891279,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-4H3 PANEL",
+       "depth": 0.6,
+       "volume": 60.759502,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J5_wedge20.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 4564,
+     "stl_volume": 184266.656128,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-5 20°",
+       "depth": 0.6,
+       "volume": 32.048236,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J6a_corner.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 5138,
+     "stl_volume": 31180.406793,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-6 90°",
+       "depth": 0.6,
+       "volume": 33.492831,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J6b_spacer79.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 6990,
+     "stl_volume": 62566.012415,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-6 79.0 = 2x39.5",
+       "depth": 0.6,
+       "volume": 65.791716,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J6c_slot_align.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 10510,
+     "stl_volume": 122470.396841,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-6c SLOT ALIGN",
+       "depth": 0.6,
+       "volume": 71.75498,
+       "ok": true
+      }
+     ],
+     "ok": true
+    },
+    {
+     "file": "J7_slot_guide.stl",
+     "closed": true,
+     "components": 1,
+     "triangles": 6818,
+     "stl_volume": 18562.569365,
+     "brep_single_valid": true,
+     "engravings": [
+      {
+       "text": "JIG-7 SLOT 3.4 x 80",
+       "depth": 0.6,
+       "volume": 66.585465,
+       "ok": true
+      }
+     ],
+     "ok": true
+    }
+   ]
+  },
+  {
+   "id": "J3",
+   "value": {
+    "sides": [
+     29.5,
+     29.5,
+     29.5,
+     29.5
+    ],
+    "top": 15.0
+   },
+   "limit": "옆면 = POST_IN 29.5 (− comp), 윗면 = post_h 15.0, ≤ 0.01",
+   "ok": true,
+   "side_dev": 0.0,
+   "top_dev": 0.0
+  },
+  {
+   "id": "J4",
+   "value": 1.5,
+   "limit": "탭 |x| ≤ 8 ↔ 노치 반폭 10, 탭 |y| ≥ 24.5 ↔ 노치 23: 여유 ≥ 1.5",
+   "ok": true,
+   "tabs": [
+    {
+     "tangential": 2.0,
+     "radial": 1.5
+    },
+    {
+     "tangential": 2.0,
+     "radial": 1.5
+    },
+    {
+     "tangential": 2.0,
+     "radial": 1.5
+    },
+    {
+     "tangential": 2.0,
+     "radial": 1.5
+    }
+   ]
+  },
+  {
+   "id": "J5",
+   "value": {
+    "pocket": {
+     "A": {
+      "w": [
+       70.4,
+       70.4
+      ],
+      "c": [
+       0.0,
+       0.0
+      ]
+     },
+     "B": {
+      "w": [
+       70.4,
+       70.4
+      ],
+      "c": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "bore_axis_off": 0.0,
+    "boss_above_nut": 1.0
+   },
+   "limit": "포켓 = plate 70.0 + 0.4 (≤ 0.01) / 보어 축 ↔ 포켓 중심 ≤ 0.01 / 보스 밑면 ≥ 너트 밑면 + 0.5",
+   "ok": true,
+   "pocket_dev": 0.0,
+   "nut_bottom": 14.0,
+   "boss_bottom": 15.0
+  },
+  {
+   "id": "J6",
+   "value": {
+    "dist": 0.0,
+    "angle_deg": 0.0
+   },
+   "limit": "S ↔ V5 비움면 y = 28.5 + z/tan65.1°: 거리 ≤ 0.01, 각 ≤ 0.02°",
+   "ok": true,
+   "apex": [
+    25.0,
+    5.442264
+   ],
+   "feet": [
+    22.473785,
+    36.724354
+   ],
+   "wall_angle_deg": 90.0,
+   "v5_points": [
+    [
+     22.473785,
+     0.0
+    ],
+    [
+     36.724354,
+     -0.0
+    ]
+   ]
+  },
+  {
+   "id": "J7",
+   "value": {
+    "chamfer_dist": 0.0,
+    "H_depth": 15.0,
+    "K": 11.1
+   },
+   "limit": "S ↔ 모따기면 z = 11 + (y − 29.5) ≤ 0.01; H 깊이 = 15.0; K 멈춤벽 ↔ 칼 홈 = 11.100",
+   "ok": true,
+   "apex": [
+    55.0,
+    11.313708
+   ],
+   "feet": [
+    43.686292,
+    66.313708
+   ]
+  },
+  {
+   "id": "J8",
+   "value": {
+    "flange": 0.0,
+    "half": 0.0,
+    "front": 0.0,
+    "top_margin": 0.1,
+    "boss": -0.0,
+    "hinge": 0.0
+   },
+   "limit": "플랜지·반폭·앞면 + tape 0.08 = V5 (≤ 0.01), 윗면 ≤ 58.5 − tape, 보스 = 44 − 0.4, 3b 구멍 축 = 힌지 (-90.0, 40.0)",
+   "ok": true
+  },
+  {
+   "id": "J9",
+   "value": 0.0,
+   "limit": "구멍(힌지·F0·B1·귀 4) ↔ 2.6절 좌표, 펜스 ↔ 타워 아래 변·앞아래 변 ≤ 0.01",
+   "ok": true,
+   "holes": [
+    {
+     "target": [
+      -90.0,
+      40.0
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -31.692542,
+      -24.083117
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -66.762234,
+      47.820407
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -75.5,
+      35.0
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -75.5,
+      45.0
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -125.0,
+      35.0
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -125.0,
+      45.0
+     ],
+     "off": 0.0,
+     "d": 3.35
+    }
+   ],
+   "fence_dev": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "id": "J10",
+   "value": 0.0,
+   "limit": "구멍 (±15.5, ±15.5), 원형 창 중심 (0, 0), 지름 23.40 ≤ 0.01",
+   "ok": true,
+   "holes": [
+    {
+     "target": [
+      -15.5,
+      -15.5
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      -15.5,
+      15.5
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      15.5,
+      -15.5
+     ],
+     "off": 0.0,
+     "d": 3.35
+    },
+    {
+     "target": [
+      15.5,
+      15.5
+     ],
+     "off": 0.0,
+     "d": 3.35
+    }
+   ],
+   "window": {
+    "off": 0.0,
+    "d": 23.4
+   }
+  },
+  {
+   "id": "J11",
+   "value": 0.0,
+   "limit": "보어 ↔ B0·F0 (선반 앞면·밑면·몸통 옆면 기준), 두 팔 동축 ≤ 0.01",
+   "ok": true,
+   "bores": [
+    {
+     "name": "B0",
+     "faces": 2,
+     "off": 0.0,
+     "coaxial": 0.0
+    },
+    {
+     "name": "F0",
+     "faces": 2,
+     "off": 0.0,
+     "coaxial": 0.0
+    }
+   ],
+   "datums": {
+    "lip_y": -23.829738,
+    "col_top": -9.0,
+    "col_inner": [
+     -7.6,
+     7.6
+    ],
+    "body_gap": 15.2
+   }
+  },
+  {
+   "id": "J12",
+   "value": {
+    "hinge": 0.0,
+    "horn_r": [
+     7.0,
+     7.0,
+     7.0,
+     7.0
+    ]
+   },
+   "limit": "힌지 보어 ↔ (−90, 40) (윗변 61.5·뒷변 -100.0 기준), 혼 구멍 반경 7.000 ≤ 0.01",
+   "ok": true,
+   "fences": {
+    "top": 61.5,
+    "back": -100.0
+   }
+  },
+  {
+   "id": "J13",
+   "value": 0.0,
+   "limit": "창·표시선·송곳 ↔ 2.6절 B01 ≤ 0.01",
+   "ok": true,
+   "window": {
+    "w": [
+     44.4,
+     47.223822
+    ],
+    "c": [
+     0.0,
+     32.393351
+    ]
+   },
+   "lines": [
+    {
+     "at": -39.5,
+     "center": -39.5,
+     "w": 1.0
+    },
+    {
+     "at": 39.5,
+     "center": 39.5,
+     "w": 1.0
+    },
+    {
+     "at": -45.5,
+     "center": -45.5,
+     "w": 1.0
+    },
+    {
+     "at": 45.5,
+     "center": 45.5,
+     "w": 1.0
+    },
+    {
+     "at": -107.013937,
+     "center": -107.013937,
+     "w": 1.0
+    },
+    {
+     "at": -103.821404,
+     "center": -103.821404,
+     "w": 1.0
+    },
+    {
+     "at": -2.724516,
+     "center": -2.724516,
+     "w": 1.0
+    },
+    {
+     "at": 0.468018,
+     "center": 0.468018,
+     "w": 1.0
+    }
+   ],
+   "awl": [
+    {
+     "target": [
+      -25.0,
+      5.788907
+     ],
+     "off": 0.0,
+     "d": 1.2
+    },
+    {
+     "target": [
+      -25.0,
+      58.997795
+     ],
+     "off": 0.0,
+     "d": 1.2
+    },
+    {
+     "target": [
+      25.0,
+      5.788907
+     ],
+     "off": 0.0,
+     "d": 1.2
+    },
+    {
+     "target": [
+      25.0,
+      58.997795
+     ],
+     "off": 0.0,
+     "d": 1.2
+    }
+   ]
+  },
+  {
+   "id": "J14",
+   "value": 20.0,
+   "limit": "앞면이 수직에서 뒤로 20.0° ≤ 0.02°",
+   "ok": true
+  },
+  {
+   "id": "J15",
+   "value": {
+    "angle": 90.0,
+    "span": 79.0,
+    "pins": 0.0
+   },
+   "limit": "6a 90° ≤ 0.02°, 6b = 2 × 39.5 ≤ 0.01, 6c 핀 ↔ F0·B1 ≤ 0.01",
+   "ok": true,
+   "pins": [
+    {
+     "target": [
+      -31.692542,
+      -24.083117
+     ],
+     "faces": 2,
+     "off": 0.0
+    },
+    {
+     "target": [
+      -66.762234,
+      47.820407
+     ],
+     "faces": 2,
+     "off": 0.0
+    }
+   ]
+  },
+  {
+   "id": "J16",
+   "value": {
+    "dist": 0.0,
+    "angle": 0.0,
+    "width": 3.8,
+    "pin_spacing": 80.0
+   },
+   "limit": "창 중심선 ↔ V5 B0→B1 직선 ≤ 0.01, 각 ≤ 0.02°, 폭 = 3.40 + blade = 3.80, 핀 간격 = 80.000",
+   "ok": true,
+   "v5_line": {
+    "B0": [
+     -37.829738,
+     -11.5
+    ],
+    "B1": [
+     -66.762234,
+     47.820407
+    ],
+    "F0": [
+     -31.692542,
+     -24.083117
+    ]
+   }
+  },
+  {
+   "id": "J17",
+   "value": "67/67",
+   "limit": "모든 안내 구멍 = 비트 + 0.15, 플러그 = 목표 − blade_t, 창 = 목표 + blade_t (일치)",
+   "ok": true,
+   "table": [
+    {
+     "jig": "1c",
+     "feature": "1c 보어 M5",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 5.0,
+     "expect": 5.15,
+     "measured": 5.15,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 힌지 (-90.0, 40.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 F0 (-31.693, -24.083)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 B1 (-66.762, 47.82)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 귀 (-125.0, 35.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 귀 (-125.0, 45.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 귀 (-75.5, 35.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 귀 (-75.5, 45.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 송곳 (-108.232, 28.076)",
+     "kind": "awl",
+     "rule": "송곳 표시 Ø1.2",
+     "target": 1.2,
+     "expect": 1.2,
+     "measured": 1.2,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 송곳 (-108.232, 91.076)",
+     "kind": "awl",
+     "rule": "송곳 표시 Ø1.2",
+     "target": 1.2,
+     "expect": 1.2,
+     "measured": 1.2,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 송곳 (-105.232, 91.076)",
+     "kind": "awl",
+     "rule": "송곳 표시 Ø1.2",
+     "target": 1.2,
+     "expect": 1.2,
+     "measured": 1.2,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 송곳 (-71.232, 28.076)",
+     "kind": "awl",
+     "rule": "송곳 표시 Ø1.2",
+     "target": 1.2,
+     "expect": 1.2,
+     "measured": 1.2,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "feature": "4A-1 송곳 (-71.232, 31.076)",
+     "kind": "awl",
+     "rule": "송곳 표시 Ø1.2",
+     "target": 1.2,
+     "expect": 1.2,
+     "measured": 1.2,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "feature": "4A-2 창 y",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 41.5,
+     "expect": 41.9,
+     "measured": 41.9,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "feature": "4A-2 창 z",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 20.8,
+     "expect": 21.2,
+     "measured": 21.2,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "feature": "4A-2 핀 (-125.0, 35.0)",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "feature": "4A-2 핀 (-125.0, 45.0)",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "feature": "4A-2 핀 (-75.5, 35.0)",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "feature": "4A-2 핀 (-75.5, 45.0)",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "4B",
+     "feature": "4B 팔각 맞변",
+     "kind": "plug",
+     "rule": "목표 − blade_t",
+     "target": 36.0,
+     "expect": 35.6,
+     "measured": 35.6,
+     "ok": true
+    },
+    {
+     "jig": "4B",
+     "feature": "4B 보어 M5",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 5.0,
+     "expect": 5.15,
+     "measured": 5.15,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "feature": "4C 구멍 (-15.5, -15.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "feature": "4C 구멍 (-15.5, 15.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "feature": "4C 구멍 (15.5, -15.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "feature": "4C 구멍 (15.5, 15.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "feature": "4C 원형 창",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 23.0,
+     "expect": 23.4,
+     "measured": 23.4,
+     "ok": true
+    },
+    {
+     "jig": "4D",
+     "feature": "4D B0",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4D",
+     "feature": "4D F0",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "feature": "4E 힌지 (-90.0, 40.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "feature": "4E 혼 (-83.0, 40.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 2.0,
+     "expect": 2.15,
+     "measured": 2.15,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "feature": "4E 혼 (-90.0, 47.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 2.0,
+     "expect": 2.15,
+     "measured": 2.15,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "feature": "4E 혼 (-97.0, 40.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 2.0,
+     "expect": 2.15,
+     "measured": 2.15,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "feature": "4E 혼 (-90.0, 33.0)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 2.0,
+     "expect": 2.15,
+     "measured": 2.15,
+     "ok": true
+    },
+    {
+     "jig": "4F-1",
+     "feature": "4F-1 맞변",
+     "kind": "plug",
+     "rule": "목표 − blade_t",
+     "target": 5.6,
+     "expect": 5.2,
+     "measured": 5.2,
+     "ok": true
+    },
+    {
+     "jig": "4F-1",
+     "feature": "4F-1 핀",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "4F-2",
+     "feature": "4F-2 맞변",
+     "kind": "plug",
+     "rule": "목표 − blade_t",
+     "target": 8.1,
+     "expect": 7.7,
+     "measured": 7.7,
+     "ok": true
+    },
+    {
+     "jig": "4F-2",
+     "feature": "4F-2 핀",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 5.0,
+     "expect": 4.9,
+     "measured": 4.9,
+     "ok": true
+    },
+    {
+     "jig": "4F-3",
+     "feature": "4F-3 맞변",
+     "kind": "plug",
+     "rule": "목표 − blade_t",
+     "target": 10.5,
+     "expect": 10.1,
+     "measured": 10.1,
+     "ok": true
+    },
+    {
+     "jig": "4F-3",
+     "feature": "4F-3 핀",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 5.0,
+     "expect": 4.9,
+     "measured": 4.9,
+     "ok": true
+    },
+    {
+     "jig": "4F-4",
+     "feature": "4F-4 맞변",
+     "kind": "plug",
+     "rule": "목표 − blade_t",
+     "target": 24.0,
+     "expect": 23.6,
+     "measured": 23.6,
+     "ok": true
+    },
+    {
+     "jig": "4F-4",
+     "feature": "4F-4 핀",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "4G",
+     "feature": "4G 창 X",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 44.0,
+     "expect": 44.4,
+     "measured": 44.4,
+     "ok": true
+    },
+    {
+     "jig": "4G",
+     "feature": "4G 창 Y",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 46.823822,
+     "expect": 47.223822,
+     "measured": 47.223822,
+     "ok": true
+    },
+    {
+     "jig": "4H-1",
+     "feature": "4H-1 M2 (-102.081966, 81.075787)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 2.0,
+     "expect": 2.15,
+     "measured": 2.15,
+     "ok": true
+    },
+    {
+     "jig": "4H-1",
+     "feature": "4H-1 M2 (-74.381966, 81.075787)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 2.0,
+     "expect": 2.15,
+     "measured": 2.15,
+     "ok": true
+    },
+    {
+     "jig": "4H-1",
+     "feature": "4H-1 창 y",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 23.3,
+     "expect": 23.7,
+     "measured": 23.7,
+     "ok": true
+    },
+    {
+     "jig": "4H-1",
+     "feature": "4H-1 창 z",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 12.8,
+     "expect": 13.2,
+     "measured": 13.2,
+     "ok": true
+    },
+    {
+     "jig": "4H-2a",
+     "feature": "4H-2a 반경",
+     "kind": "plug_r",
+     "rule": "반경 = 목표 − blade_t/2",
+     "target": 5.0,
+     "expect": 4.8,
+     "measured": 4.8,
+     "ok": true
+    },
+    {
+     "jig": "4H-2a",
+     "feature": "4H-2a 구멍 (-82.982, 81.076)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 6.0,
+     "expect": 6.15,
+     "measured": 6.15,
+     "ok": true
+    },
+    {
+     "jig": "4H-2a",
+     "feature": "4H-2a 구멍 (-68.516, 51.416)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-2b",
+     "feature": "4H-2b 반경",
+     "kind": "plug_r",
+     "rule": "반경 = 목표 − blade_t/2",
+     "target": 7.0,
+     "expect": 6.8,
+     "measured": 6.8,
+     "ok": true
+    },
+    {
+     "jig": "4H-2b",
+     "feature": "4H-2b 구멍 (-82.982, 81.076)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 6.0,
+     "expect": 6.15,
+     "measured": 6.15,
+     "ok": true
+    },
+    {
+     "jig": "4H-2c",
+     "feature": "4H-2c 반경",
+     "kind": "plug_r",
+     "rule": "반경 = 목표 − blade_t/2",
+     "target": 5.0,
+     "expect": 4.8,
+     "measured": 4.8,
+     "ok": true
+    },
+    {
+     "jig": "4H-2c",
+     "feature": "4H-2c 구멍 (-68.516, 51.416)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-2c",
+     "feature": "4H-2c 구멍 (-37.83, -11.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 LCD (-37.5, 29.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 LCD (-37.5, 60.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 LCD (37.5, 29.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 LCD (37.5, 60.5)",
+     "kind": "drill",
+     "rule": "비트 + 0.15",
+     "target": 3.2,
+     "expect": 3.35,
+     "measured": 3.35,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 LCD 창 u",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 72.0,
+     "expect": 72.4,
+     "measured": 72.4,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 LCD 창 v",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 26.0,
+     "expect": 26.4,
+     "measured": 26.4,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "feature": "4H-3 버튼 창",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 12.2,
+     "expect": 12.6,
+     "measured": 12.6,
+     "ok": true
+    },
+    {
+     "jig": "6c",
+     "feature": "6c 핀 (-31.693, -24.083)",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "6c",
+     "feature": "6c 핀 (-66.762, 47.82)",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "7",
+     "feature": "7 창 폭",
+     "kind": "window",
+     "rule": "목표 + blade_t",
+     "target": 3.4,
+     "expect": 3.8,
+     "measured": 3.8,
+     "ok": true
+    },
+    {
+     "jig": "7",
+     "feature": "7 핀 s 0",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    },
+    {
+     "jig": "7",
+     "feature": "7 핀 s 80",
+     "kind": "pin",
+     "rule": "구멍 비트 − 0.1",
+     "target": 3.2,
+     "expect": 3.1,
+     "measured": 3.1,
+     "ok": true
+    }
+   ],
+   "failed": []
+  },
+  {
+   "id": "J18",
+   "manual": true,
+   "value": null,
+   "limit": "출력한 1b 게이지 59.00 ± 0.05, 지그 7 창 3.80 ± 0.05",
+   "ok": null,
+   "note": "사람 측정. 넘으면 PH jig_xy_comp_mm 를 (측정 − 목표)/2 로 넣고 다시 출력"
+  }
+ ]
+}
