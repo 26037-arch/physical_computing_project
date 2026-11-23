@@ -2,7 +2,7 @@
  "source": "docs/V5H_DESIGN.md 6.1절",
  "stl_files": 28,
  "prints": 30,
- "passed": 17,
+ "passed": 18,
  "failed": [],
  "manual": [
   "J18"
@@ -92,7 +92,7 @@
      "file": "J4A2_t2r_window.stl",
      "size": [
       57.5,
-      40.0,
+      53.0,
       11.0
      ],
      "qty": 1
@@ -100,7 +100,7 @@
     {
      "file": "J4B_octagon_plug.stl",
      "size": [
-      68.542191,
+      91.727737,
       35.599998,
       21.0
      ],
@@ -128,7 +128,7 @@
      "file": "J4E_hood_arm.stl",
      "size": [
       27.0,
-      39.5,
+      53.5,
       14.0
      ],
      "qty": 1
@@ -136,8 +136,8 @@
     {
      "file": "J4F1_m3_nut_plug.stl",
      "size": [
-      14.0,
-      49.751953,
+      20.0,
+      79.87207,
       24.0
      ],
      "qty": 1
@@ -145,8 +145,8 @@
     {
      "file": "J4F2_m5_nut_plug.stl",
      "size": [
-      14.0,
-      49.643555,
+      20.0,
+      74.90625,
       24.0
      ],
      "qty": 1
@@ -154,8 +154,8 @@
     {
      "file": "J4F3_head_pocket_plug.stl",
      "size": [
-      14.0,
-      49.6875,
+      20.0,
+      74.90625,
       24.0
      ],
      "qty": 1
@@ -164,7 +164,7 @@
      "file": "J4F4_t1r_square_plug.stl",
      "size": [
       23.6,
-      54.189648,
+      79.308792,
       24.0
      ],
      "qty": 1
@@ -190,7 +190,7 @@
     {
      "file": "J4H2a_crank_plug.stl",
      "size": [
-      57.194861,
+      82.451701,
       39.2536,
       15.0
      ],
@@ -199,8 +199,8 @@
     {
      "file": "J4H2b_hub_plug.stl",
      "size": [
-      63.17603,
-      31.771205,
+      88.230713,
+      33.771206,
       15.0
      ],
      "qty": 1
@@ -208,7 +208,7 @@
     {
      "file": "J4H2c_link_plug.stl",
      "size": [
-      64.882853,
+      90.069377,
       72.508982,
       15.0
      ],
@@ -274,7 +274,7 @@
   {
    "id": "J2",
    "value": 28,
-   "limit": "28 개 모두 닫힌 단일 솔리드 + JIG- 각인 (깊이 0.6)",
+   "limit": "28 개 모두 닫힌 단일 솔리드 + JIG- 각인 + 조각 ID 각인 (깊이 0.6)",
    "ok": true,
    "failed": [],
    "rows": [
@@ -282,9 +282,18 @@
      "file": "J1a_holder_base.stl",
      "closed": true,
      "components": 1,
-     "triangles": 6686,
-     "stl_volume": 251909.64311,
+     "triangles": 29372,
+     "stl_volume": 251595.284111,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H01",
+      "H02",
+      "H03",
+      "H04",
+      "P01",
+      "P02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-1 HOLDER",
@@ -293,9 +302,57 @@
        "ok": true
       },
       {
+       "text": "4",
+       "depth": 0.6,
+       "volume": 3.622402,
+       "ok": true
+      },
+      {
+       "text": "A: H01 P01 P02",
+       "depth": 0.6,
+       "volume": 57.339702,
+       "ok": true
+      },
+      {
+       "text": "2",
+       "depth": 0.6,
+       "volume": 3.42943,
+       "ok": true
+      },
+      {
+       "text": "B: H01 H02 H03 H04",
+       "depth": 0.6,
+       "volume": 79.127293,
+       "ok": true
+      },
+      {
        "text": "JIG-1 HOLDER",
        "depth": 0.6,
        "volume": 55.979719,
+       "ok": true
+      },
+      {
+       "text": "4",
+       "depth": 0.6,
+       "volume": 3.622402,
+       "ok": true
+      },
+      {
+       "text": "A: H01 P01 P02",
+       "depth": 0.6,
+       "volume": 57.339702,
+       "ok": true
+      },
+      {
+       "text": "2",
+       "depth": 0.6,
+       "volume": 3.42943,
+       "ok": true
+      },
+      {
+       "text": "B: H01 H02 H03 H04",
+       "depth": 0.6,
+       "volume": 79.127293,
        "ok": true
       }
      ],
@@ -305,14 +362,26 @@
      "file": "J1b_post_gauge.stl",
      "closed": true,
      "components": 1,
-     "triangles": 5534,
-     "stl_volume": 49693.79947,
+     "triangles": 10038,
+     "stl_volume": 48043.50803,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H01",
+      "P01",
+      "P02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-1 GAUGE",
+       "text": "JIG-1 STEP 5-7",
        "depth": 0.6,
-       "volume": 50.063689,
+       "volume": 50.664665,
+       "ok": true
+      },
+      {
+       "text": "H01 P01 P02",
+       "depth": 0.6,
+       "volume": 49.720979,
        "ok": true
       },
       {
@@ -328,14 +397,32 @@
      "file": "J1c_bolt_bridge.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3836,
-     "stl_volume": 23573.148703,
+     "triangles": 10950,
+     "stl_volume": 23474.197345,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H02",
+      "H03",
+      "H04"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-1 BRIDGE",
        "depth": 0.6,
        "volume": 55.035527,
+       "ok": true
+      },
+      {
+       "text": "H02 H03 H04",
+       "depth": 0.6,
+       "volume": 53.525897,
+       "ok": true
+      },
+      {
+       "text": "JIG-1 STEP 3",
+       "depth": 0.6,
+       "volume": 45.478294,
        "ok": true
       }
      ],
@@ -345,14 +432,24 @@
      "file": "J1d_center_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2872,
-     "stl_volume": 34172.095385,
+     "triangles": 5588,
+     "stl_volume": 33549.791097,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H01"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-1 PLUG",
        "depth": 0.6,
        "volume": 41.233337,
+       "ok": true
+      },
+      {
+       "text": "STEP 2 H01",
+       "depth": 0.6,
+       "volume": 30.328672,
        "ok": true
       }
      ],
@@ -362,14 +459,67 @@
      "file": "J2_post_bevel.stl",
      "closed": true,
      "components": 1,
-     "triangles": 9234,
-     "stl_volume": 328660.488529,
+     "triangles": 19830,
+     "stl_volume": 328529.301788,
      "brep_single_valid": true,
+     "piece_ids": [
+      "P01",
+      "P02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-2 POST 65.1 / 45 / 15.00",
        "depth": 0.6,
        "volume": 94.929995,
+       "ok": true
+      },
+      {
+       "text": "1",
+       "depth": 0.6,
+       "volume": 2.917678,
+       "ok": true
+      },
+      {
+       "text": "H P01",
+       "depth": 0.6,
+       "volume": 22.777843,
+       "ok": true
+      },
+      {
+       "text": "2",
+       "depth": 0.6,
+       "volume": 3.42943,
+       "ok": true
+      },
+      {
+       "text": "C P01",
+       "depth": 0.6,
+       "volume": 20.930083,
+       "ok": true
+      },
+      {
+       "text": "3",
+       "depth": 0.6,
+       "volume": 3.514873,
+       "ok": true
+      },
+      {
+       "text": "R P02",
+       "depth": 0.6,
+       "volume": 23.46406,
+       "ok": true
+      },
+      {
+       "text": "4",
+       "depth": 0.6,
+       "volume": 3.622402,
+       "ok": true
+      },
+      {
+       "text": "K P02",
+       "depth": 0.6,
+       "volume": 23.114972,
        "ok": true
       }
      ],
@@ -379,9 +529,15 @@
      "file": "J3a_hood_shim.stl",
      "closed": true,
      "components": 1,
-     "triangles": 7968,
-     "stl_volume": 102835.858983,
+     "triangles": 16866,
+     "stl_volume": 102725.262386,
      "brep_single_valid": true,
+     "piece_ids": [
+      "K01",
+      "K02",
+      "K03"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-3 HOOD",
@@ -394,6 +550,54 @@
        "depth": 0.6,
        "volume": 40.639914,
        "ok": true
+      },
+      {
+       "text": "2",
+       "depth": 0.6,
+       "volume": 3.42943,
+       "ok": true
+      },
+      {
+       "text": "K02",
+       "depth": 0.6,
+       "volume": 17.308533,
+       "ok": true
+      },
+      {
+       "text": "3",
+       "depth": 0.6,
+       "volume": 3.514873,
+       "ok": true
+      },
+      {
+       "text": "K03",
+       "depth": 0.6,
+       "volume": 17.431572,
+       "ok": true
+      },
+      {
+       "text": "4",
+       "depth": 0.6,
+       "volume": 3.622402,
+       "ok": true
+      },
+      {
+       "text": "K01",
+       "depth": 0.6,
+       "volume": 16.571611,
+       "ok": true
+      },
+      {
+       "text": "5",
+       "depth": 0.6,
+       "volume": 3.70324,
+       "ok": true
+      },
+      {
+       "text": "K04",
+       "depth": 0.6,
+       "volume": 17.586413,
+       "ok": true
       }
      ],
      "ok": true
@@ -402,14 +606,24 @@
      "file": "J3b_arm_locator.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2812,
-     "stl_volume": 17554.501464,
+     "triangles": 5666,
+     "stl_volume": 17509.838254,
      "brep_single_valid": true,
+     "piece_ids": [
+      "K04"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-3 ARM",
        "depth": 0.6,
        "volume": 40.978165,
+       "ok": true
+      },
+      {
+       "text": "K04 STEP 5",
+       "depth": 0.6,
+       "volume": 44.682585,
        "ok": true
       }
      ],
@@ -419,9 +633,16 @@
      "file": "J4A1_tower_drill.stl",
      "closed": true,
      "components": 1,
-     "triangles": 8532,
-     "stl_volume": 174057.492178,
+     "triangles": 18100,
+     "stl_volume": 173863.503074,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B06",
+      "B07",
+      "T1R",
+      "T2R"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "LR",
@@ -476,6 +697,24 @@
        "depth": 0.6,
        "volume": 63.23888,
        "ok": true
+      },
+      {
+       "text": "ON B06 B07",
+       "depth": 0.6,
+       "volume": 89.848142,
+       "ok": true
+      },
+      {
+       "text": "T1L T2L T1R T2R",
+       "depth": 0.6,
+       "volume": 57.448799,
+       "ok": true
+      },
+      {
+       "text": "JIG-4 STEP 5",
+       "depth": 0.6,
+       "volume": 46.764345,
+       "ok": true
       }
      ],
      "ok": true
@@ -484,14 +723,31 @@
      "file": "J4A2_t2r_window.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3476,
-     "stl_volume": 11111.490123,
+     "triangles": 9532,
+     "stl_volume": 16997.171388,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B07",
+      "T2R"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-4A2 T2R",
        "depth": 0.6,
        "volume": 46.890797,
+       "ok": true
+      },
+      {
+       "text": "ON B07 T2R",
+       "depth": 0.6,
+       "volume": 47.597919,
+       "ok": true
+      },
+      {
+       "text": "JIG-4 STEP 5",
+       "depth": 0.6,
+       "volume": 46.764345,
        "ok": true
       }
      ],
@@ -501,14 +757,26 @@
      "file": "J4B_octagon_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2802,
-     "stl_volume": 9538.486608,
+     "triangles": 8940,
+     "stl_volume": 11408.749035,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H02",
+      "H03",
+      "H04"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4B HD",
+       "text": "JIG-4B STEP 2",
        "depth": 0.6,
-       "volume": 40.710662,
+       "volume": 53.561113,
+       "ok": true
+      },
+      {
+       "text": "ON H02 H03 H04",
+       "depth": 0.6,
+       "volume": 67.855869,
        "ok": true
       }
      ],
@@ -518,14 +786,30 @@
      "file": "J4C_motor_plate.stl",
      "closed": true,
      "components": 1,
-     "triangles": 4838,
-     "stl_volume": 29343.755554,
+     "triangles": 10348,
+     "stl_volume": 29258.039925,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-4C MOTOR",
        "depth": 0.6,
        "volume": 58.134154,
+       "ok": true
+      },
+      {
+       "text": "ON B02",
+       "depth": 0.6,
+       "volume": 57.702823,
+       "ok": true
+      },
+      {
+       "text": "STEP 8",
+       "depth": 0.6,
+       "volume": 28.059058,
        "ok": true
       }
      ],
@@ -535,9 +819,15 @@
      "file": "J4D_lifter_drill.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3584,
-     "stl_volume": 20269.580725,
+     "triangles": 8686,
+     "stl_volume": 21224.453804,
      "brep_single_valid": true,
+     "piece_ids": [
+      "L01",
+      "L02",
+      "L03"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-4D",
@@ -550,6 +840,18 @@
        "depth": 0.6,
        "volume": 26.459953,
        "ok": true
+      },
+      {
+       "text": "L01-L03",
+       "depth": 0.6,
+       "volume": 20.935612,
+       "ok": true
+      },
+      {
+       "text": "STEP 6",
+       "depth": 0.6,
+       "volume": 19.180654,
+       "ok": true
       }
      ],
      "ok": true
@@ -558,9 +860,13 @@
      "file": "J4E_hood_arm.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3506,
-     "stl_volume": 9226.528932,
+     "triangles": 6662,
+     "stl_volume": 12216.392691,
      "brep_single_valid": true,
+     "piece_ids": [
+      "K04"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "LR",
@@ -579,6 +885,18 @@
        "depth": 0.6,
        "volume": 25.543113,
        "ok": true
+      },
+      {
+       "text": "ON K04",
+       "depth": 0.6,
+       "volume": 22.164157,
+       "ok": true
+      },
+      {
+       "text": "STEP 4",
+       "depth": 0.6,
+       "volume": 11.991006,
+       "ok": true
       }
      ],
      "ok": true
@@ -587,14 +905,26 @@
      "file": "J4F1_m3_nut_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 1678,
-     "stl_volume": 3479.37742,
+     "triangles": 8224,
+     "stl_volume": 6076.541624,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B07",
+      "T2R",
+      "V02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4F1",
+       "text": "JIG-4F1 STEP 5",
        "depth": 0.6,
-       "volume": 28.731513,
+       "volume": 55.827684,
+       "ok": true
+      },
+      {
+       "text": "ON B07 T2R V02",
+       "depth": 0.6,
+       "volume": 64.071195,
        "ok": true
       }
      ],
@@ -604,14 +934,24 @@
      "file": "J4F2_m5_nut_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2018,
-     "stl_volume": 3675.313236,
+     "triangles": 5470,
+     "stl_volume": 6013.538201,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H04"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4F2",
+       "text": "JIG-4F2 STEP 2",
        "depth": 0.6,
-       "volume": 29.468435,
+       "volume": 56.170318,
+       "ok": true
+      },
+      {
+       "text": "ON H04",
+       "depth": 0.6,
+       "volume": 32.31618,
        "ok": true
       }
      ],
@@ -621,14 +961,24 @@
      "file": "J4F3_head_pocket_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2552,
-     "stl_volume": 3981.048254,
+     "triangles": 6332,
+     "stl_volume": 6317.730428,
      "brep_single_valid": true,
+     "piece_ids": [
+      "H02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4F3",
+       "text": "JIG-4F3 STEP 2",
        "depth": 0.6,
-       "volume": 29.591474,
+       "volume": 56.293358,
+       "ok": true
+      },
+      {
+       "text": "ON H02",
+       "depth": 0.6,
+       "volume": 32.038299,
        "ok": true
       }
      ],
@@ -638,14 +988,25 @@
      "file": "J4F4_t1r_square_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 1682,
-     "stl_volume": 6684.440659,
+     "triangles": 6616,
+     "stl_volume": 9003.621977,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B07",
+      "T1R"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4F4",
+       "text": "JIG-4F4 STEP 5",
        "depth": 0.6,
-       "volume": 29.746315,
+       "volume": 56.842486,
+       "ok": true
+      },
+      {
+       "text": "ON B07 T1R",
+       "depth": 0.6,
+       "volume": 46.860998,
        "ok": true
       }
      ],
@@ -655,14 +1016,30 @@
      "file": "J4G_deck.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3932,
-     "stl_volume": 79856.463734,
+     "triangles": 9910,
+     "stl_volume": 79752.39589,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B01"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-4G DECK",
        "depth": 0.6,
        "volume": 50.473787,
+       "ok": true
+      },
+      {
+       "text": "ON B01",
+       "depth": 0.6,
+       "volume": 56.39274,
+       "ok": true
+      },
+      {
+       "text": "JIG-4 STEP 8",
+       "depth": 0.6,
+       "volume": 47.727232,
        "ok": true
       }
      ],
@@ -672,14 +1049,30 @@
      "file": "J4H1_sg90_plate.stl",
      "closed": true,
      "components": 1,
-     "triangles": 1686,
-     "stl_volume": 20852.666622,
+     "triangles": 6884,
+     "stl_volume": 20768.260199,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B10"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-4H1",
        "depth": 0.6,
        "volume": 30.641147,
+       "ok": true
+      },
+      {
+       "text": "ON B10",
+       "depth": 0.6,
+       "volume": 56.39274,
+       "ok": true
+      },
+      {
+       "text": "STEP 8",
+       "depth": 0.6,
+       "volume": 28.059058,
        "ok": true
       }
      ],
@@ -689,14 +1082,24 @@
      "file": "J4H2a_crank_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3342,
-     "stl_volume": 3810.972971,
+     "triangles": 6406,
+     "stl_volume": 5727.038394,
      "brep_single_valid": true,
+     "piece_ids": [
+      "V01"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4H2a",
+       "text": "JIG-4H2a STEP 7",
        "depth": 0.6,
-       "volume": 36.192321,
+       "volume": 61.929824,
+       "ok": true
+      },
+      {
+       "text": "ON V01",
+       "depth": 0.6,
+       "volume": 30.066327,
        "ok": true
       }
      ],
@@ -706,14 +1109,24 @@
      "file": "J4H2b_hub_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2994,
-     "stl_volume": 4645.627214,
+     "triangles": 6914,
+     "stl_volume": 6603.3015,
      "brep_single_valid": true,
+     "piece_ids": [
+      "V03"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4H2b",
+       "text": "JIG-4H2b STEP 7",
        "depth": 0.6,
-       "volume": 37.254032,
+       "volume": 62.991536,
+       "ok": true
+      },
+      {
+       "text": "ON V03",
+       "depth": 0.6,
+       "volume": 30.926288,
        "ok": true
       }
      ],
@@ -723,14 +1136,24 @@
      "file": "J4H2c_link_plug.stl",
      "closed": true,
      "components": 1,
-     "triangles": 2982,
-     "stl_volume": 5298.894566,
+     "triangles": 6386,
+     "stl_volume": 7205.367418,
      "brep_single_valid": true,
+     "piece_ids": [
+      "V02"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
-       "text": "JIG-4H2c",
+       "text": "JIG-4H2c STEP 7",
        "depth": 0.6,
-       "volume": 34.770758,
+       "volume": 60.508262,
+       "ok": true
+      },
+      {
+       "text": "ON V02",
+       "depth": 0.6,
+       "volume": 30.803248,
        "ok": true
       }
      ],
@@ -740,14 +1163,30 @@
      "file": "J4H3_panel.stl",
      "closed": true,
      "components": 1,
-     "triangles": 3670,
-     "stl_volume": 51590.891279,
+     "triangles": 8814,
+     "stl_volume": 51491.283624,
      "brep_single_valid": true,
+     "piece_ids": [
+      "C01"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-4H3 PANEL",
        "depth": 0.6,
        "volume": 60.759502,
+       "ok": true
+      },
+      {
+       "text": "ON C01",
+       "depth": 0.6,
+       "volume": 52.361985,
+       "ok": true
+      },
+      {
+       "text": "JIG-4 STEP 9",
+       "depth": 0.6,
+       "volume": 47.290682,
        "ok": true
       }
      ],
@@ -757,14 +1196,46 @@
      "file": "J5_wedge20.stl",
      "closed": true,
      "components": 1,
-     "triangles": 4564,
-     "stl_volume": 184266.656128,
+     "triangles": 16018,
+     "stl_volume": 184159.349217,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B03",
+      "B04",
+      "B09",
+      "B13",
+      "C01"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-5 20°",
        "depth": 0.6,
        "volume": 32.048236,
+       "ok": true
+      },
+      {
+       "text": "B03 B04 B09",
+       "depth": 0.6,
+       "volume": 55.70514,
+       "ok": true
+      },
+      {
+       "text": "B13 C01",
+       "depth": 0.6,
+       "volume": 31.577574,
+       "ok": true
+      },
+      {
+       "text": "1",
+       "depth": 0.6,
+       "volume": 2.917678,
+       "ok": true
+      },
+      {
+       "text": "2",
+       "depth": 0.6,
+       "volume": 3.42943,
        "ok": true
       }
      ],
@@ -774,14 +1245,45 @@
      "file": "J6a_corner.stl",
      "closed": true,
      "components": 1,
-     "triangles": 5138,
-     "stl_volume": 31180.406793,
+     "triangles": 17484,
+     "stl_volume": 31051.020931,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B03",
+      "B04",
+      "B05",
+      "B06",
+      "B07",
+      "B09",
+      "B11",
+      "B12",
+      "B13",
+      "C01"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-6 90°",
        "depth": 0.6,
        "volume": 33.492831,
+       "ok": true
+      },
+      {
+       "text": "STEP 1",
+       "depth": 0.6,
+       "volume": 25.964962,
+       "ok": true
+      },
+      {
+       "text": "B03-B07 B09",
+       "depth": 0.6,
+       "volume": 55.404,
+       "ok": true
+      },
+      {
+       "text": "B11-B13 C01",
+       "depth": 0.6,
+       "volume": 48.112665,
        "ok": true
       }
      ],
@@ -791,14 +1293,31 @@
      "file": "J6b_spacer79.stl",
      "closed": true,
      "components": 1,
-     "triangles": 6990,
-     "stl_volume": 62566.012415,
+     "triangles": 13082,
+     "stl_volume": 62503.152584,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B06",
+      "B07"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-6 79.0 = 2x39.5",
        "depth": 0.6,
        "volume": 65.791716,
+       "ok": true
+      },
+      {
+       "text": "STEP 2",
+       "depth": 0.6,
+       "volume": 26.701883,
+       "ok": true
+      },
+      {
+       "text": "B06 B07",
+       "depth": 0.6,
+       "volume": 36.209607,
        "ok": true
       }
      ],
@@ -808,14 +1327,25 @@
      "file": "J6c_slot_align.stl",
      "closed": true,
      "components": 1,
-     "triangles": 10510,
-     "stl_volume": 122470.396841,
+     "triangles": 17120,
+     "stl_volume": 122427.238334,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B06",
+      "B07"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-6c SLOT ALIGN",
        "depth": 0.6,
        "volume": 71.75498,
+       "ok": true
+      },
+      {
+       "text": "STEP 3 B06 B07",
+       "depth": 0.6,
+       "volume": 63.03453,
        "ok": true
       }
      ],
@@ -825,14 +1355,25 @@
      "file": "J7_slot_guide.stl",
      "closed": true,
      "components": 1,
-     "triangles": 6818,
-     "stl_volume": 18562.569365,
+     "triangles": 11872,
+     "stl_volume": 18512.068088,
      "brep_single_valid": true,
+     "piece_ids": [
+      "B06",
+      "B07"
+     ],
+     "missing_ids": [],
      "engravings": [
       {
        "text": "JIG-7 SLOT 3.4 x 80",
        "depth": 0.6,
        "volume": 66.585465,
+       "ok": true
+      },
+      {
+       "text": "ON B06 B07",
+       "depth": 0.6,
+       "volume": 50.53958,
        "ok": true
       }
      ],
@@ -1088,7 +1629,7 @@
   {
    "id": "J11",
    "value": 0.0,
-   "limit": "보어 ↔ B0·F0 (선반 앞면·밑면·몸통 옆면 기준), 두 팔 동축 ≤ 0.01",
+   "limit": "보어 ↔ B0·F0 (멈춤턱 −y 면·끝판 받침 턱 n = -4.0 면 기준), 두 팔 동축 ≤ 0.01",
    "ok": true,
    "bores": [
     {
@@ -1106,12 +1647,14 @@
    ],
    "datums": {
     "lip_y": -23.829738,
-    "col_top": -9.0,
+    "ledges": [
+     -43.042412,
+     -43.042412
+    ],
     "col_inner": [
      -7.6,
      7.6
-    ],
-    "body_gap": 15.2
+    ]
    }
   },
   {
@@ -1914,9 +2457,9 @@
      "feature": "6c 핀 (-31.693, -24.083)",
      "kind": "pin",
      "rule": "구멍 비트 − 0.1",
-     "target": 3.2,
-     "expect": 3.1,
-     "measured": 3.1,
+     "target": 3.4,
+     "expect": 3.3,
+     "measured": 3.3,
      "ok": true
     },
     {
@@ -1924,9 +2467,9 @@
      "feature": "6c 핀 (-66.762, 47.82)",
      "kind": "pin",
      "rule": "구멍 비트 − 0.1",
-     "target": 3.2,
-     "expect": 3.1,
-     "measured": 3.1,
+     "target": 3.4,
+     "expect": 3.3,
+     "measured": 3.3,
      "ok": true
     },
     {
@@ -1969,6 +2512,761 @@
    "limit": "출력한 1b 게이지 59.00 ± 0.05, 지그 7 창 3.80 ± 0.05",
    "ok": null,
    "note": "사람 측정. 넘으면 PH jig_xy_comp_mm 를 (측정 − 목표)/2 로 넣고 다시 출력"
+  },
+  {
+   "id": "J19",
+   "value": {
+    "tests": 46,
+    "worst_sag": 0.046465,
+    "worst_overlap": 0.0,
+    "min_engraving_gap": 0.176367
+   },
+   "limit": "떨어뜨린 처짐 ≤ 0.05, 놓인 자세 겹침 ≤ 0.02 mm³, 각인이 조각·책상과 0.05 넘게 떨어짐 (맞닿는 면에 없음)",
+   "ok": true,
+   "rows": [
+    {
+     "jig": "1a",
+     "target": "H01 (면 B), H01+H02~H04 (면 A)",
+     "test": "1d 마개 → 책상 (면 B)",
+     "g": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1a",
+     "target": "H01 (면 B), H01+H02~H04 (면 A)",
+     "test": "H01 → 면 B 포켓·마개",
+     "g": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1a",
+     "target": "H01 (면 B), H01+H02~H04 (면 A)",
+     "test": "H01+스택 → 면 A 포켓",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1b",
+     "target": "H01, P01 (모서리 기둥), P02 (경사 2)",
+     "test": "1b → H01·1a 소켓",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1b",
+     "target": "H01, P01 (모서리 기둥), P02 (경사 2)",
+     "test": "P01 → 게이지 모서리",
+     "g": [
+      -0.707107,
+      -0.707107,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1b",
+     "target": "H01, P01 (모서리 기둥), P02 (경사 2)",
+     "test": "P02 (+y 팔) → 게이지",
+     "g": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1b",
+     "target": "H01, P01 (모서리 기둥), P02 (경사 2)",
+     "test": "P02 (+x 팔) → 게이지",
+     "g": [
+      -1.0,
+      0.0,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1c",
+     "target": "H01~H04 스택 (다리는 1a 소켓)",
+     "test": "1c → 1a 면 B 소켓",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1d",
+     "target": "H01",
+     "test": "1d → 책상",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "1d",
+     "target": "H01",
+     "test": "H01 → 1d 윗면",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "2",
+     "target": "P02 띠 적층 (R, K), P01 적층 (C, H)",
+     "test": "R: P02 적층 → V홈 꼭짓점",
+     "g": [
+      0.0,
+      -0.34366,
+      0.939094
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "2",
+     "target": "P02 띠 적층 (R, K), P01 적층 (C, H)",
+     "test": "C: P01 적층 → V홈 꼭짓점",
+     "g": [
+      0.0,
+      -0.0,
+      1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "2",
+     "target": "P02 띠 적층 (R, K), P01 적층 (C, H)",
+     "test": "H: P01 적층 → 구멍 천장",
+     "g": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "2",
+     "target": "P02 띠 적층 (R, K), P01 적층 (C, H)",
+     "test": "K: 마감 P02 → 홈 바닥",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3a",
+     "target": "K02, K03 ×2, K01 (테이프 0.08 포함)",
+     "test": "K02 → 플랜지",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3a",
+     "target": "K02, K03 ×2, K01 (테이프 0.08 포함)",
+     "test": "K03 R → 플랜지",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3a",
+     "target": "K02, K03 ×2, K01 (테이프 0.08 포함)",
+     "test": "K03 L → 플랜지",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3a",
+     "target": "K02, K03 ×2, K01 (테이프 0.08 포함)",
+     "test": "K01 → 벽 윗모서리",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3b",
+     "target": "3b → 3a 소켓, K04 ×2 → 옆벽",
+     "test": "3b → 소켓 바닥 (+y 로 끝까지)",
+     "g": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3b",
+     "target": "3b → 3a 소켓, K04 ×2 → 옆벽",
+     "test": "K04 R → 옆벽",
+     "g": [
+      -1.0,
+      0.0,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "3b",
+     "target": "3b → 3a 소켓, K04 ×2 → 옆벽",
+     "test": "K04 L → 옆벽",
+     "g": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "target": "B06 (T1L·T2L), B07 (T1R·T2R)",
+     "test": "4A-1 → B06",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "target": "B06 (T1L·T2L), B07 (T1R·T2R)",
+     "test": "4A-1 → B07",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "target": "B07 T2R (귀 구멍 Ø3.2 뚫은 뒤)",
+     "test": "4A-2 → B07 T2R",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4B",
+     "target": "H02 (H03·H04 같은 외곽)",
+     "test": "4B → H02",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "target": "B02",
+     "test": "4C → B02",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4D",
+     "target": "L01 ×5 + L02 ×2 + L03 ×2 (조립 뒤)",
+     "test": "리프터 → 4D",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "target": "K04",
+     "test": "4E → K04",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4F-1",
+     "target": "B07 T2R 귀 구멍 (V02 도 같은 방식)",
+     "test": "4F-1 → B07 T2R",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4F-2",
+     "target": "H04 (가운데 Ø5)",
+     "test": "4F-2 → H04",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4F-3",
+     "target": "H02 (가운데 Ø5)",
+     "test": "4F-3 → H02",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4F-4",
+     "target": "B07 T1R (힌지 Ø3.2)",
+     "test": "4F-4 → B07 T1R",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4G",
+     "target": "B01",
+     "test": "4G → B01",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4H-1",
+     "target": "B10",
+     "test": "4H-1 → B10",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4H-2a",
+     "target": "V01",
+     "test": "4H-2a → V01",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4H-2b",
+     "target": "V03",
+     "test": "4H-2b → V03",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4H-2c",
+     "target": "V02",
+     "test": "4H-2c → V02",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "target": "C01",
+     "test": "4H-3 → C01",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "5",
+     "target": "B09 (폭 79, B03·B04·B13·C01 은 더 좁음)",
+     "test": "쐐기 → 책상",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "5",
+     "target": "B09 (폭 79, B03·B04·B13·C01 은 더 좁음)",
+     "test": "B09 → 앞면 (20°)",
+     "g": [
+      0.0,
+      -0.939693,
+      -0.34202
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "6a",
+     "target": "3 mm 판 바깥 모서리 (B03·B05 등), 홈에 세운 판",
+     "test": "6a → 판 모서리",
+     "g": [
+      0.707107,
+      0.707107,
+      0.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "6a",
+     "target": "3 mm 판 바깥 모서리 (B03·B05 등), 홈에 세운 판",
+     "test": "6a → 책상",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "6a",
+     "target": "3 mm 판 바깥 모서리 (B03·B05 등), 홈에 세운 판",
+     "test": "판 → 6a 윗면 홈",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "6b",
+     "target": "B06·B07 안쪽면 사이",
+     "test": "6b → 데크 (두 타워 사이)",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    },
+    {
+     "jig": "6c",
+     "target": "B06 ×2, B07 T1R·T2R 슬롯 끝",
+     "test": "6c → 슬롯 끝 (월드 아래)",
+     "g": [
+      0.0,
+      -0.34202,
+      -0.939693
+     ],
+     "overlap": 0.0,
+     "sag": 0.046465,
+     "ok": true
+    },
+    {
+     "jig": "7",
+     "target": "B06·B07 (F0·B1 Ø3.2 뚫은 뒤)",
+     "test": "7 → B06",
+     "g": [
+      0.0,
+      0.0,
+      -1.0
+     ],
+     "overlap": 0.0,
+     "sag": 0.0,
+     "ok": true
+    }
+   ],
+   "engraving": [
+    {
+     "jig": "1a",
+     "engraving_to_piece": 0.415918,
+     "ok": true
+    },
+    {
+     "jig": "1b",
+     "engraving_to_piece": 8.021922,
+     "ok": true
+    },
+    {
+     "jig": "1c",
+     "engraving_to_piece": 17.715039,
+     "ok": true
+    },
+    {
+     "jig": "1d",
+     "engraving_to_piece": 1.0,
+     "ok": true
+    },
+    {
+     "jig": "2",
+     "engraving_to_piece": 3.784082,
+     "ok": true
+    },
+    {
+     "jig": "3a",
+     "engraving_to_piece": 0.176367,
+     "ok": true
+    },
+    {
+     "jig": "3b",
+     "engraving_to_piece": 2.670585,
+     "ok": true
+    },
+    {
+     "jig": "4A-1",
+     "engraving_to_piece": 9.4,
+     "ok": true
+    },
+    {
+     "jig": "4A-2",
+     "engraving_to_piece": 7.4,
+     "ok": true
+    },
+    {
+     "jig": "4B",
+     "engraving_to_piece": 20.4,
+     "ok": true
+    },
+    {
+     "jig": "4C",
+     "engraving_to_piece": 7.4,
+     "ok": true
+    },
+    {
+     "jig": "4D",
+     "engraving_to_piece": 7.143689,
+     "ok": true
+    },
+    {
+     "jig": "4E",
+     "engraving_to_piece": 7.4,
+     "ok": true
+    },
+    {
+     "jig": "4F-1",
+     "engraving_to_piece": 20.4,
+     "ok": true
+    },
+    {
+     "jig": "4F-2",
+     "engraving_to_piece": 20.4,
+     "ok": true
+    },
+    {
+     "jig": "4F-3",
+     "engraving_to_piece": 20.4,
+     "ok": true
+    },
+    {
+     "jig": "4F-4",
+     "engraving_to_piece": 20.4,
+     "ok": true
+    },
+    {
+     "jig": "4G",
+     "engraving_to_piece": 5.4,
+     "ok": true
+    },
+    {
+     "jig": "4H-1",
+     "engraving_to_piece": 7.4,
+     "ok": true
+    },
+    {
+     "jig": "4H-2a",
+     "engraving_to_piece": 14.4,
+     "ok": true
+    },
+    {
+     "jig": "4H-2b",
+     "engraving_to_piece": 14.409708,
+     "ok": true
+    },
+    {
+     "jig": "4H-2c",
+     "engraving_to_piece": 14.4,
+     "ok": true
+    },
+    {
+     "jig": "4H-3",
+     "engraving_to_piece": 7.4,
+     "ok": true
+    },
+    {
+     "jig": "5",
+     "engraving_to_piece": 2.1,
+     "ok": true
+    },
+    {
+     "jig": "6a",
+     "engraving_to_piece": 1.915039,
+     "ok": true
+    },
+    {
+     "jig": "6b",
+     "engraving_to_piece": 1.542969,
+     "ok": true
+    },
+    {
+     "jig": "6c",
+     "engraving_to_piece": 7.272593,
+     "ok": true
+    },
+    {
+     "jig": "7",
+     "engraving_to_piece": 4.4,
+     "ok": true
+    }
+   ],
+   "skipped": [],
+   "failed": []
   }
  ]
 }

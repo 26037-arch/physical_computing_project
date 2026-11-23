@@ -9,6 +9,7 @@ J18 은 사람이 출력물을 재는 항목이라 manual: true 로 기록만 �
 """
 import json
 import math
+import re
 import struct
 import sys
 
@@ -205,6 +206,19 @@ def stl_stats(path):
                 size=[hi[i] - lo[i] for i in range(3)])
 
 
+def id_tokens(text):
+    """각인 글에서 조각 ID 를 뽑는다. 'B03-B07' / 'H01-04' 같은 범위는 펼친다."""
+    out = set()
+    for tok in re.split(r'[\s:,]+', text):
+        m = re.fullmatch(r'([A-Z])(\d\d)-([A-Z]?)(\d\d)', tok)
+        if m and (not m.group(3) or m.group(3) == m.group(1)):
+            for k in range(int(m.group(2)), int(m.group(4)) + 1):
+                out.add(f'{m.group(1)}{k:02d}')
+        elif tok:
+            out.add(tok)
+    return out
+
+
 # ---------------------------------------------------------------- 검사
 
 def j1_j2(jigs, index):
@@ -253,12 +267,19 @@ def j1_j2(jigs, index):
                 depth, ok = 0.0, False
             eng_rows.append(dict(text=e['text'], depth=r6(depth), volume=r6(vol), ok=ok))
         has_jig = any(r['text'].startswith('JIG-') and r['ok'] for r in eng_rows)
-        ok = st['closed'] and st['components'] == 1 and st['volume'] > 0 and brep_ok and has_jig and all(r['ok'] for r in eng_rows)
+        found = set()
+        for r in eng_rows:
+            if r['ok']:
+                found |= id_tokens(r['text'])
+        missing = [i for i in j['ids'] if i not in found]
+        ok = (st['closed'] and st['components'] == 1 and st['volume'] > 0 and brep_ok and has_jig and all(r['ok'] for r in eng_rows)
+              and not missing)
         rows.append(dict(file=j['file'], closed=st['closed'], components=st['components'], triangles=st['triangles'],
-                         stl_volume=r6(st['volume']), brep_single_valid=brep_ok, engravings=eng_rows, ok=ok))
+                         stl_volume=r6(st['volume']), brep_single_valid=brep_ok, piece_ids=j['ids'], missing_ids=missing,
+                         engravings=eng_rows, ok=ok))
         if not ok:
             closed_bad.append(j['file'])
-    rec('J2', len(rows) - len(closed_bad), f'{len(rows)} 개 모두 닫힌 단일 솔리드 + JIG- 각인 (깊이 {jb.ENGRAVE})', not closed_bad,
+    rec('J2', len(rows) - len(closed_bad), f'{len(rows)} 개 모두 닫힌 단일 솔리드 + JIG- 각인 + 조각 ID 각인 (깊이 {jb.ENGRAVE})', not closed_bad,
         failed=closed_bad, rows=rows)
 
 
@@ -275,7 +296,7 @@ def j3_j5(jigs):
         for sgn in (-1, 1):
             f = max(axis_planes(g, ax, sgn, box=[-40, 40, -40, 40, 0.1, hh - 0.1]), key=lambda p: p['area'])
             side.append(sgn * f['off'])
-    top = max(axis_planes(g, 'z', 1), key=lambda p: p['area'])['off']
+    top = max(p['off'] for p in axis_planes(g, 'z', 1))      # 글 자리(1 mm 낮춤)가 아닌 가장 높은 면
     dev = max(abs(s - (POST_IN5 - comp)) for s in side)
     rec('J3', dict(sides=[r6(s) for s in side], top=r6(top)), f'옆면 = POST_IN {POST_IN5} (− comp), 윗면 = post_h {hh}, ≤ {TOL_L}',
         dev <= TOL_L and abs(top - hh) <= TOL_L, side_dev=r6(dev), top_dev=r6(abs(top - hh)))
@@ -442,27 +463,34 @@ def j10(jigs):
 
 
 def j11(jigs):
-    s = by_id(jigs, '4D')['solid']
+    j = by_id(jigs, '4D')
+    s = j['solid']
+    N5 = (math.cos(_a), math.sin(_a))
+    en0 = PH['endplate_n_mm'][0]
     lip = [p['off'] for p in axis_planes(s, 'y', -1, box=[-16, 16, -25, -22, -9.5, -7.5])]
-    colt = [p['off'] for p in axis_planes(s, 'z', 1, box=[-17, 17, -29, -19, -10, -8.5])]
-    cin = sorted(p['off'] for p in axis_planes(s, 'x', box=[-8, 8, -29, -19, -31, -10]))
-    lip_y, col_top = lip[0], max(colt)
-    want_b = (B0_5[0] - Q0_5[0], B0_5[1] - (Q0_5[1] - P['shelf_t_mm']))
-    want_f = (F0_5[0] - Q0_5[0], F0_5[1] - (Q0_5[1] - P['shelf_t_mm']))
+    lip_y = lip[0]
+    # 끝판 받침 턱 윗면: 법선 = N (리프터 쪽), 두 팔 안쪽
+    ledges = [p for p in planes(s) if abs(p['n'][0]) < 1e-9 and abs(p['n'][1] - N5[0]) < 1e-6 and abs(p['n'][2] - N5[1]) < 1e-6
+              and abs(p['c'][0]) > 30]
+    ld = [N5[0] * p['c'][1] + N5[1] * p['c'][2] for p in ledges]
     rows = []
-    for name, want in (('B0', want_b), ('F0', want_f)):
-        tgt = (lip_y + want[0], col_top + want[1])
-        cs = [c for c in cylinders(s) if abs(abs(c['dir'][0]) - 1) < 1e-9 and math.dist((c['loc'][1], c['loc'][2]), tgt) < 0.5
+    for name, P_ in (('B0', B0_5), ('F0', F0_5)):
+        want_y = P_[0] - Q0_5[0]
+        cs = [c for c in cylinders(s) if abs(abs(c['dir'][0]) - 1) < 1e-9 and math.dist((c['loc'][1], c['loc'][2]), P_) < 0.5
               and abs(2 * c['r'] - jb.guide(3.2)) < 0.05]
-        offs = [math.dist((c['loc'][1], c['loc'][2]), tgt) for c in cs]
+        offs = []
+        for c in cs:
+            yz = (c['loc'][1], c['loc'][2])
+            offs.append(abs((yz[0] - lip_y) - want_y))
+            offs += [abs((N5[0] * yz[0] + N5[1] * yz[1] - d) - (-en0)) for d in ld]
         coax = max(math.dist((a['loc'][1], a['loc'][2]), (c['loc'][1], c['loc'][2])) for a in cs for c in cs) if cs else None
         rows.append(dict(name=name, faces=len(cs), off=r6(max(offs)) if offs else None, coaxial=r6(coax) if cs else None))
+    cin = sorted(p['off'] for p in axis_planes(s, 'x', box=[-8, 8, -29, -19, -31, -10]))
     sym = abs(cin[0] + cin[-1]) / 2
-    gap_ = cin[-1] - cin[0]
     worst = max([r['off'] for r in rows] + [r['coaxial'] for r in rows] + [sym])
-    ok = worst <= TOL_L and all(r['faces'] >= 2 for r in rows) and gap_ >= PH['hook_w_mm']
-    rec('J11', r6(worst), f'보어 ↔ B0·F0 (선반 앞면·밑면·몸통 옆면 기준), 두 팔 동축 ≤ {TOL_L}', ok, bores=rows,
-        datums=dict(lip_y=r6(lip_y), col_top=r6(col_top), col_inner=[r6(cin[0]), r6(cin[-1])], body_gap=r6(gap_)))
+    ok = worst <= TOL_L and all(r['faces'] >= 2 for r in rows) and len(ledges) >= 2
+    rec('J11', r6(worst), f'보어 ↔ B0·F0 (멈춤턱 −y 면·끝판 받침 턱 n = {en0} 면 기준), 두 팔 동축 ≤ {TOL_L}', ok, bores=rows,
+        datums=dict(lip_y=r6(lip_y), ledges=[r6(v) for v in ld], col_inner=[r6(cin[0]), r6(cin[-1])]))
 
 
 def j12(jigs):
@@ -604,6 +632,267 @@ def j17(jigs):
         table=rows, failed=bad)
 
 
+# ---------------------------------------------------------------- J19 맞물림 (조각을 지그에 놓고 기준 방향으로 떨어뜨림)
+
+SAG_LIM, OVL_LIM, ENG_GAP = 0.05, 0.02, 0.05
+
+
+def comp(shapes):
+    return cq.Compound.makeCompound(list(shapes))
+
+
+def ovl_vol(a, fixed):
+    return sum(x.Volume() for x in a.intersect(fixed).Solids())
+
+
+def mv(sh, v):
+    return sh.translate(cq.Vector(*v))
+
+
+def drop(mover, fixed_list, g):
+    """(놓인 자세 겹침 체적, 처짐). 처짐 = g 방향으로 겹침이 새로 생기기 전까지 움직일 수 있는 거리 (해상도 약 6e-5)."""
+    fixed = fuse_all(list(fixed_list))      # 서로 겹치거나 맞닿은 받침은 한 덩어리로 (Compound 끼리 불리언이 흔들린다)
+    v0 = ovl_vol(mover, fixed)
+
+    def hit(t):
+        return ovl_vol(mv(mover, [t * gi for gi in g]), fixed) - v0 > 1e-5
+    lo, hi = 0.0, None
+    for t in (0.06, 0.5, 3.0, 20.0):
+        if hit(t):
+            hi = t
+            break
+        lo = t
+    if hi is None:
+        return v0, None
+    for _ in range(10):
+        m = (lo + hi) / 2
+        if hit(m):
+            hi = m
+        else:
+            lo = m
+    return v0, lo
+
+
+def unit(*v):
+    L = math.sqrt(sum(x * x for x in v))
+    return tuple(x / L for x in v)
+
+
+def pcs(pid, **kw):
+    return [p for p in b.PIECES if p['id'] == pid and p['group'] != 'spare' and all(p.get(k) == v for k, v in kw.items())]
+
+
+def ps(pid, i=0, **kw):
+    m = pcs(pid, **kw)
+    assert len(m) == 1, (pid, kw)
+    return b.piece_solid(m[0], i)
+
+
+def fuse_all(shapes):
+    out = shapes[0]
+    for x in shapes[1:]:
+        out = out.fuse(x)
+    return out.clean()
+
+
+def slab(outline, holes=(), shift=(0.0, 0.0)):
+    """조각 2D 외곽(u, v)을 w −t~0 판으로 (드릴 가이드·플러그 지그 아래에 놓이는 조각)."""
+    poly = [(u + shift[0], v + shift[1]) for u, v in outline]
+    s_ = jb.prism(poly, -PH['sheet_t_mm'], 0.0)
+    for c, d in holes:
+        s_ = s_.cut(jb.cyl((c[0] + shift[0], c[1] + shift[1]), d / 2, -5, 5))
+    return s_
+
+
+def scenes(jigs):
+    J = {j['id']: j['solid'] for j in jigs}
+    M = {j['id']: j['meta'] for j in jigs}
+    down = (0.0, 0.0, -1.0)
+    up = (0.0, 0.0, 1.0)
+    sc = {}
+    # 1a: 면 B (뒤집어 놓음 → 1a 좌표에서 아래 = +z), 면 A
+    table_b = jb.box3(-80, 80, -80, 80, 26.0, 40.0)
+    plug_b = J['1d'].rotate(cq.Vector(0, 0, 0), cq.Vector(1, 0, 0), 180).translate(cq.Vector(0, 0, 26.0))
+    h01_b = mv(ps('H01'), (0, 0, M['1a']['pocket_d']))
+    stack = fuse_all([ps('H01'), ps('H02', 0), ps('H02', 1), ps('H03'), ps('H04')])
+    stack_a = mv(stack, (0, 0, M['1a']['zA'] + PH['plate_t_mm']))
+    sc['1a'] = dict(target='H01 (면 B), H01+H02~H04 (면 A)',
+                    tests=[('1d 마개 → 책상 (면 B)', plug_b, [table_b], up), ('H01 → 면 B 포켓·마개', h01_b, [J['1a'], plug_b], up),
+                           ('H01+스택 → 면 A 포켓', stack_a, [J['1a']], down)],
+                    rest=[table_b, plug_b, h01_b, stack_a])
+    # 1d (자기 좌표: 책상 위에 섬, H01 이 윗면에 얹힘)
+    table_d = jb.box3(-40, 40, -40, 40, -10, 0)
+    h01_d = mv(ps('H01'), (0, 0, M['1d']['h'] + PH['plate_t_mm']))
+    sc['1d'] = dict(target='H01', tests=[('1d → 책상', J['1d'], [table_d], down), ('H01 → 1d 윗면', h01_d, [J['1d']], down)],
+                    rest=[table_d, h01_d])
+    # 1b (홀더 국소): 1a 면 A 위 H01, 기둥 한 모서리
+    a_at = mv(J['1a'], (0, 0, -(M['1a']['zA'] + PH['plate_t_mm'])))
+    h01 = ps('H01')
+    p01 = pcs('P01')[0]
+    post = fuse_all([b.piece_solid(p01, i) for i, ins in enumerate(p01['instances']) if ins['rot_z'] == 0])
+    ramps = []
+    for p in pcs('P02'):
+        for i in range(len(p['offset'])):
+            sol = b.piece_solid(p, i)
+            c = sol.Center()
+            if c.x > 0 and c.y > 0:
+                ramps.append(((round(c.x, 3) > round(c.y, 3)), sol))
+    ramp_y = fuse_all([sol for isx, sol in ramps if not isx])      # +y 팔 (x 17.5~28.6)
+    ramp_x = fuse_all([sol for isx, sol in ramps if isx])
+    sc['1b'] = dict(target='H01, P01 (모서리 기둥), P02 (경사 2)',
+                    tests=[('1b → H01·1a 소켓', J['1b'], [a_at, h01], down),
+                           ('P01 → 게이지 모서리', post, [J['1b'], h01], unit(-1, -1, 0)),
+                           ('P02 (+y 팔) → 게이지', ramp_y, [J['1b'], h01], (0, -1, 0)),
+                           ('P02 (+x 팔) → 게이지', ramp_x, [J['1b'], h01], (-1, 0, 0))],
+                    rest=[a_at, h01, post, ramp_y, ramp_x])
+    # 1c (면 B 를 위로, 면 B = z 0)
+    a_flip = J['1a'].rotate(cq.Vector(0, 0, 0), cq.Vector(1, 0, 0), 180)
+    stack_c = stack.rotate(cq.Vector(0, 0, 0), cq.Vector(1, 0, 0), 180).translate(cq.Vector(0, 0, -M['1a']['pocket_d']))
+    sc['1c'] = dict(target='H01~H04 스택 (다리는 1a 소켓)', tests=[('1c → 1a 면 B 소켓', J['1c'], [a_flip, stack_c], down)],
+                    rest=[a_flip, stack_c])
+    # 2: V홈은 고무줄이 꼭짓점 쪽으로 누름, H 는 구멍 천장 쪽, K 는 아래
+    m2 = M['2']
+    PO = jb.POST_OUT
+
+    def vframe(st):
+        A = tuple(st['apex'])
+        f1, f2 = (st['f1'], 0.0), (st['f2'], 0.0)
+        u1 = unit(f1[0] - A[0], f1[1] - A[1])
+        u2 = unit(f2[0] - A[0], f2[1] - A[1])
+        return A, u1, u2
+
+    def to_av(poly, A, u1, u2):
+        return [(A[0] + (PO - y) * u1[0] + z * u2[0], A[1] + (PO - y) * u1[1] + z * u2[1]) for y, z in poly]
+    A, u1, u2 = vframe(m2['R'])
+    cut_y = PH['post_ramp_cut_y_mm']
+    t_ = PH['sheet_t_mm']
+    from shapely.geometry import box as sb
+    from shapely.ops import unary_union as uu
+    raw = uu([sb(cut_y[k], k * t_, PO, (k + 1) * t_) for k in range(len(cut_y))])
+    bar_r = jb.prism(b.ccw(to_av(list(raw.exterior.coords)[:-1], A, u1, u2)), 10.0, 120.0, axis='x')
+    gR = unit(0.0, -(u1[0] + u2[0]), -(u1[1] + u2[1]))
+    A, u1, u2 = vframe(m2['C'])
+    post_c = jb.prism(b.ccw(to_av(b.rect(jb.RELIEF_X, PO, 0.0, PH['post_h_mm']), A, u1, u2)), 5.0, 5.0 + PO - jb.RELIEF_X, axis='x')
+    gC = unit(0.0, -(u1[0] + u2[0]), -(u1[1] + u2[1]))
+    ol = p01['outline']
+    cx = (min(p[0] for p in ol) + max(p[0] for p in ol)) / 2
+    cy = (min(p[1] for p in ol) + max(p[1] for p in ol)) / 2
+    hc = m2['H']['c']
+    post_h = jb.prism([(x - cx + hc[0], y - cy + hc[1]) for x, y in ol], 0.0, PH['post_h_mm'])
+    k = m2['K']
+    fin = pcs('P02')[0]['final_section']
+    mid = (jb.POST_IN + PO) / 2
+    bar_k = jb.prism(b.ccw([(k['a'] + y - mid, jb.J2_V - k['depth'] + z) for y, z in fin]), k['stop'], jb.J2_L, axis='x')
+    sc['2'] = dict(target='P02 띠 적층 (R, K), P01 적층 (C, H)',
+                   tests=[('R: P02 적층 → V홈 꼭짓점', bar_r, [J['2']], gR), ('C: P01 적층 → V홈 꼭짓점', post_c, [J['2']], gC),
+                          ('H: P01 적층 → 구멍 천장', post_h, [J['2']], up), ('K: 마감 P02 → 홈 바닥', bar_k, [J['2']], down)],
+                   rest=[bar_r, post_c, post_h, bar_k])
+    # 3a: 심 + 마스킹테이프(tape_t) 모형, 벽 → 지붕
+    m3 = M['3a']
+    tp = PH['tape_t_mm']
+    tape = fuse_all([jb.box3(-m3['half'] - tp, m3['half'] + tp, m3['back'], m3['front'] + tp, m3['fl_top'], m3['top'])
+                     .cut(jb.box3(-m3['half'], m3['half'], m3['back'] - 1, m3['front'], m3['fl_top'] - 1, m3['top'] + 1)),
+                     jb.box3(-38, 38, -38, 38, m3['fl_top'], m3['fl_top'] + tp)
+                     .cut(jb.box3(-m3['half'], m3['half'], m3['back'], m3['front'], m3['fl_top'] - 1, m3['fl_top'] + 1))])
+    shim = J['3a'].fuse(tape).clean()
+    k02, k03r, k03l, k01 = ps('K02'), ps('K03', 0), ps('K03', 1), ps('K01')
+    sc['3a'] = dict(target='K02, K03 ×2, K01 (테이프 0.08 포함)',
+                    tests=[('K02 → 플랜지', k02, [shim], down), ('K03 R → 플랜지', k03r, [shim], down),
+                           ('K03 L → 플랜지', k03l, [shim], down), ('K01 → 벽 윗모서리', k01, [shim, k02, k03r, k03l], down)],
+                    rest=[k02, k03r, k03l, k01])
+    k04r, k04l = ps('K04', side='R'), ps('K04', side='L')
+    sc['3b'] = dict(target='3b → 3a 소켓, K04 ×2 → 옆벽',
+                    tests=[('3b → 소켓 바닥 (+y 로 끝까지)', J['3b'], [J['3a']], (0, 1, 0)),
+                           ('K04 R → 옆벽', k04r, [shim, k03r, J['3b']], (-1, 0, 0)), ('K04 L → 옆벽', k04l, [shim, k03l, J['3b']], (1, 0, 0))],
+                    rest=[J['3a'], k04r, k04l, k03r, k03l])
+    # 4 판형: 지그를 조각 위로 떨어뜨림 (−w)
+    def plate(jid, target, slabs):
+        sc[jid] = dict(target=target, tests=[(f'{jid} → {n}', J[jid], [sl], down) for n, sl in slabs], rest=[sl for _n, sl in slabs])
+    b06, t1r, t2r = pcs('B06')[0], pcs('B07', sub='T1R')[0], pcs('B07', sub='T2R')[0]
+    plate('4A-1', 'B06 (T1L·T2L), B07 (T1R·T2R)', [('B06', slab(b06['outline'])), ('B07', slab(t1r['outline']))])
+    ears = PH['mg996r_ear_holes']
+    plate('4A-2', 'B07 T2R (귀 구멍 Ø3.2 뚫은 뒤)', [('B07 T2R', slab(t2r['outline'], [(e, 3.2) for e in ears]))])
+    plate('4C', 'B02', [('B02', slab(pcs('B02')[0]['outline']))])
+    plate('4E', 'K04', [('K04', slab(pcs('K04', side='R')[0]['outline']))])
+    plate('4G', 'B01', [('B01', slab(pcs('B01')[0]['outline']))])
+    plate('4H-1', 'B10', [('B10', slab(pcs('B10', sub='outer')[0]['outline']))])
+    plate('4H-3', 'C01', [('C01', slab(pcs('C01')[0]['outline']))])
+    oc = b.octagon(PH['stack_disc_af_mm'])
+    plate('4B', 'H02 (H03·H04 같은 외곽)', [('H02', slab(oc))])
+    e0 = sorted(ears)[0]
+    plate('4F-1', 'B07 T2R 귀 구멍 (V02 도 같은 방식)', [('B07 T2R', slab(t2r['outline'], [(e0, 3.2)], shift=(-e0[0], -e0[1])))])
+    plate('4F-2', 'H04 (가운데 Ø5)', [('H04', slab(oc, [((0, 0), 5.0)]))])
+    plate('4F-3', 'H02 (가운데 Ø5)', [('H02', slab(oc, [((0, 0), 5.0)]))])
+    plate('4F-4', 'B07 T1R (힌지 Ø3.2)', [('B07 T1R', slab(t1r['outline'], [(HINGE5, 3.2)], shift=(-HINGE5[0], -HINGE5[1])))])
+    for jid, vid in (('4H-2a', 'V01'), ('4H-2b', 'V03'), ('4H-2c', 'V02')):
+        plate(jid, vid, [(vid, slab(pcs(vid)[0]['outline']))])
+    # 7: 타워를 (s, n) 판 좌표로
+    fr = M['7']['frame']
+    o, sd = fr['origin'], fr['s']
+    nd = (-sd[1], sd[0])
+    tw = [((y - o[0]) * sd[0] + (z - o[1]) * sd[1], (y - o[0]) * nd[0] + (z - o[1]) * nd[1]) for y, z in b06['outline']]
+    plate('7', 'B06·B07 (F0·B1 Ø3.2 뚫은 뒤)', [('B06', slab(b.ccw(tw), [((0, 0), 3.2), ((M['7']['L'], 0), 3.2)]))])
+    # 4D: 조립한 리프터 (L01 ×5, L02 ×2, L03 ×2) 를 −z 로
+    lifter = fuse_all([b.piece_solid(p, i) for pid in ('L01', 'L02', 'L03') for p in pcs(pid) for i in range(len(p['offset']))])
+    sc['4D'] = dict(target='L01 ×5 + L02 ×2 + L03 ×2 (조립 뒤)', tests=[('리프터 → 4D', lifter, [J['4D']], down)], rest=[lifter])
+    # 5: 쐐기 → 책상, 넓은 조각(B09 폭 79) 을 앞면에 기댐
+    tilt = math.radians(P['tilt_deg'])
+    table5 = jb.box3(-100, 100, -150, 100, -5, 0)
+    n5 = (math.cos(tilt), math.sin(tilt))                 # 앞면 바깥 법선 (Y, Z)
+    d5 = (-math.sin(tilt), math.cos(tilt))
+    zt = 55.0
+    p1 = (zt * d5[0] / d5[1], zt)
+    p2 = (p1[0] + t_ * n5[0], p1[1] + t_ * n5[1])
+    p3 = (t_ / math.cos(tilt), 0.0)                       # 바깥면 아래끝 (밑변을 책상 높이로 깎은 판)
+    w9 = PH['tower_in_x_mm']
+    lean = jb.prism(b.ccw([(0.0, 0.0), p3, p2, p1]), -w9, w9, axis='x')
+    sc['5'] = dict(target='B09 (폭 79, B03·B04·B13·C01 은 더 좁음)',
+                   tests=[('쐐기 → 책상', J['5'], [table5], down), ('B09 → 앞면 (20°)', lean, [J['5'], table5], (0.0, -n5[0], -n5[1]))],
+                   rest=[table5, lean])
+    # 6a: 3 mm 판 두 장이 만든 바깥 모서리, 윗면 홈에 세운 판
+    T6 = M['6a']['T']
+    wall_a = jb.box3(T6, 60, T6, T6 + t_, 0, 40)
+    wall_b = jb.box3(T6, T6 + t_, T6 + t_, 60, 0, 40)
+    table6 = jb.box3(-20, 80, -20, 80, -5, 0)
+    in_slot = jb.box3(15.0, 45.0, T6 / 2 - t_ / 2, T6 / 2 + t_ / 2, 32.0, 52.0)
+    sc['6a'] = dict(target='3 mm 판 바깥 모서리 (B03·B05 등), 홈에 세운 판',
+                    tests=[('6a → 판 모서리', J['6a'], [wall_a, wall_b], unit(1, 1, 0)), ('6a → 책상', J['6a'], [table6], down),
+                           ('판 → 6a 윗면 홈', in_slot, [J['6a']], down)],
+                    rest=[wall_a, wall_b, table6, in_slot])
+    sp = M['6b']['span']
+    tl, tr = jb.box3(-6, 0, -10, 40, 0, 40), jb.box3(sp, sp + 6, -10, 40, 0, 40)
+    table6b = jb.box3(-10, sp + 10, -10, 40, -5, 0)
+    sc['6b'] = dict(target='B06·B07 안쪽면 사이', tests=[('6b → 데크 (두 타워 사이)', J['6b'], [table6b, tl, tr], down)], rest=[tl, tr, table6b])
+    towers = [ps('B06', 0), ps('B06', 1), ps('B07', sub='T1R'), ps('B07', sub='T2R')]
+    gw = (0.0, -math.sin(tilt), -math.cos(tilt))       # 월드 아래 (타워 국소 좌표)
+    sc['6c'] = dict(target='B06 ×2, B07 T1R·T2R 슬롯 끝', tests=[('6c → 슬롯 끝 (월드 아래)', J['6c'], towers, gw)], rest=towers)
+    return sc
+
+
+def j19(jigs):
+    sc = scenes(jigs)
+    rows, skipped, eng_rows = [], [], []
+    for j in jigs:
+        s_ = sc.get(j['id'])
+        if s_ is None:
+            skipped.append(dict(jig=j['id'], why='대상 조각·방향을 정하지 않음'))
+            continue
+        for name, mover, fixed, g in s_['tests']:
+            v0, sag = drop(mover, fixed, g)
+            ok = v0 <= OVL_LIM and sag is not None and round(sag, 4) <= SAG_LIM
+            rows.append(dict(jig=j['id'], target=s_['target'], test=name, g=[r6(v) for v in g], overlap=r6(v0),
+                             sag=None if sag is None else r6(sag), ok=ok))
+            print(f"     J19 {j['id']:6s} {name[:34]:34s} 겹침 {v0:.4f} 처짐 {'자유낙하' if sag is None else f'{sag:.4f}'}", flush=True)
+        removed = j['body'].cut(j['solid'])
+        dmin = removed.distance(comp(s_['rest']))
+        eng_rows.append(dict(jig=j['id'], engraving_to_piece=r6(dmin), ok=dmin > ENG_GAP))
+    bad = [r for r in rows if not r['ok']] + [r for r in eng_rows if not r['ok']]
+    rec('J19', dict(tests=len(rows), worst_sag=max((r['sag'] for r in rows if r['sag'] is not None), default=None),
+                    worst_overlap=max(r['overlap'] for r in rows), min_engraving_gap=min(r['engraving_to_piece'] for r in eng_rows)),
+        f'떨어뜨린 처짐 ≤ {SAG_LIM}, 놓인 자세 겹침 ≤ {OVL_LIM} mm³, 각인이 조각·책상과 {ENG_GAP} 넘게 떨어짐 (맞닿는 면에 없음)',
+        not bad, rows=rows, engraving=eng_rows, skipped=skipped, failed=bad)
+
+
 def j18():
     CHECKS.append(dict(id='J18', manual=True, value=None, limit='출력한 1b 게이지 59.00 ± 0.05, 지그 7 창 3.80 ± 0.05',
                        ok=None, note='사람 측정. 넘으면 PH jig_xy_comp_mm 를 (측정 − 목표)/2 로 넣고 다시 출력'))
@@ -616,7 +905,7 @@ def main():
     assert [j['file'] for j in jigs] == [i['file'] for i in index['jigs']], 'index.json 이 오래됨 — build_v5h_jigs.py 를 먼저'
     for fn in (lambda: j1_j2(jigs, index), lambda: j3_j5(jigs), lambda: j6_j7(jigs), lambda: j8(jigs), lambda: j9(jigs),
                lambda: j10(jigs), lambda: j11(jigs), lambda: j12(jigs), lambda: j13(jigs), lambda: j14(jigs), lambda: j15(jigs),
-               lambda: j16(jigs), lambda: j17(jigs), j18):
+               lambda: j16(jigs), lambda: j17(jigs), j18, lambda: j19(jigs)):
         fn()
     auto = [c for c in CHECKS if not c.get('manual')]
     failed = [c['id'] for c in auto if not c['ok']]
