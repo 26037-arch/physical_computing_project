@@ -149,13 +149,13 @@ def mg996r():
             ('cable', box(1.6, 7.6, 2.6, cx + 21.1, 0, 3.), '#8a4b21')]
 
 
-def nema17():
+def nema17(shaft_len_mm=24.0):
     """원점: 축 중심, 장착면 z=0. 몸통은 z<0 (길이 40), 축은 z>0."""
     body = cq.Workplane('XY').rect(42.3, 42.3).extrude(-40.).edges('|Z').chamfer(5.)
     body = body.cut(cq.Workplane('XY').pushPoints([(sx * 15.5, sy * 15.5) for sx in (-1, 1) for sy in (-1, 1)])
                     .circle(1.5).extrude(-4.5))                              # M3 탭 깊이 4.5
     body = body.union(cyl(22., 2.))
-    shaft = cyl(5., 24.).cut(box(2., 6., 20., 3.0, 0, 4.))                   # D컷 길이 20: 평면이 x=+2
+    shaft = cyl(5., shaft_len_mm).cut(box(2., 6., 20., 3.0, 0, shaft_len_mm - 20.))  # 끝에서 20 mm D컷
     conn = box(16., 5., 9.5, 0, -23.6, -40.)
     return [('body', body, DARK), ('shaft', shaft, METAL), ('connector', conn, WHITE)]
 

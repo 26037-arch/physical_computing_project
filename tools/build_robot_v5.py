@@ -287,9 +287,9 @@ def lever(a, b, x0, x1, boss=False):
     return part.clean()
 
 
-def kit_solid(name, skip=('cable',)):
+def kit_solid(name, skip=('cable',), **shape_options):
     """One shape from the kit reference model (tools/build_kit_parts_v5.py), in its own frame."""
-    return fuse(*[body.val() for sub, body, _ in getattr(kit, name)() if sub not in skip])
+    return fuse(*[body.val() for sub, body, _ in getattr(kit, name)(**shape_options) if sub not in skip])
 
 
 def purchased():

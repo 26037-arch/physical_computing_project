@@ -12,6 +12,7 @@ PDF 좌표에서 1 mm = 72/25.4 pt 이다 (그림판 = 페이지 mm 좌표계, �
 """
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -63,13 +64,19 @@ PCA_ROTATE = {"L03", "V01", "V02", "V03"}
 
 
 def setup_fonts():
-    for f in FONT_FILES:
+    font_family = "Noto Sans CJK KR"
+    font_files = FONT_FILES
+    if sys.platform == "win32":
+        fonts_dir = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts"
+        font_family = "Malgun Gothic"
+        font_files = [str(fonts_dir / name) for name in ("malgun.ttf", "malgunbd.ttf")]
+    for f in font_files:
         if not Path(f).exists():
-            sys.exit("한글 글꼴을 찾지 못했다: " + f + " (fc-list :lang=ko 확인)")
+            sys.exit("한글 글꼴을 찾지 못했다: " + f)
         fm.fontManager.addfont(f)
     matplotlib.rcParams.update({
         "pdf.fonttype": 42,
-        "font.family": ["DejaVu Sans", "Noto Sans CJK KR"],
+        "font.family": ["DejaVu Sans", font_family],
         "path.simplify": False,
         "hatch.linewidth": 0.25,
         "axes.unicode_minus": True,
@@ -865,7 +872,7 @@ def main():
     for c in all_checks:
         print(f"{c['id']}: value={c['value']} limit={c['limit']} ok={c['ok']}")
     print(f"쪽수 {n_pages}, 레이아웃 크기 불일치 {sum(len(v) for v in mism.values())}, 글 넘침 {overflow}")
-    return 0 if all(c["ok"] for c in all_checks) else 1
+    return 0 if all(c["ok"] for c in all_checks) and not any(mism.values()) else 1
 
 
 if __name__ == "__main__":

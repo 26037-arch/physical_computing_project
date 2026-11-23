@@ -340,20 +340,20 @@ def make_pieces():
     PS.append(piece('B01', '데크', 'base', 'WORLD', rect(-xh, xh, yw0, yw1), [(TABLE, TABLE + t), (TABLE + t, DECK)],
                     holes=[window(rect(-inner, inner, *win_yw), method='knife', note='모터 상자 안쪽 ±22 를 데크 윗면에 투영')],
                     marks=marks,
-                    notes='월드 조각 (X, Y_w), 위에서 본 면. 층 1 Z_w −95~−92, 층 2 −92~−89. 층 2 윗면에 지그 4G 표시선(marks).'))
+                    notes='월드 조각 (X, Y_w), 위에서 본 면. 층 2 윗면에 지그 4G 표시선(marks).'))
     face = PH['motor_face_z_mm']
     mh = PH['motor_hole_pitch_mm'] / 2
     PS.append(piece('B02', '모터 윗판', 'base', 'XY', rect(-25, 25, -25, 25), [(face, face + t), (face + t, face + 2 * t)],
                     holes=[drill(0.0, 0.0, PH['motor_plate_hole_mm'], method='knife', note='지그 4C 원형 창으로 칼')] +
                           [drill(sx * mh, sy * mh, PH['motor_hole_mm']) for sx in (-1, 1) for sy in (-1, 1)],
-                    notes='모터 상자 네 벽 윗모서리(z −50) 위. 모터 앞면이 밑면에 닿고 M3×10 × 4.'))
+                    notes='모터 상자 네 벽 윗모서리 위. 모터 앞면이 밑면에 닿고 M3×10 × 4.'))
     bo = PH['motor_box_outer_mm'] / 2
     doc(floor_z(bo), -103.811, 'B03 bottom'); doc(floor_z(inner), -102.719, 'B03 inner bottom')
     PS.append(piece('B03', '모터 상자 앞벽', 'base', 'XZ', rect(-bo, bo, floor_z(bo), face), [(inner, bo)],
-                    finish=['deck_bevel'], notes='뒤에서 본 면. 아래 모서리를 지그 5 로 20° 경사 → 안쪽면(y 22) 아래끝 z −102.719.'))
+                    finish=['deck_bevel'], notes='뒤에서 본 면. 아래 모서리를 지그 5 로 20° 경사.'))
     doc(floor_z(-inner), -86.705, 'B04 bottom'); doc(floor_z(-bo), -85.613, 'B04 outer bottom')
     PS.append(piece('B04', '모터 상자 뒷벽', 'base', 'XZ', rect(-bo, bo, floor_z(-inner), face), [(-bo, -inner)],
-                    finish=['deck_bevel'], notes='지그 5 로 20° 경사 → 바깥면(y −25) 아래끝 z −85.613.'))
+                    finish=['deck_bevel'], notes='아래 모서리를 지그 5 로 20° 경사.'))
     side = [(-inner, face), (inner, face), (inner, floor_z(inner)), (-inner, floor_z(-inner))]
     cw = PH['motor_cable_slot_w_mm'] / 2
     cz0 = face - PH['motor_len_mm']
@@ -417,7 +417,7 @@ def make_pieces():
     rw = PH['rear_wall_y_mm']
     doc(floor_z(rw[1]), -48.124, 'B09 bottom')
     PS.append(piece('B09', '리어월', 'base', 'XZ', rect(-TOWER_IN, TOWER_IN, floor_z(rw[1]), PH['rear_wall_top_z_mm']), [tuple(rw)],
-                    finish=['deck_bevel'], notes='지그 5 로 20° 경사 → 바깥면(y −131) 아래끝 z −47.032. 두 타워 안쪽면·데크에 접착.'))
+                    finish=['deck_bevel'], notes='아래 모서리를 지그 5 로 20° 경사. 두 타워 안쪽면·데크에 접착.'))
     sy, sz = SERVO
     c_sg, e_sg = PH['sg90_fit_clear_mm'], PH['sg90_axis_to_end_mm']
     way = PH['sg90_body_dir']
@@ -442,7 +442,7 @@ def make_pieces():
     fb = PH['front_brace_y_mm']
     doc(floor_z(fb[1]), -83.793, 'B13 bottom')
     PS.append(piece('B13', '앞 보강판', 'base', 'XZ', rect(-TOWER_IN, TOWER_IN, floor_z(fb[1]), PH['front_brace_top_z_mm']), [tuple(fb)],
-                    finish=['deck_bevel'], notes='지그 5 로 20° 경사 → 바깥면(y −33) 아래끝 z −82.701. 두 타워 안쪽면·데크에 접착.'))
+                    finish=['deck_bevel'], notes='아래 모서리를 지그 5 로 20° 경사. 두 타워 안쪽면·데크에 접착.'))
     # ---- 패널 (C) — 자체 좌표
     pw, ph_, pd = PH['panel_w_mm'] / 2, PH['panel_h_mm'], PH['panel_floor_d_mm']
     lw, lh = PH['panel_lcd_window_mm']
@@ -645,7 +645,8 @@ def purchased():
     """2.8절 자리. 키트 참고 모델(V5 kit_solid)을 V5H 기준면에 놓는다."""
     o = (0, 0, 0)
     face = PH['motor_face_z_mm']
-    nema = v5.kit_solid('nema17').rotate(o, (0, 0, 1), 90).translate((0, 0, face))
+    motor = v5.kit_solid('nema17', shaft_len_mm=PH['motor_shaft_len_mm'])
+    nema = motor.rotate(o, (0, 0, 1), 90).translate((0, 0, face))
     bb = nema.BoundingBox()
     assert abs(bb.zmax - face - PH['motor_shaft_len_mm']) < .01 and bb.xmax > PH['motor_mm'] / 2 + 3, 'NEMA17 connector must face +x'
     mg = v5.kit_solid('mg996r').rotate(o, (0, 0, 1), 90).rotate(o, (0, 1, 0), -90).translate((PH['mg996r_case_top_x_mm'] + 37.0, *HINGE))

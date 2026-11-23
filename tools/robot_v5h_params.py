@@ -60,7 +60,12 @@ PH.update(
 )
 
 # 7.4 커플링 스택
+motor_shaft_env = 'V5H_MOTOR_SHAFT_LEN_MM'
+motor_shaft_len_mm = float(os.environ.get(motor_shaft_env, P['motor_shaft_len_mm']))
+if not 24.0 <= motor_shaft_len_mm <= 25.0:
+    raise ValueError(f'{motor_shaft_env}: 모터 장착면부터 축 끝까지 잰 24~25 mm 값을 입력하세요.')
 PH.update(
+    motor_shaft_len_mm=motor_shaft_len_mm,
     coupler_len_mm=25.0, coupler_bore_mm=5.0,
     coupler_od_mm=18.0,                                # 가정
     coupler_setscrew_from_end_mm=5.0, coupler_setscrews_per_side=2,   # 가정
@@ -175,7 +180,7 @@ FIXED_KEYS = ('cube_mm', 'layer_mm', 'tilt_deg', 'post_clearance_mm', 'post_h_mm
               'hinge_z_mm', 'hinge_hub_d_mm', 'hood_open_deg', 'hood_flip_deg', 'hood_load_deg',
               'lift_contact_y_mm', 'lift_bottom_z_mm', 'lift_stroke_mm', 'lift_dir_deg', 'shelf_len_mm',
               'shelf_t_mm', 'lip_h_mm', 'lip_t_mm', 'cube_edge_r_mm', 'slider_bar_dy_mm', 'slider_bar_dz_mm',
-              'crank_r_mm', 'link_mm', 'motor_mm', 'motor_box_outer_mm', 'motor_len_mm', 'motor_shaft_len_mm',
+              'crank_r_mm', 'link_mm', 'motor_mm', 'motor_box_outer_mm', 'motor_len_mm',
               'motor_cable_slot_w_mm', 'motor_cable_slot_h_mm', 'sg90_body_l_mm', 'sg90_body_w_mm',
               'sg90_axis_to_end_mm', 'sg90_hole_pitch_mm', 'sg90_body_dir', 'sg90_fit_clear_mm',
               'mg996r_body_l_mm', 'mg996r_body_w_mm', 'mg996r_axis_to_end_mm', 'mg996r_fit_clear_mm',

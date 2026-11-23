@@ -356,10 +356,12 @@ def a12():
 
 I1_CHANGED = {
     'A_lifter_bottom_clears_spin_sweep': dict(gap_mm=2.0),
-    'A_load_hood_above_table': dict(hood_lowest_world_mm=-3.2, motor_lowest_world_mm=-91.8, table_zw_mm=-95.0),
+    'A_load_hood_above_table': dict(hood_lowest_world_mm=-3.2, motor_lowest_world_mm=round(PH['motor_low_zw_mm'], 1),
+                                  table_zw_mm=PH['table_zw_mm']),
     'C_lifter_bottom_below_plate': dict(lip_top_mm=-5.0, plate_bottom_mm=-3.0),
     'C_hook_width_fits_notch': dict(hook_w_mm=15.0, notch_w_mm=20.0),
-    'G_motor_plate_above_motor_face': dict(plate_z=[-50.0, -44.0], hub_z=[-41.0, -3.0]),
+    'G_motor_plate_above_motor_face': dict(plate_z=[PH['motor_face_z_mm'], PH['motor_face_z_mm'] + PH['motor_plate_t_mm']],
+                                          hub_z=[PH['coupler_bottom_z_mm'], -PH['plate_t_mm']]),
     'F_hood_servo_torque': dict(torque_kgcm=0.27),
 }
 I1_NOTES = {

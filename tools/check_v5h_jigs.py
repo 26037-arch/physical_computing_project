@@ -548,8 +548,8 @@ def j13(jigs):
 def j14(jigs):
     s = by_id(jigs, '5')['solid']
     fr = [p for p in planes(s) if p['n'][1] > 1e-6 and p['n'][2] > 1e-6 and abs(p['n'][0]) < 1e-9]
-    assert len(fr) == 1, fr
-    n = fr[0]['n']
+    # 각인 글꼴에 따라 작은 경사면도 생기므로 가장 큰 앞면을 잰다.
+    n = max(fr, key=lambda p: p['area'])['n']
     ang = math.degrees(math.atan2(n[2], n[1]))
     rec('J14', r6(ang), f'앞면이 수직에서 뒤로 {P["tilt_deg"]}° ≤ {TOL_A}°', abs(ang - P['tilt_deg']) <= TOL_A)
 
