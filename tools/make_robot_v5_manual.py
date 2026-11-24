@@ -468,6 +468,7 @@ def write_manual():
 
     w.start('05  출력 중 | 배선과 펌웨어')
     w.image('wiring', 55, '신호와 전원 경로를 구분한 블록도. 각 핀은 아래 표와 연결합니다.')
+    w.para('키트 170홀 미니 브레드보드의 구멍 위치는 docs/WIRING_V5_R4.html 4절을 따릅니다. 서보 전원은 보드 밖 분기 단자 2개를 씁니다.', size=8, leading=11)
     w.table(PINS, [21, 58, 99], size=7.7, padding=2.5)
     w.para(section(HARD, '## 4.').split('\n\n')[-1], size=8, leading=11.5)
     w.para('powershell -ExecutionPolicy Bypass -File v5/scripts/build.ps1\npowershell -ExecutionPolicy Bypass -File v5/scripts/upload.ps1 -Port COMx', size=8, leading=12)

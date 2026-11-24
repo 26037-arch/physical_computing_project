@@ -20,66 +20,61 @@ const COLORS = {
 // THE wiring table: kind, step, endpoint A, endpoint B, colour, wire type,
 // and optional drawing bends. Component legs are attachments, not shorts
 // through the component: capacitor/resistor/buzzer/coils are separate devices.
-// Rail addresses T-/T+/B-/B+:1..50 number the actual holes left to right.
-// 1..25 are the left bank; 26..50 the isolated right bank.
+// The rail-less SYB-170 has 17 columns with two independent strips each.
+const BOARD = {cols:17, w:47, d:35, h:8.5};
 const WIRING = [
-  ['leg', 2, 'drvCup:VMOT', 'e5'], ['leg', 2, 'drvCup:GNDmot', 'e6'],
-  ['leg', 2, 'drvCup:2B', 'e7'], ['leg', 2, 'drvCup:2A', 'e8'],
-  ['leg', 2, 'drvCup:1A', 'e9'], ['leg', 2, 'drvCup:1B', 'e10'],
-  ['leg', 2, 'drvCup:VDD', 'e11'], ['leg', 2, 'drvCup:GND', 'e12'],
-  ['leg', 2, 'drvCup:ENABLE', 'h5'], ['leg', 2, 'drvCup:MS1', 'h6'],
-  ['leg', 2, 'drvCup:MS2', 'h7'], ['leg', 2, 'drvCup:MS3', 'h8'],
-  ['leg', 2, 'drvCup:RESET', 'h9'], ['leg', 2, 'drvCup:SLEEP', 'h10'],
-  ['leg', 2, 'drvCup:STEP', 'h11'], ['leg', 2, 'drvCup:DIR', 'h12'],
-  ['leg', 3, 'cap:+', 'c5'], ['leg', 3, 'cap:-', 'c6'],
-  ['leg', 5, 'btnStart:1.l', 'e15'], ['leg', 5, 'btnStart:2.l', 'e17'],
-  ['leg', 5, 'btnStart:1.r', 'f15'], ['leg', 5, 'btnStart:2.r', 'f17'],
-  ['leg', 6, 'resistor:1', 'i18'], ['leg', 6, 'resistor:2', 'i21'],
-  ['leg', 6, 'bz1:2', 'f21'], ['leg', 6, 'bz1:1', 'f24'],
-  ['wire', 1, 'uno:5V', 'T+:1', 'red', '수-수', [[446, 385], [152, 385], [152, 504]]],
-  ['wire', 1, 'uno:GND.1', 'T-:1', 'black', '수-수', [[460, 398], [174, 398]]],
-  ['wire', 1, 'T-:25', 'B-:25', 'black', '수-수', [[575, 490], [575, 742]]],
-  ['wire', 1, 'jack:+', 'B+:1', 'purple', '단선', [[130, 802], [174, 802]]],
-  ['wire', 1, 'jack:-', 'B-:1', 'black', '단선', [[144, 790], [160, 790], [160, 742]]],
-  ['wire', 2, 'i9', 'i10', 'yellow', '수-수(짧게)', [[272, 678], [286, 678]]],
-  ['wire', 2, 'j7', 'T+:6', 'red', '수-수 / MS2', [[244, 804], [114, 804], [114, 518], [258, 518]]],
-  ['wire', 2, 'a6', 'T-:4', 'black', '수-수'],
-  ['wire', 2, 'a12', 'T-:10', 'black', '수-수'],
-  ['wire', 2, 'a11', 'T+:9', 'red', '수-수'],
-  ['wire', 3, 'a5', 'B+:4', 'purple', '수-수(길게)', [[216, 535], [91, 535], [91, 779], [216, 779]]],
-  ['wire', 2, 'uno:6', 'j5', 'orange', '수-수', [[558, 47], [740, 47], [740, 826], [202, 826], [202, 700]]],
-  ['wire', 2, 'uno:2', 'j11', 'teal', '수-수', [[614, 55], [724, 55], [724, 812], [300, 812]]],
-  ['wire', 2, 'uno:7', 'j12', 'purple', '수-수', [[544, 39], [756, 39], [756, 840], [314, 840]]],
-  ['wire', 4, 'motCup:A-', 'a7', 'blue', '모터 선', [[190, 410], [244, 410]]],
-  ['wire', 4, 'motCup:A+', 'a8', 'blue', '모터 선', [[204, 418], [251, 418], [251, 539], [258, 539]]],
-  ['wire', 4, 'motCup:B+', 'a9', 'green', '모터 선', [[218, 426], [272, 426]]],
-  ['wire', 4, 'motCup:B-', 'a10', 'green', '모터 선', [[232, 434], [286, 434]]],
-  ['wire', 5, 'uno:A2', 'a15', 'yellow', '수-수', [[544, 450], [356, 450]]],
-  ['wire', 5, 'j17', 'B-:12', 'black', '수-수', [[384, 731], [356, 731]]],
-  ['wire', 6, 'uno:A3', 'j18', 'orange', '수-수', [[558, 440], [670, 440], [670, 794], [398, 794]]],
-  ['wire', 6, 'j24', 'B-:20', 'black', '수-수'],
-  ['wire', 7, 'adapter:+', 'j27', 'red', '단선', [[810, 858], [524, 858]]],
-  ['wire', 7, 'adapter:-', 'B-:24', 'black', '단선', [[824, 850], [776, 850], [776, 766], [552, 766]]],
-  ['wire', 7, 'j29', 'B-:23', 'black', '수-수', [[552, 724], [538, 724]]],
-  ['wire', 7, 'srvHood:V+', 'h27', 'red', '수-수', [[876, 672]]],
-  ['wire', 7, 'srvHood:GND', 'f29', 'black', '수-수', [[862, 644]]],
-  ['wire', 7, 'uno:8', 'srvHood:PWM', 'green', '수-수 / 주황 신호선에 연결', [[516, 31], [772, 31], [772, 270], [984, 270], [984, 404], [890, 404]]],
-  ['wire', 7, 'srvLift:V+', 'i27', 'red', '수-수', [[1056, 686]]],
-  ['wire', 7, 'srvLift:GND', 'g29', 'black', '수-수', [[1042, 658]]],
-  ['wire', 7, 'uno:9', 'srvLift:PWM', 'blue', '수-수 / 주황 신호선에 연결', [[502, 23], [788, 23], [788, 254], [1170, 254], [1170, 404], [1070, 404]]],
-  ['wire', 8, 'lcd1:GND', 'T-:20', 'black', '암-수', [[880, 242], [812, 242], [812, 460], [482, 460]]],
-  ['wire', 8, 'lcd1:VCC', 'T+:19', 'red', '암-수', [[908, 250], [800, 250], [800, 452], [804, 452], [804, 532], [468, 532]]],
-  ['wire', 8, 'uno:A4', 'lcd1:SDA', 'green', '암-수', [[572, 410], [700, 410], [700, 246], [936, 246]]],
-  ['wire', 8, 'uno:A5', 'lcd1:SCL', 'blue', '암-수', [[586, 422], [712, 422], [712, 238], [964, 238]]],
+  ['leg', 2, 'drvCup:VMOT', 'e1'], ['leg', 2, 'drvCup:GNDmot', 'e2'],
+  ['leg', 2, 'drvCup:2B', 'e3'], ['leg', 2, 'drvCup:2A', 'e4'],
+  ['leg', 2, 'drvCup:1A', 'e5'], ['leg', 2, 'drvCup:1B', 'e6'],
+  ['leg', 2, 'drvCup:VDD', 'e7'], ['leg', 2, 'drvCup:GND', 'e8'],
+  ['leg', 2, 'drvCup:ENABLE', 'h1'], ['leg', 2, 'drvCup:MS1', 'h2'],
+  ['leg', 2, 'drvCup:MS2', 'h3'], ['leg', 2, 'drvCup:MS3', 'h4'],
+  ['leg', 2, 'drvCup:RESET', 'h5'], ['leg', 2, 'drvCup:SLEEP', 'h6'],
+  ['leg', 2, 'drvCup:STEP', 'h7'], ['leg', 2, 'drvCup:DIR', 'h8'],
+  ['leg', 3, 'cap:+', 'c1'], ['leg', 3, 'cap:-', 'c2'],
+  ['leg', 5, 'btnStart:1.l', 'd11'], ['leg', 5, 'btnStart:2.l', 'd13'],
+  ['leg', 5, 'btnStart:1.r', 'g11'], ['leg', 5, 'btnStart:2.r', 'g13'],
+  ['leg', 6, 'resistor:1', 'a14'], ['leg', 6, 'resistor:2', 'a17'],
+  ['leg', 6, 'bz1:2', 'e17'], ['leg', 6, 'bz1:1', 'f17'],
+  ['wire', 1, 'uno:5V', 'a7', 'red', '수-수', [[446,407], [484,407]]],
+  ['wire', 1, 'uno:GND.1', 'a8', 'black', '수-수', [[460,420], [498,420]]],
+  ['wire', 1, 'd8', 'd9', 'black', '수-수(짧게)', [[498,581], [512,581]]],
+  ['wire', 2, 'i5', 'i6', 'yellow', '수-수(짧게)', [[456,677], [470,677]]],
+  ['wire', 2, 'j3', 'c7', 'red', '수-수 / MS2', [[428,741], [349,741], [349,574]]],
+  ['wire', 2, 'b2', 'c8', 'black', '수-수', [[414,569], [498,569]]],
+  ['wire', 2, 'uno:6', 'j1', 'orange', '수-수', [[558,47], [736,47], [736,770], [400,770]]],
+  ['wire', 2, 'uno:2', 'j7', 'teal', '수-수', [[614,55], [721,55], [721,754], [484,754]]],
+  ['wire', 2, 'uno:7', 'j8', 'purple', '수-수', [[544,39], [751,39], [751,785], [498,785]]],
+  ['wire', 3, 'jack:+', 'a1', 'purple', '단선', [[130,810], [304,810], [304,484], [400,484]]],
+  ['wire', 3, 'jack:-', 'a2', 'black', '단선', [[144,825], [318,825], [318,495], [414,495]]],
+  ['wire', 4, 'motCup:A-', 'a3', 'blue', '모터 선', [[190,460], [428,460]]],
+  ['wire', 4, 'motCup:A+', 'a4', 'blue', '모터 선', [[204,448], [442,448]]],
+  ['wire', 4, 'motCup:B+', 'a5', 'green', '모터 선', [[218,436], [456,436]]],
+  ['wire', 4, 'motCup:B-', 'a6', 'green', '모터 선', [[232,424], [470,424]]],
+  ['wire', 5, 'uno:A2', 'a11', 'yellow', '수-수', [[544,467], [540,467]]],
+  ['wire', 5, 'b9', 'j13', 'black', '수-수', [[512,553], [542,553], [542,727], [568,727]]],
+  ['wire', 6, 'uno:A3', 'b14', 'orange', '수-수', [[558,478], [579,478], [579,560]]],
+  ['wire', 6, 'j17', 'c9', 'black', '수-수', [[624,715], [673,715], [673,574]]],
+  ['wire', 7, 'adapter:+', 'servo5:in', 'red', '단선', [[810,849], [848,849], [848,575]]],
+  ['wire', 7, 'adapter:-', 'servoGnd:in', 'black', '단선', [[824,865], [861,865]]],
+  ['wire', 7, 'servo5:hood', 'srvHood:V+', 'red', '수-단선', [[957,518], [876,518]]],
+  ['wire', 7, 'servoGnd:hood', 'srvHood:GND', 'black', '수-단선', [[957,634], [862,634]]],
+  ['wire', 7, 'uno:8', 'srvHood:PWM', 'green', '수-수 / 주황 신호선에 연결', [[516,31], [772,31], [772,270], [984,270], [984,404], [890,404]]],
+  ['wire', 7, 'servo5:lift', 'srvLift:V+', 'red', '수-단선', [[985,504], [1056,504]]],
+  ['wire', 7, 'servoGnd:lift', 'srvLift:GND', 'black', '수-단선', [[985,620], [1042,620]]],
+  ['wire', 7, 'uno:9', 'srvLift:PWM', 'blue', '수-수 / 주황 신호선에 연결', [[502,23], [788,23], [788,254], [1170,254], [1170,404], [1070,404]]],
+  ['wire', 7, 'servoGnd:common', 'b8', 'black', '수-단선', [[918,729], [698,729], [698,520], [505,520], [505,560]]],
+  ['wire', 8, 'lcd1:GND', 'a9', 'black', '암-수', [[880,242], [812,242], [812,449], [512,449]]],
+  ['wire', 8, 'lcd1:VCC', 'b7', 'red', '암-수', [[908,250], [800,250], [800,433], [491,433], [491,560]]],
+  ['wire', 8, 'uno:A4', 'lcd1:SDA', 'green', '암-수', [[572,410], [700,410], [700,246], [936,246]]],
+  ['wire', 8, 'uno:A5', 'lcd1:SCL', 'blue', '암-수', [[586,422], [712,422], [712,238], [964,238]]],
 ].map(([kind, step, a, b, color = 'metal', type = '부품 다리', via = []], i) =>
   ({kind, step, a, b, color, type, via, id: i + 1}));
 const WIRES = WIRING.filter(r => r.kind === 'wire');
 const LEGS = WIRING.filter(r => r.kind === 'leg');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&apos;'}[c]));
-const colX = n => 160 + (n - 1) * 14;
+const colX = n => 400 + (n - 1) * 14;
 const rowY = {a:546, b:560, c:574, d:588, e:602, f:644, g:658, h:672, i:686, j:700};
-const railY = {'T-':490, 'T+':504, 'B-':742, 'B+':756};
-const railX = n => colX(2 + Math.floor((n - 1) / 5) * 6 + (n - 1) % 5 + (n > 25 ? 1 : 0));
 const HEADERS = [
   ['SCL', 'SDA', 'AREF', 'GND.3', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2', '1', '0'],
   ['NC', 'IOREF', 'RESET', '3V3', '5V', 'GND.1', 'GND.2', 'VIN', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5'],
@@ -93,15 +88,14 @@ Object.entries({
   'srvLift:GND':[1042,370], 'srvLift:V+':[1056,370], 'srvLift:PWM':[1070,370],
   'lcd1:GND':[880,230], 'lcd1:VCC':[908,230], 'lcd1:SDA':[936,230], 'lcd1:SCL':[964,230],
   'jack:+':[130,880], 'jack:-':[144,880], 'adapter:+':[810,880], 'adapter:-':[824,880],
+  'servo5:in':[861,575], 'servo5:hood':[957,550], 'servo5:lift':[985,550],
+  'servoGnd:in':[861,692], 'servoGnd:hood':[957,666], 'servoGnd:lift':[985,666], 'servoGnd:common':[918,692],
 }).forEach(([k,v]) => terminals.set(k,v));
 for (const r of LEGS) terminals.set(r.a, holePoint(r.b));
 
 function holePoint(id) {
   let m = /^([a-j])(\d+)$/.exec(id);
-  if (m && +m[2] >= 1 && +m[2] <= 63) return [colX(+m[2]), rowY[m[1]]];
-  m = /^([TB][+-]):(\d+)$/.exec(id);
-  if (m && +m[2] >= 1 && +m[2] <= 50) return [railX(+m[2]), railY[m[1]]];
-  return null;
+  return m && +m[2] >= 1 && +m[2] <= BOARD.cols ? [colX(+m[2]), rowY[m[1]]] : null;
 }
 function point(id) {
   const p = holePoint(id) || terminals.get(id);
@@ -109,11 +103,11 @@ function point(id) {
   return p;
 }
 function label(id) {
-  const m = /^([TB])([+-]):(\d+)$/.exec(id);
-  if (m) return `${m[1] === 'T' ? '위' : '아래'} ${m[2] === '-' ? '−' : '+'} 레일 ${+m[3] <= 25 ? 'L' : 'R'}${String(((+m[3]-1)%25)+1).padStart(2,'0')}`;
-  const names = {uno:'UNO', drvCup:'A4988', motCup:'NEMA17', srvHood:'MG996R', srvLift:'SG90', lcd1:'LCD', jack:'12 V 잭', adapter:'5 V 어댑터'};
+  const names = {uno:'UNO', drvCup:'A4988', motCup:'NEMA17', srvHood:'MG996R', srvLift:'SG90', lcd1:'LCD', jack:'12 V 잭', adapter:'5 V 어댑터', servo5:'서보 +5 V 단자', servoGnd:'서보 GND 단자'};
   const [part, pin] = id.split(':');
   if (!pin) return id;
+  const port = {in:'입력', hood:'후드', lift:'리프터', common:'공통'};
+  if (part === 'servo5' || part === 'servoGnd') return `${names[part]} ${port[pin]}`;
   return `${names[part] || part} ${part === 'uno' && /^\d+$/.test(pin) ? 'D' : ''}${pin.replace(/GND\.\d/, 'GND')}`;
 }
 function wireNumber(r) { return WIRES.indexOf(r) + 1; }
@@ -162,26 +156,25 @@ function electricalCheck() {
     if (buckets.has(bucket)) nets.join(h,buckets.get(bucket));
     else { buckets.set(bucket,h); nets.root(h); }
   };
-  for (let n=1;n<=63;n++) for (const row of 'abcdefghij') addHole(`${row}${n}`, `${row <= 'e' ? 'upper' : 'lower'}:${n}`);
-  for (const rail of Object.keys(railY)) for (let n=1;n<=50;n++) addHole(`${rail}:${n}`, `${rail}:${n <= 25 ? 'L' : 'R'}`);
+  for (let n=1;n<=BOARD.cols;n++) for (const row of 'abcdefghij') addHole(`${row}${n}`, `${row <= 'e' ? 'upper' : 'lower'}:${n}`);
   for (const r of WIRING) {
     for (const id of [r.a,r.b]) {
       point(id); // Valid header, external connector or breadboard hole.
       assert(!occupied.has(id), `Double insertion at ${id}: rows ${occupied.get(id)} and ${r.id}`);
       occupied.set(id,r.id);
-      if (holePoint(id)) {
-        const rail = /^([TB][+-]):(\d+)$/.exec(id);
-        assert(!rail || +rail[2] <= 25, `Rail connection outside left bank: ${id}`);
-      } else active.add(id);
+      if (!holePoint(id)) active.add(id);
     }
     nets.join(r.a,r.b);
   }
+  // Each external lever connector joins all its ports.
+  for (const pin of ['servo5:hood','servo5:lift']) nets.join('servo5:in',pin);
+  for (const pin of ['servoGnd:hood','servoGnd:lift','servoGnd:common']) nets.join('servoGnd:in',pin);
   // UNO's three GND headers and tact switch duplicate legs are internal copper.
   for (const g of ['uno:GND.2','uno:GND.3']) { nets.join('uno:GND.1',g); active.add(g); }
   nets.join('btnStart:1.l','btnStart:1.r');
   nets.join('btnStart:2.l','btnStart:2.r'); // Open switch; pressing is tested below.
   // The Wokwi diagram supplies MCU signal pins and coil labels. Physical
-  // supplies (separate servo adapter) and the series resistor follow the brief.
+  // supplies (separate servo adapter) and the series resistor follow the physical layout.
   const diagram = JSON.parse(fs.readFileSync(path.join(ROOT,'v5/diagram.json'),'utf8'));
   const unoFor = pin => {
     const matches = diagram.connections.filter(c => c.slice(0,2).includes(pin))
@@ -198,10 +191,10 @@ function electricalCheck() {
   expect('BUZZER_AFTER_100_OHM', ['resistor:2','bz1:2']);
   assert.equal(unoFor('drvCup:MS2'),'uno:5V','diagram.json must connect MS2 to UNO 5V');
   expect('UNO_5V', ['uno:5V','drvCup:VDD','drvCup:MS2','lcd1:VCC']);
-  expect('SERVO_5V', ['adapter:+','srvHood:V+','srvLift:V+']);
+  expect('SERVO_5V', ['adapter:+','srvHood:V+','srvLift:V+','servo5:in','servo5:hood','servo5:lift']);
   expect('MOTOR_12V', ['jack:+','drvCup:VMOT','cap:+']);
   expect('GND', ['uno:GND.1','uno:GND.2','uno:GND.3','drvCup:GND','drvCup:GNDmot','cap:-',
-    'jack:-','adapter:-','srvHood:GND','srvLift:GND','lcd1:GND','btnStart:2.l','btnStart:2.r','bz1:1']);
+    'jack:-','adapter:-','servoGnd:in','servoGnd:hood','servoGnd:lift','servoGnd:common','srvHood:GND','srvLift:GND','lcd1:GND','btnStart:2.l','btnStart:2.r','bz1:1']);
   expect('RESET_SLEEP', ['drvCup:RESET','drvCup:SLEEP']);
   for (const p of ['MS1','MS3']) expect(`${p}_FLOATING`, [`drvCup:${p}`]);
   for (const p of ['1A','1B','2A','2B']) {
@@ -224,14 +217,10 @@ function electricalCheck() {
     const insertions=[...occupied.keys()].filter(h=>holePoint(h) && nets.root(h)===nets.root(pin));
     assert.deepEqual(insertions,[mount],`${pin} must have no jumper or other leg on its strip`);
   }
-  for (const rail of Object.keys(railY)) {
-    assert.notEqual(nets.root(`${rail}:25`),nets.root(`${rail}:26`),`Split rail bridged: ${rail}`);
-    assert(![...active].some(p => nets.root(p) === nets.root(`${rail}:26`)),`Right rail in use: ${rail}`);
-  }
   assert.notEqual(nets.root('uno:A2'),nets.root('uno:GND.1'),'Button short while released');
   nets.join('btnStart:1.l','btnStart:2.l');
   assert.equal(nets.root('uno:A2'),nets.root('uno:GND.1'),'Button does not ground A2 when pressed');
-  return {nets:expected.length, holes:830, occupied:[...occupied.keys()].filter(h => holePoint(h)).length, terminals:active.size};
+  return {nets:expected.length, holes:BOARD.cols * Object.keys(rowY).length, occupied:[...occupied.keys()].filter(h => holePoint(h)).length, terminals:active.size};
 }
 
 function makeSvg() {
@@ -243,12 +232,12 @@ function makeSvg() {
   const line = (x1,y1,x2,y2,color,width=2) => put(`<path d="M${x1},${y1} L${x2},${y2}" fill="none" stroke="${color}" stroke-width="${width}"/>`);
   const badge = (n,x,y,title) => { circle(x,y,13,'#163c4d','#fff'); text(x,y+5,'①②③④⑤⑥⑦⑧⑨'[n-1],19,'#fff','middle'); if (title) text(x+19,y+4,title,12); };
   put('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1050" width="1200" height="1050" role="img" aria-labelledby="wiring-title wiring-desc">');
-  put('<title id="wiring-title">V5 UNO R4 WiFi · 830홀 브레드보드 배선</title>');
-  put('<desc id="wiring-desc">위에 UNO 평면도, 아래에 63열 브레드보드. 모든 레일 배선은 왼쪽 절반. 아래 + 레일은 12 V. MS2는 j7에서 위 + 레일로 연결. 교차하는 선은 접속되지 않으며 양 끝 점에서만 꽂는다.</desc>');
+  put('<title id="wiring-title">V5 UNO R4 WiFi · 키트 170홀 브레드보드 배선</title>');
+  put('<desc id="wiring-desc">전원 레일이 없는 17열 미니 브레드보드, UNO와 주변 부품. 서보 전원은 외부 분기 단자 두 개에 연결한다. 선은 양 끝 점에서만 접속한다.</desc>');
   put('<g font-family="Malgun Gothic, Arial, sans-serif" stroke-linecap="round" stroke-linejoin="round">');
   rect(0,0,1200,1050,'#fff','#fff');
   text(30,33,'V5 · 실제 홀에 꽂는 배선도',19,'#153b4b');
-  text(30,53,'830홀 / 2.54 mm 피치 · a 행이 UNO 쪽',12);
+  text(30,53,'키트 170홀 · 2.54 mm 피치 · a 행이 UNO 쪽',12);
   // UNO: 68.6 x 53.4 mm at exactly 14 px per 2.54 mm.
   rect(310,70,+(68.6*14/2.54).toFixed(3),+(53.4*14/2.54).toFixed(3),'#16858e','#095963',12);
   for (const [x,y] of [[324,84],[674,84],[324,350],[674,350]]) circle(x,y,6,'#f8f6e8','#c5c6b8');
@@ -277,22 +266,26 @@ function makeSvg() {
     text(x+75,284,'갈 GND / 빨 + / 주황 신호',10,'#374b58','middle');
   }
   rect(65,880,205,65,'#e7ecef','#64717a',7); text(82,911,'12 V DC 잭 터미널',14); text(82,933,'+ 보라 / − 검정',12);
-  rect(760,880,270,65,'#edf0f2','#64717a',7); text(777,911,'5 V USB 어댑터 · 서보 전용',14); text(777,933,'+ → j27 / − → 아래 − 레일',12);
+  rect(760,880,270,65,'#edf0f2','#64717a',7); text(777,911,'5 V USB 어댑터 · 서보 전용',14); text(777,933,'+ / − → 각각의 분기 단자',12);
   for (const id of ['jack:+','jack:-','adapter:+','adapter:-']) { const [x,y]=point(id), positive=id.endsWith('+'); circle(x,y,5,'#b7bdc2'); text(x+(positive?-10:10),y+4,positive?'+':'−',11,'#111',positive?'end':'start'); }
-  // 630 terminal holes + 200 rail holes = 830, exactly.
-  rect(130,470,948,310,'#f3f0e6','#bab7a9',9);
-  rect(142,614,924,18,'#ded9c9','#d1ccbf',2);
-  for (const [rail,y] of Object.entries(railY)) {
-    const color=rail.includes('-')?'#3880cf':'#df3437';
-    for (const [x1,x2] of [[150,575],[600,1058]]) line(x1,y-7,x2,y-7,color,1.6);
-    text(142,y+4,rail.includes('-')?'−':'+',13,color,'middle'); text(1066,y+4,rail.includes('-')?'−':'+',13,color,'middle');
-    for (let n=1;n<=50;n++) { const id=`${rail}:${n}`; const [x,hy]=point(id); put(`<circle data-hole="${id}" cx="${x}" cy="${hy}" r="2.8" fill="#66685f" stroke="#cbc7b9"/>`); }
+  for (const [x,y,name,pins] of [
+    [861,550,'서보 +5 V',['servo5:in','servo5:hood','servo5:lift']],
+    [861,666,'서보 GND',['servoGnd:in','servoGnd:hood','servoGnd:lift','servoGnd:common']],
+  ]) {
+    rect(x,y,143,42,'#e7ecef','#64717a',5);
+    text(x+10,y+17,name,12);
+    for (const pin of pins) circle(...point(pin),4,'#8e9ba5');
   }
-  for (let n=1;n<=63;n++) {
-    if (n===1 || n%5===0) for (const y of [532,722]) text(colX(n),y,n,10,'#5c615b','middle');
+  const scale = 14 / 2.54;
+  const left = (colX(1) + colX(BOARD.cols) - BOARD.w * scale) / 2;
+  const centerY = (rowY.e + rowY.f) / 2;
+  rect(left,centerY-BOARD.d*scale/2,BOARD.w*scale,BOARD.d*scale,'#f3f0e6','#bab7a9',8);
+  rect(left,centerY-3*scale/2,BOARD.w*scale,3*scale,'#ded9c9','#d1ccbf',2);
+  for (let n=1;n<=BOARD.cols;n++) {
+    for (const y of [539,713]) text(colX(n),y,n,9,'#5c615b','middle');
     for (const row of 'abcdefghij') { const id=`${row}${n}`; const [x,y]=point(id); put(`<circle data-hole="${id}" cx="${x}" cy="${y}" r="2.8" fill="#66685f" stroke="#cbc7b9"/>`); }
   }
-  for (const [row,y] of Object.entries(rowY)) for (const x of [143,1054]) text(x,y+4,row,11,'#53615c','middle');
+  for (const [row,y] of Object.entries(rowY)) for (const x of [371,660]) text(x,y+4,row,10,'#53615c','middle');
   // Mounted component bodies. Their pin coordinates come only from WIRING.
   const [dx,dy]=point('drvCup:VMOT'), [ex,ey]=point('drvCup:DIR');
   rect(dx-8,dy-7,ex-dx+16,ey-dy+14,'#b63c38','#76231f',3);
@@ -306,18 +299,20 @@ function makeSvg() {
     text(x+3,top?y+8:y-5,r.a.split(':')[1].replace('GNDmot','GND'),10,'#fff','start',`transform="rotate(-90 ${x+3} ${top?y+8:y-5})"`);
   }
   const [cx,cy]=point('cap:+'), [cnx,cny]=point('cap:-');
-  const canX=(cx+cnx)/2, canY=(cy+rowY.d)/2;
+  const canX=(cx+cnx)/2-16.5, canY=(cy+rowY.d)/2;
   line(cx,cy,canX-4,canY-4,'#777',2); line(cnx,cny,canX+4,canY-4,'#777',2);
   circle(canX,canY,7,'#263745','#17232e');
   put(`<path d="M${canX+3},${canY-6} A7,7 0 0 1 ${canX+3},${canY+6} Z" fill="#d9dfe1" stroke="none"/>`);
   line(canX+3,canY,canX+6,canY,'#263745',1);
   const [bx,by]=point('btnStart:1.l'), [b2x,b2y]=point('btnStart:2.r');
-  rect(bx-4,by-4,b2x-bx+8,b2y-by+8,'#bcc1c1','#646c6c',3); circle((bx+b2x)/2,(by+b2y)/2,11,'#343b40');
+  rect((bx+b2x)/2-33,(by+b2y)/2-33,66,66,'#bcc1c1','#646c6c',3); circle((bx+b2x)/2,(by+b2y)/2,11,'#343b40');
   const [rx,ry]=point('resistor:1'), [r2x]=point('resistor:2');
   line(rx,ry,r2x,ry,'#9b9d9e',2); rect(rx+6,ry-6,r2x-rx-12,12,'#dfc79d','#a38657',4);
   for (const [x,c] of [[rx+11,'#794222'],[rx+17,'#181818'],[rx+23,'#794222'],[r2x-10,'#bc941e']]) rect(x,ry-6,3,12,c,c);
   const [zx,zy]=point('bz1:2'), [z2x,z2y]=point('bz1:1');
-  circle((zx+z2x)/2,zy,26,'#262d32','#0b1116'); circle((zx+z2x)/2,zy,7,'#10171b'); text(zx,zy+5,'+',12,'#fff'); text(z2x,zy+5,'−',12,'#fff');
+  const bzY=(zy+z2y)/2;
+  circle(zx,bzY,33,'#262d32','#0b1116'); circle(zx,bzY,7,'#10171b');
+  text(zx+5,zy+4,'+',12,'#fff'); text(z2x+5,z2y+4,'−',12,'#fff');
   for (const r of LEGS.filter(r => !r.a.startsWith('drvCup:'))) { const [x,y]=point(r.b); circle(x,y,2.5,'#d7b77e'); }
   // Wires: white crossing clearance, same-colour dark edge, rounded core.
   for (const r of WIRES) {
@@ -331,22 +326,12 @@ function makeSvg() {
     put('</g>');
   }
   // Badges and labels are above the wiring layer for a readable assembly key.
-  badge(1,145,467,'레일'); badge(2,333,617); badge(3,196,579);
-  text(160,605,'100 µF',11);   // 커패시터(c5·c6) 바로 아래, 비어 있는 1~3열 d·e 위
-
-  badge(5,398,618); badge(6,481,695); badge(7,532,620);
-  text(411,673,'100 Ω',10,'#5c686e','middle');
-  text(180,849,'MS2: j7 → 위 +',12,'#b62227'); text(850,797,'D2 → j11 STEP',11,'#087680');
-  text(850,815,'D6 → j5 ENABLE',11,'#bd5911'); text(850,833,'D7 → j12 DIR',11,'#75409f');
-  text(590,486,'레일 중앙 단절',10,'#4a565d','middle');
-  rect(994,786,188,78,'#f5f7f8','#bac4ca',5);
-  text(1004,801,'오른쪽 레일 미사용',11,'#5c686e');
-  text(1004,819,'L01~L25: 왼쪽 25홀',11,'#5c686e');
-  text(1004,837,'(5홀 × 5묶음)',11,'#5c686e');
-  text(1004,855,'1~63열 · 가운데 홈',11,'#5c686e');
+  badge(1,433,398); badge(2,369,622); badge(3,365,581);
+  text(353,604,'100 µF',11);
+  badge(5,567,611); badge(6,677,620); badge(7,846,546);
   rect(295,886,425,63,'#fff1e9','#cf4c25',7); badge(9,317,906);
-  text(337,910,'아래 + 레일 = 12 V, 5 V 부품 금지',16,'#ad3219');
-  text(312,934,'위 + / 27열 / 아래 + 는 서로 연결하지 않는다.',12,'#ad3219');
+  text(337,910,'12 V + → a1 (VMOT 전용)',16,'#ad3219');
+  text(312,934,'12 V, UNO 5 V, 서보 +5 V는 각각 분리한다.',12,'#ad3219');
   text(35,978,'선 색 = 의미',13,'#163c4d');
   for (const [i,c] of ['red','black','purple','orange','yellow','teal','green','blue'].entries()) {
     const x=35+(i%4)*290,y=996+Math.floor(i/4)*24;
@@ -377,7 +362,7 @@ function checkXml(svg) {
     } else { entityCheck(s); assert(stack.length || !s.trim(),'Text outside SVG root'); }
   }
   assert.equal(consumed,svg.length); assert.equal(roots,1); assert.equal(stack.length,0,'Unclosed SVG tags');
-  assert.equal([...svg.matchAll(/data-hole="/g)].length,830,'SVG must draw exactly 830 holes');
+  assert.equal([...svg.matchAll(/data-hole="/g)].length,BOARD.cols * Object.keys(rowY).length,'SVG hole count must match the board');
   assert.equal([...svg.matchAll(/data-wire="/g)].length,WIRES.length,'SVG wire count mismatch');
 }
 function makeList() {
@@ -389,7 +374,7 @@ function makeList() {
 function makeData() {
   const data={
     pitchPx:14, origin:[colX(1),(rowY.e+rowY.f)/2], headers:HEADERS,
-    grid:{cols:63, rowY, railY, railX:Array.from({length:50},(_,i)=>railX(i+1))},
+    grid:{...BOARD, rowY},
     colors:Object.fromEntries(Object.entries(COLORS).map(([k,v])=>[k,{hex:v[0],label:v[1]}])),
     wires:WIRES.map(r=>({n:wireNumber(r),step:r.step,a:r.a,b:r.b,color:r.color,type:r.type,la:label(r.a),lb:label(r.b),pa:holePoint(r.a),pb:holePoint(r.b)})),
     legs:LEGS.map(r=>({pin:r.a,hole:r.b,step:r.step,p:holePoint(r.b)})),
@@ -413,7 +398,7 @@ function main() {
   const original=fs.readFileSync(HTML,'utf8');
   const newline=original.includes('\r\n')?'\r\n':'\n';
   let html=original.replace(/\r\n/g,'\n');
-  const figure=`<figure>\n${svg.trimEnd()}\n<figcaption>그림 3. UNO 평면도와 풀사이즈 830홀 배치. <code>tools/make_wiring_v5.js</code>의 배선 표 하나로 SVG·선 목록·넷 검사를 생성한다. ①~⑨는 아래 순서와 같다. 양 끝 점만 구멍에 꽂으며 선의 교차는 접속이 아니다. 레일은 위쪽 줄 −, 아래쪽 줄 + 이며 중앙에서 끊긴 왼쪽 절반만 쓴다. L01~L25는 각 레일 왼쪽의 실제 구멍 번호다.</figcaption>\n</figure>`;
+  const figure=`<figure>\n${svg.trimEnd()}\n<figcaption>그림 3. UNO R4 WiFi와 키트 170홀 미니 브레드보드. ①~⑨는 아래 순서와 같다. 선 끝의 점에서만 접속한다. 그림과 선 목록은 <code>tools/make_wiring_v5.js</code>의 배선 표에서 생성한다.</figcaption>\n</figure>`;
   html=replaceBlock(html,'FIG',figure);
   html=replaceBlock(html,'LIST',makeList());
   if(newline==='\r\n') html=html.replace(/\n/g,'\r\n');
@@ -429,8 +414,8 @@ function main() {
   console.log(`PASS holes: ${report.holes}; occupied breadboard holes: ${report.occupied}; no duplicate insertions`);
   console.log(`PASS nets: ${report.nets}; component terminals: ${report.terminals}; 9 UNO signals match v5/diagram.json`);
   console.log('PASS MS2=UNO 5V; RESET=SLEEP; MS1/MS3 floating; button open/pressed; buzzer via 100 ohm');
-  console.log('PASS 12V / UNO 5V / servo 5V isolated; GND common; split rails right banks unused');
+  console.log('PASS 12V / UNO 5V / servo 5V isolated; GND common');
   console.log('PASS wire routes orthogonal; no collinear wire overlaps');
-  console.log(`PASS SVG XML tags + 830 drawn holes + ${WIRES.length} wires; generated SVG/HTML ${check?'up to date (read only)':'written'}`);
+  console.log(`PASS SVG XML tags + ${report.holes} drawn holes + ${WIRES.length} wires; generated SVG/HTML ${check?'up to date (read only)':'written'}`);
 }
 if (require.main===module) { try { main(); } catch (error) { console.error(`FAIL ${error.message}`); process.exitCode=1; } }

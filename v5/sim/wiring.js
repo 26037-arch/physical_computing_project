@@ -1,4 +1,4 @@
-// V5 최종 모습 3D — 조립된 로봇(models.js) 옆에 UNO R4 WiFi·830홀 브레드보드·부품·점퍼선 35개를 실제 치수로 놓는다.
+// V5 최종 모습 3D — 조립된 로봇(models.js) 옆에 UNO R4 WiFi·170홀 미니 브레드보드·부품·배선을 실제 치수로 놓는다.
 // 배선은 wiring_data.js(= tools/make_wiring_v5.js 의 WIRING 표에서 생성)만 읽는다. 여기서 선을 더하거나 고치지 않는다.
 // 단위 mm. 월드: 관중은 −y, 책상 면 z = table_zw_mm. 로봇 좌표·자세는 build.js 와 같다 (국소를 z 로 180° 돌린 뒤 x 로 −20°).
 // 부품 외형·케이블이 지나가는 길·전자부를 놓은 자리는 예시다. 정확한 것은 "어느 선이 어느 구멍/핀에 꽂히는가" 이다.
@@ -173,7 +173,7 @@
       }
       const used = [...new Set(W.wires.map((w) => w.color))];
       content.innerHTML = head +
-        `<div class="warn"><b>아래 + 레일은 12 V</b> 다. 서보·LCD·A4988 VDD 는 여기에 꽂지 않는다. 서보 5 V(27열)는 UNO 5V 와 따로다.</div>` +
+        `<div class="warn"><b>12 V +는 a1 전용</b>이다. 서보 +5 V는 보드 밖 분기 단자를 쓴다. 세 전원의 GND는 공통이다.</div>` +
         `<table>${rows}</table>` +
         `<h3>선 색</h3><div class="legend">${used.map((c) => `<span><span class="sw" style="background:${W.colors[c].hex}"></span>${W.colors[c].label}</span>`).join('')}</div>` +
         `<div class="ok">선의 양 끝(구멍·핀)은 <a href="../../docs/WIRING_V5_R4.html">배선 안내</a> 4절의 평면도·선 목록과 같은 표(<code>tools/make_wiring_v5.js</code>)에서 나온다. 선이 휘는 모양, 케이블이 지나가는 길, 보드를 놓은 자리는 보기 좋게 잡은 예시다.</div>`;

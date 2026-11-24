@@ -1,8 +1,8 @@
 {
   "pdf": "docs/BUILD_V5_제작설명서.pdf",
-  "generated_on": "2026-11-15",
+  "generated_on": "2026-11-23",
   "source_date": "2026-10-24",
-  "base_commit": "4b0960f",
+  "base_commit": "440d1d9",
   "source_scope": "Current working tree; includes uncommitted V5 source data.",
   "passed": true,
   "checks": {
@@ -170,6 +170,7 @@
       "embedded": true,
       "subtype": "/TrueType",
       "used_pages": [
+        9,
         10,
         11,
         12,
@@ -311,7 +312,7 @@
     "docs/images/v5_manual/page_15.png",
     "docs/images/v5_manual/page_16.png"
   ],
-  "render_engine": "Windows.Data.Pdf (actual PDF pages, 1200 px width)",
+  "render_engine": "PyMuPDF (all PDF pages checked; pages 1, 4 and 6 replaced at 1200 px width)",
   "layout": [
     {
       "page": 1,
@@ -327,7 +328,7 @@
     },
     {
       "page": 4,
-      "content_bottom_mm": 117.7
+      "content_bottom_mm": 113.69
     },
     {
       "page": 5,
@@ -335,7 +336,7 @@
     },
     {
       "page": 6,
-      "content_bottom_mm": 71.28
+      "content_bottom_mm": 65.0
     },
     {
       "page": 7,
@@ -452,12 +453,12 @@
   },
   "source_hashes_sha256": {
     "docs/MANUAL_V5_BRIEF.md": "fefb0443ec14de974d4670311d9626db3bc1b7c4a3915ade5a2cdbd627aeee1c",
-    "docs/BUILD_V5.md": "0e80a1dbfd1d415db9a1b5f005e0cc27943d30c02276138b22e633762c1af51e",
-    "docs/HARDWARE_V5.md": "3d70234aef93a9eaa6bfc99021c16a2f1ec12a67c13f08e12161517625fd58d9",
-    "models/robot_v5/parameters.json": "01406152b13ae36ecd4ee79ef464578c0475582dca1d0b7cdc2cc5b0e873260b",
-    "models/robot_v5/manufacturing.json": "f9b325a3a8b933127e8da7f9ad0f7ad7243d1567f1736ab48cdbe76da89a5da8",
-    "models/robot_v5/kinematic_checks.json": "f02979c8b73ee7aeff331f0564cb7b9d17d01cdf0565a1faa0299d6679a383ce",
-    "models/robot_v5/mechanical_checks.json": "67fcd83c9c575f19dcf843d81a06dd0b1bbd25700f2dc2b18e18828874f99857",
+    "docs/BUILD_V5.md": "11ce24d9fc212ea215cf0a7835c8f16708baf3db876f39ac9339d420439ea7fb",
+    "docs/HARDWARE_V5.md": "6ba45763d2b53fd8bba7542e976557f36fbe3fe6182894fc97a8b9469ee6befc",
+    "models/robot_v5/parameters.json": "b41674a66b9cc939ff4dd49e0fd29982110e512c18acc5e7ffe77638c1b0391e",
+    "models/robot_v5/manufacturing.json": "4de043c4eff4c872f97d34aa4eefce7ae945d18a815ed7ab6b815c0f0f5c87ae",
+    "models/robot_v5/kinematic_checks.json": "8833bb28a4d47d23d5a896d830799e3b5b06fd47d4e5a254d5336b5c9623d446",
+    "models/robot_v5/mechanical_checks.json": "eb81d9a69944e2ac02b44facc52503e946e158a91ffe7be6f779b997893fc28d",
     "models/robot_v5/print/cube_holder.step": "5ee7f555f2b5d2a241cb109273835a3481de7f1a26be4ad97bdfcb3aac15662a",
     "models/robot_v5/print/hub.step": "aa402075941a83c56a3c1817097e3474e9b5f0507371d7c5b8192cbea8b49cc6",
     "models/robot_v5/print/hood.step": "dbda6efc0132a19739229c3b81f0e657a2d70c9ea3b526e6c8cb56da120370af",
@@ -467,7 +468,7 @@
     "models/robot_v5/print/link.step": "bc91b13d4665c252bccff84a154242709ec42d3885b31d33e3f29e9adf4c6486"
   },
   "visual_review": {
-    "status": "pending",
+    "status": "updated pages 4 and 6 checked for layout",
     "contact_sheet": "docs/images/v5_manual/pages_contact_sheet.png"
   }
 }
