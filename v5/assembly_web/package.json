@@ -1,0 +1,31 @@
+{
+  "name": "v5h-assembly-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "V5H 3D 단계별 조립 설명서 (React + Remotion Player + three.js, 단일 HTML 빌드)",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "build": "vite build",
+    "shots": "python3 scripts/shots.py",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.8.2",
+    "@remotion/player": "4.0.547",
+    "@remotion/three": "4.0.547",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.547",
+    "three": "0.172.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.2",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.172.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "typescript": "5.9.3",
+    "vite": "6.4.6",
+    "vite-plugin-singlefile": "2.3.4"
+  }
+}

@@ -6,3 +6,5 @@ screenshot.png
 __pycache__/
 .env
 .venv-cad/
+v5/assembly_web/node_modules/
+v5/assembly_web/dist/
