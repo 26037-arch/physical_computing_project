@@ -4,7 +4,7 @@ import { ThreeCanvas } from '@remotion/three';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { web, steps, firstStep, type View } from './data';
-import { getBuilt, boxOf, type Built } from './geometry';
+import { getBuilt, boxOf, meshOf, type Built } from './geometry';
 
 export const FPS = 30;
 export const STEP_FRAMES = 100;
@@ -58,7 +58,7 @@ const CameraRig: React.FC<{ target: THREE.Vector3; pos: THREE.Vector3 }> = ({ ta
 
 type Item = { b: Built; kind: 'old' | 'new' | 'ghost' | 'focus'; delay: number; from: THREE.Vector3; isBolt: boolean; xray?: boolean };
 
-const ItemMesh: React.FC<{ it: Item; frame: number; xray: boolean }> = ({ it, frame, xray }) => {
+const ItemMesh: React.FC<{ it: Item; frame: number; xray: boolean; flying: boolean }> = ({ it, frame, xray, flying }) => {
   const { b } = it;
   const t = easeOut((frame - it.delay) / FLY_FRAMES);
   const k = 1 - t;
@@ -70,8 +70,9 @@ const ItemMesh: React.FC<{ it: Item; frame: number; xray: boolean }> = ({ it, fr
   }, [it.kind, b.color]);
   const mixed = useMemo(() => color.clone().lerp(ORANGE, it.kind === 'new' || it.kind === 'focus' ? 0.2 + 0.45 * blink : 0), [color, blink, it.kind]);
   const ghost = it.kind === 'ghost';
-  const translucent = ghost || xray || b.inst === 'CUBE';
-  const opacity = ghost ? 0.13 : xray ? 0.22 : b.inst === 'CUBE' ? 0.28 : 1;
+  const soft = it.kind === 'old' && !xray && flying; // 날아오는 동안 기존 조각을 흐리게
+  const translucent = ghost || xray || soft || b.inst === 'CUBE';
+  const opacity = ghost ? 0.13 : xray ? 0.4 : soft ? 0.6 : b.inst === 'CUBE' ? 0.28 : 1;
   const edgeColor = it.kind === 'new' || it.kind === 'focus' ? '#ff6a00' : '#1b1f27';
   const pos: [number, number, number] =
     it.kind === 'new' ? [it.from.x * k, it.from.y * k, it.from.z * k] : [0, 0, 0];
@@ -91,9 +92,9 @@ const ItemMesh: React.FC<{ it: Item; frame: number; xray: boolean }> = ({ it, fr
           polygonOffsetUnits={1}
         />
       </mesh>
-      {b.edges && !ghost && !xray ? (
+      {b.edges && !ghost ? (
         <lineSegments geometry={b.edges}>
-          <lineBasicMaterial color={edgeColor} transparent opacity={it.kind === 'old' ? 0.45 : 0.9} />
+          <lineBasicMaterial color={edgeColor} transparent opacity={xray ? 0.5 : it.kind === 'old' ? 0.45 : 0.9} />
         </lineSegments>
       ) : null}
     </group>
@@ -110,7 +111,7 @@ export const Scene: React.FC<SceneProps> = (props) => {
   const items = useMemo(() => {
     const out: Item[] = [];
     let newIdx = 0;
-    const from = step ? new THREE.Vector3(...step.from) : new THREE.Vector3();
+    const stepFrom = step ? new THREE.Vector3(...step.from) : new THREE.Vector3();
     const all = [...web.pieces.map((p) => p.inst), ...web.parts.map((p) => p.inst)];
     // 보이는 게 하나도 없는 단계(준비 등)는 완성 미리보기를 깔아 준다
     const anyVisible = isFinal || all.some((i) => (firstStep.get(i) ?? 1e9) <= stepIndex);
@@ -119,6 +120,13 @@ export const Scene: React.FC<SceneProps> = (props) => {
       const b = getBuilt(inst);
       if (!b || fs === undefined) continue;
       const isBolt = /^F\d/.test(inst);
+      // 철물은 자기 축(bbox 가장 긴 축)을 따라 들어온다. 수직이면 위에서 아래로, 수평이면 조각 from 쪽 부호
+      let from = stepFrom;
+      if (isBolt) {
+        const ax = b.axis;
+        const sign = ax.z !== 0 ? 1 : (stepFrom.dot(ax) < 0 ? -1 : 1);
+        from = ax.clone().multiplyScalar(45 * sign);
+      }
       if (isFinal || fs < stepIndex) out.push({ b, kind: 'old', delay: 0, from, isBolt });
       else if (fs === stepIndex) {
         out.push({ b, kind: 'new', delay: Math.min(newIdx, 12) + (isBolt ? 12 : 0), from, isBolt });
@@ -165,9 +173,13 @@ export const Scene: React.FC<SceneProps> = (props) => {
     cam.center.z + dist * Math.sin(el),
   );
 
+  const lastArrive = Math.max(0, ...items.filter((i) => i.kind === 'new').map((i) => i.delay + FLY_FRAMES));
+  const flying = frame < lastArrive;
+
   // 카메라와 초점 조각 사이를 가리는 기존 조각은 투명하게
   const xray = useMemo(() => {
     const set = new Set<string>();
+    const rc = new THREE.Raycaster();
     if (isFinal || !step) return set;
     const targets = step.focus.map((i) => getBuilt(i)).filter(Boolean).slice(0, 8).map((b) => b!.box.getCenter(new THREE.Vector3()));
     if (targets.length === 0) return set;
@@ -178,7 +190,10 @@ export const Scene: React.FC<SceneProps> = (props) => {
         const len = dir.length();
         const ray = new THREE.Ray(pos.clone(), dir.normalize());
         const hit = ray.intersectBox(it.b.box, new THREE.Vector3());
-        if (hit && hit.distanceTo(pos) < len - 1) { set.add(it.b.inst); break; }
+        if (!hit || hit.distanceTo(pos) >= len - 1) continue;
+        rc.set(pos, ray.direction);
+        rc.far = len - 1;
+        if (rc.intersectObject(meshOf(it.b), false).length > 0) { set.add(it.b.inst); break; }
       }
     }
     return set;
@@ -198,7 +213,7 @@ export const Scene: React.FC<SceneProps> = (props) => {
         </mesh>
         <gridHelper args={[520, 26, '#c3cad6', '#d5dae3']} position={[0, 20, web.table_zw]} rotation={[Math.PI / 2, 0, 0]} />
         {items.map((it) => (
-          <ItemMesh key={it.b.inst} it={it} frame={frame} xray={xray.has(it.b.inst)} />
+          <ItemMesh key={it.b.inst} it={it} frame={frame} xray={xray.has(it.b.inst)} flying={flying} />
         ))}
       </ThreeCanvas>
     </AbsoluteFill>

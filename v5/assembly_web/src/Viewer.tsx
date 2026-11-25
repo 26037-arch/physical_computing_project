@@ -10,9 +10,10 @@ type Props = {
   cam: Cam;
   onCam: (c: Cam) => void;
   playing: boolean;
+  onStall: () => void;
 };
 
-export const Viewer: React.FC<Props> = ({ stepIndex, ghost, cam, onCam, playing }) => {
+export const Viewer: React.FC<Props> = ({ stepIndex, ghost, cam, onCam, playing, onStall }) => {
   const ref = useRef<PlayerRef>(null);
   const final = stepIndex < 0;
   const camRef = useRef(cam);
@@ -23,19 +24,38 @@ export const Viewer: React.FC<Props> = ({ stepIndex, ghost, cam, onCam, playing 
     [stepIndex, ghost, cam.dyaw, cam.dpitch, cam.zoom],
   );
 
+  const last = (final ? FINAL_FRAMES : STEP_FRAMES) - 1;
+  // 단계에 들어올 때: 정지 상태면 도착 상태(마지막 프레임)로, 재생 중이면 처음부터.
+  // 자동재생이 막혀 프레임이 안 움직이면 도착 상태로 두고 정지한다.
   useEffect(() => {
     const p = ref.current;
     if (!p) return;
+    if (!playing) {
+      p.pause();
+      p.seekTo(last);
+      return;
+    }
     p.seekTo(0);
-    if (playing) p.play();
+    p.play();
+    const t = window.setTimeout(() => {
+      if (!p.isPlaying() || p.getCurrentFrame() === 0) {
+        p.pause();
+        p.seekTo(last);
+        onStall();
+      }
+    }, 700);
+    return () => window.clearTimeout(t);
   }, [stepIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const p = ref.current;
     if (!p) return;
     if (playing) p.play();
-    else p.pause();
-  }, [playing]);
+    else {
+      p.pause();
+      if (p.getCurrentFrame() === 0) p.seekTo(last);
+    }
+  }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 포인터: 드래그 = 회전, 휠/핀치 = 확대 (애니메이션은 계속 돈다)
   const pts = useRef(new Map<number, { x: number; y: number }>());

@@ -28,6 +28,7 @@ export type Part = {
   matrix: number[];
 };
 export type Web = {
+  thickness: number;
   pieces: Piece[];
   parts: Part[];
   bbox: [number[], number[]];

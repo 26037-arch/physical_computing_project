@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Viewer, type Cam } from './Viewer';
 import {
   script, steps, modules, JOIN_LABEL, baseName, partDesc, fastenerNoModel, web, firstStep,
@@ -117,14 +117,17 @@ const ModuleBar: React.FC<{ cur: number; go: (n: number) => void }> = ({ cur, go
 export const App: React.FC = () => {
   const [cur, setCur] = useState(readHash);
   const [ghost, setGhost] = useState(false);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(() => !/paused/.test(location.hash));
   const [cam, setCam] = useState<Cam>(CAM0);
+
+  const playingRef = useRef(playing);
+  playingRef.current = playing;
 
   const go = useCallback((n: number) => {
     const v = Math.min(END, Math.max(0, n));
     setCur(v);
     setCam(CAM0);
-    history.replaceState(null, '', `#step=${v}`);
+    history.replaceState(null, '', `#step=${v}${playingRef.current ? '' : '&paused'}`);
   }, []);
 
   useEffect(() => {
@@ -161,7 +164,7 @@ export const App: React.FC = () => {
       </header>
       <main className="main">
         <section className="left">
-          <Viewer stepIndex={stepIndex} ghost={ghost && stepIndex >= 0} cam={cam} onCam={setCam} playing={playing} />
+          <Viewer stepIndex={stepIndex} ghost={ghost && stepIndex >= 0} cam={cam} onCam={setCam} playing={playing} onStall={() => setPlaying(false)} />
           <div className="toolbar">
             <button onClick={(e) => { setCam(CAM0); nav.blur(e); }}>시점 초기화</button>
             <button onClick={(e) => { setPlaying((p) => !p); nav.blur(e); }}>{playing ? '일시정지' : '재생'}</button>
@@ -197,8 +200,8 @@ export const App: React.FC = () => {
               <p className="text">홀더·타워·리프터·후드·크랭크·패널까지 모두 붙였다. 화면의 완성 모습을 돌려 가며 내 로봇과 비교한다.</p>
               <div className="box">
                 <h3>다음은 배선</h3>
-                <p className="small">모터·서보·LCD·버튼 배선과 전원, 펌웨어는 이 설명서 범위 밖이다. 배선 설명서를 연다.</p>
-                <p><a className="link" href="WIRING_V5_R4.html">docs/WIRING_V5_R4.html 열기</a></p>
+                <p className="small">모터·서보·LCD·버튼 배선과 전원, 펌웨어는 이 설명서 범위 밖이다. 배선은 레포 <b>docs/WIRING_V5_R4.html</b> 를 본다.</p>
+                <p className="small"><a className="link" href="https://github.com/26037-arch/physical_computing_project/blob/master/docs/WIRING_V5_R4.html">https://github.com/26037-arch/physical_computing_project/blob/master/docs/WIRING_V5_R4.html</a></p>
               </div>
             </div>
           )}

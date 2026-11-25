@@ -17,6 +17,8 @@ shots = [
     ("02_step12", "#step=12"),
     ("03_step46", "#step=46"),
     ("04_step77", "#step=77"),
+    ("04b_step42", "#step=42"),
+    ("04c_step66", "#step=66"),
     ("05_step103", "#step=103"),
     ("06_end", "#step=104"),
 ]
@@ -26,7 +28,7 @@ with sync_playwright() as pw:
     browser = pw.chromium.launch(
         executable_path="/usr/bin/google-chrome",
         headless=True,
-        args=["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"],
+        args=["--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--autoplay-policy=no-user-gesture-required"],
     )
     ctx = browser.new_context(viewport={"width": 1280, "height": 800})
     page = ctx.new_page()
@@ -35,16 +37,22 @@ with sync_playwright() as pw:
     page.on("requestfailed", lambda r: errors.append(f"requestfailed: {r.url}"))
     page.on("request", lambda r: external.append(r.url) if not r.url.startswith(("file://", "data:", "blob:")) else None)
     for name, h in shots:
-        page.goto(url + h)
+        # '&paused' = 정지 상태로 열기 → 도착 상태(마지막 프레임)에서 조각이 제자리에 있어야 한다
+        page.goto(url + h + "&paused")
         page.reload()  # 해시 복원(새로고침해도 유지) 동시 확인
-        page.wait_for_timeout(2600)  # 날아오기(~2 s) 끝 + 하이라이트
+        page.wait_for_timeout(1200)
         page.screenshot(path=str(out / f"{name}.png"))
         print("shot", name)
+    # 날아오는 중간 장면 (재생 상태, 0.6 s 시점)
+    page.goto(url + "#step=42")
+    page.reload()
+    page.wait_for_timeout(600)
+    page.screenshot(path=str(out / "09_midflight_step42.png"))
     # 태블릿 크기
     page.set_viewport_size({"width": 1024, "height": 768})
-    page.goto(url + "#step=63")
+    page.goto(url + "#step=63&paused")
     page.reload()
-    page.wait_for_timeout(2600)
+    page.wait_for_timeout(1200)
     page.screenshot(path=str(out / "07_tablet_1024x768_step63.png"))
     # 드래그 회전 + 휠 확대 + 키보드
     page.set_viewport_size({"width": 1280, "height": 800})

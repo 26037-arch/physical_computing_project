@@ -9,6 +9,9 @@ export type Built = {
   metal: number;
   box: THREE.Box3;
   kind: 'piece' | 'part';
+  /** 볼트 등 긴 부품의 축 방향(단위벡터, bbox 가장 긴 축) */
+  axis: THREE.Vector3;
+  mesh?: THREE.Mesh;
 };
 
 const FOAM = '#f4f2ec';
@@ -32,7 +35,14 @@ function pieceGeometry(p: Piece): THREE.BufferGeometry {
     shape.holes.push(path);
   }
   for (const c of p.cutouts) shape.holes.push(new THREE.Path(c.map(([u, v]) => new THREE.Vector2(u, v))));
-  return new THREE.ExtrudeGeometry(shape, { depth: 3, bevelEnabled: false, curveSegments: 16 });
+  return new THREE.ExtrudeGeometry(shape, { depth: web.thickness || 3, bevelEnabled: false, curveSegments: 16 });
+}
+
+function longAxis(box: THREE.Box3): THREE.Vector3 {
+  const s = box.getSize(new THREE.Vector3());
+  if (s.x >= s.y && s.x >= s.z) return new THREE.Vector3(1, 0, 0);
+  if (s.y >= s.z) return new THREE.Vector3(0, 1, 0);
+  return new THREE.Vector3(0, 0, 1);
 }
 
 function finish(g: THREE.BufferGeometry, matrix: number[]): THREE.BufferGeometry {
@@ -64,7 +74,7 @@ export function getBuilt(inst: string): Built | undefined {
     const geom = finish(pieceGeometry(piece), piece.matrix);
     const b: Built = {
       inst, geom, edges: new THREE.EdgesGeometry(geom, 30),
-      color: piece.color || FOAM, metal: 0, box: geom.boundingBox!, kind: 'piece',
+      color: piece.color || FOAM, metal: 0, box: geom.boundingBox!, kind: 'piece', axis: new THREE.Vector3(0, 0, 1),
     };
     cache.set(inst, b);
     return b;
@@ -75,7 +85,7 @@ export function getBuilt(inst: string): Built | undefined {
     const metal = /^F\d|^MG996R-HORN/.test(inst) ? 0.55 : 0.1;
     const b: Built = {
       inst, geom, edges: part.kind === 'box' ? new THREE.EdgesGeometry(geom, 30) : null,
-      color: part.color || '#a0a6ad', metal, box: geom.boundingBox!, kind: 'part',
+      color: part.color || '#a0a6ad', metal, box: geom.boundingBox!, kind: 'part', axis: longAxis(geom.boundingBox!),
     };
     cache.set(inst, b);
     return b;
@@ -90,4 +100,11 @@ export function boxOf(insts: string[]): THREE.Box3 {
     if (b) box.union(b.box);
   }
   return box;
+}
+
+const dbl = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+/** 가림 판정용: 실제 삼각형과 광선이 만나는지 */
+export function meshOf(b: Built): THREE.Mesh {
+  if (!b.mesh) b.mesh = new THREE.Mesh(b.geom, dbl);
+  return b.mesh;
 }
