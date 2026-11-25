@@ -334,6 +334,104 @@ def main_tiles():
     print(f"{OUT_TILE.relative_to(cs.ROOT)}: {total}쪽 (판 {len(sheets)}장 × 4칸, 배치 {cnt}개)")
 
 
+
+# --------------------------------------------------------------------------- 포맥스 1장 = A4 2장 (총 A4 4장)
+OUT_4 = cs.ROOT / "docs" / "V5H_재단가이드_A4x4.pdf"
+M4 = 7.0          # 쪽 가장자리 여백 (프린터 안 찍히는 곳). 배치에 rectpack 사용 (pip install rectpack)
+G4 = 3.0          # 조각 사이 (칼날 + 여유)
+
+
+def pack4(items):
+    import rectpack
+    W, H = cs.A4[0] - 2 * M4, cs.A4[1] - 2 * M4
+    best = None
+    for algo in (rectpack.MaxRectsBssf, rectpack.MaxRectsBaf, rectpack.MaxRectsBl):
+        for so in (rectpack.SORT_AREA, rectpack.SORT_LSIDE, rectpack.SORT_PERI):
+            pk = rectpack.newPacker(rotation=True, pack_algo=algo, sort_algo=so)
+            for i, it in enumerate(items):
+                x0, y0, x1, y1 = cs.bbox(item_geom(it["piece"], False)["outline"])
+                pk.add_rect(round((x1 - x0 + G4) * 100), round((y1 - y0 + G4) * 100), i)
+            for _ in range(8):
+                pk.add_bin(round((W + G4) * 100), round((H + G4) * 100))
+            pk.pack()
+            if len(pk.rect_list()) == len(items) and (best is None or len(pk) < best[0]):
+                best = (len(pk), pk.rect_list())
+    npages, rl = best
+    for b, x, y, w, h, i in rl:
+        it = items[i]
+        x0, y0, x1, y1 = cs.bbox(item_geom(it["piece"], False)["outline"])
+        pw = x1 - x0 + G4
+        it["turn"] = abs(w / 100 - pw) > 0.02
+        it["page"], it["x"], it["y"] = b, M4 + x / 100, M4 + y / 100
+        it["w"], it["h"] = w / 100 - G4, h / 100 - G4
+    return npages
+
+
+def free_spot(rects, w, h):
+    """조각 사각형과 안 겹치는 (x, y) 를 찾는다 (가로·세로 1 mm 격자)."""
+    for vertical in (False, True):
+        ww, hh = (h, w) if vertical else (w, h)
+        for yy in range(int(M4), int(cs.A4[1] - M4 - hh)):
+            for xx in range(int(M4), int(cs.A4[0] - M4 - ww)):
+                if all(xx + ww < rx or xx > rx + rw or yy + hh < ry or yy > ry + rh for rx, ry, rw, rh in rects):
+                    return xx, yy, vertical
+    return None
+
+
+def main_4pages():
+    cs.setup_fonts()
+    data = cs.load_pieces()
+    items = build_items(data)
+    total_of, seen = {}, {}
+    for it in items:
+        pid = it["piece"]["id"]
+        total_of[pid] = total_of.get(pid, 0) + 1
+        seen[pid] = seen.get(pid, 0) + 1
+        it["k"] = seen[pid]
+    npages = pack4(items)
+    total = npages + 1
+    meta = {"Title": "V5H 포맥스 재단 가이드 (포맥스 1장 = A4 2장)", "Author": "V5H",
+            "Creator": "make_v5h_templates_a4.py", "Producer": "matplotlib", "CreationDate": None}
+    with PdfPages(str(OUT_4), metadata=meta) as pdf:
+        for i in range(npages):
+            pg = cs.Page(*cs.A4)
+            mine = [it for it in items if it["page"] == i]
+            for it in mine:
+                draw_item(pg, it, total_of)
+            rects = [(it["x"] - 1, it["y"] - 1, it["w"] + 2, it["h"] + 2) for it in mine]
+            # 쪽 이름표 + 100 mm 기준선을 빈 자리에
+            sp = free_spot(rects, 108.0, 14.0)
+            board = "포맥스 1 (왼쪽 절반)" if i == 0 else "포맥스 1 (오른쪽 절반)" if i == 1 else \
+                "포맥스 2 (왼쪽 절반)" if i == 2 else "포맥스 2 (오른쪽 절반)"
+            if sp and not sp[2]:
+                x, y, _ = sp
+                cs.ruler(pg, x + 4, y + 4.5)
+                pg.text(x + 4, y + 11.5, f"V5H 재단 가이드 {i + 1}/{total} · {board} · 100 % 인쇄", fs=5.5, bold=True)
+            elif sp:
+                x, y, _ = sp
+                x0r = x + 9.0
+                pg.line([(x0r, y + 4), (x0r, y + 104)], lw=cs.LW_RULER)
+                for k in range(11):
+                    hk = 4.0 if k in (0, 5, 10) else 2.5
+                    pg.line([(x0r, y + 4 + 10 * k), (x0r - hk, y + 4 + 10 * k)], lw=cs.LW_TICK)
+                pg.text(x0r + 2.5, y + 54, "100 mm 기준선", fs=5.5, bold=True, rotation=90, va="center")
+                pg.text(x + 1.5, y + 54, f"{i + 1}/{total} · {board}", fs=4.8, rotation=90, va="center")
+            else:
+                # 빈 자리가 없는 쪽: 가장 긴 조각의 실제 길이로 확인
+                big = max(mine, key=lambda it: max(it["w"], it["h"]))
+                L = max(big["w"], big["h"])
+                pg.text(cs.A4[0] / 2, 4.2, f"{i + 1}/{total} · {board} · 확인: {big['piece']['id']} 긴 변 = {L:.1f} mm 로 재기"
+                        " (기준선은 3·4·5쪽)", fs=5.5, ha="center", bold=True)
+            pdf.savefig(pg.fig)
+            cs.plt.close(pg.fig)
+        pg = cs.Page(*cs.A4)
+        angle_page(pg, total, total)
+        pdf.savefig(pg.fig)
+        cs.plt.close(pg.fig)
+    print(f"{OUT_4.relative_to(cs.ROOT)}: {total}쪽 (조각 {len(items)}장 → A4 {npages}장, 각도자 1쪽)")
+
+
 if __name__ == "__main__":
     main()
     main_tiles()
+    main_4pages()
