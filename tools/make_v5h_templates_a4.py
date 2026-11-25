@@ -196,5 +196,144 @@ def main():
     print(f"{OUT.relative_to(cs.ROOT)}: {total}쪽 (조각 {len(items)}장, 각도자 1쪽)")
 
 
+
+
+# --------------------------------------------------------------------------- 판 맞춤 타일 (300×450 판 = A4 4쪽)
+OUT_TILE = cs.ROOT / "docs" / "V5H_재단가이드_판맞춤.pdf"
+TW, TH = 150.0, 225.0          # 판을 2×2 로 나눈 한 칸
+OV = 8.0                       # 이웃 칸과 겹쳐 찍는 폭 (맞춰 붙이기용)
+PX0, PY0 = 10.0, 30.0          # 쪽 위 그리는 원점 (판 좌표 → 쪽 좌표)
+
+
+def layout_items(data):
+    rows_by = cs.load_layout()
+    by_id = {}
+    for p in data["pieces"]:
+        by_id.setdefault(p["id"], []).append(p)
+    out = {}
+    for sname, rows in rows_by.items():
+        lst = []
+        for r in rows:
+            for p in by_id.get(r["id"], []):
+                g = cs.geometry(p)
+                x0, y0, x1, y1 = cs.bbox(g["outline"])
+                w, h = x1 - x0, y1 - y0
+                ew, eh = (h, w) if r["rot"] else (w, h)
+                if ew <= r["w"] + 0.01 and eh <= r["h"] + 0.01 and r["w"] - ew <= 6.0 and r["h"] - eh <= 6.0:
+                    if r["rot"]:
+                        g = item_geom(p, True)
+                    gx0, gy0, _, _ = cs.bbox(g["outline"])
+                    lst.append({"row": r, "piece": p, "g": g, "dx": r["x"] - gx0, "dy": r["y"] - gy0})
+                    break
+            else:
+                raise SystemExit(f"배치표 행에 맞는 조각 없음: {r['label']}")
+        out[sname] = lst
+    return out
+
+
+def draw_tile(pg, sname, col, row, items, n, total):
+    # 이 칸이 보여 줄 판 범위 (겹침 포함)
+    bx0 = col * TW - (OV if col else 0)
+    by0 = row * TH - (OV if row else 0)
+    bx1 = (col + 1) * TW + (OV if col == 0 else 0)
+    by1 = (row + 1) * TH + (OV if row == 0 else 0)
+    ox, oy = PX0 - bx0, PY0 - by0
+
+    def P(q):
+        return (q[0] + ox, q[1] + oy)
+
+    ax = pg.ax
+    import matplotlib.patches as mp
+    clip = mp.Rectangle((PX0, PY0), bx1 - bx0, by1 - by0, transform=ax.transData)
+    # 판 테두리
+    pg.poly([P((0, 0)), P((300, 0)), P((300, 450)), P((0, 450))], lw=1.4, color="#888888")
+    for it in items:
+        g, dx, dy = it["g"], it["dx"], it["dy"]
+        Q = lambda q: P((q[0] + dx, q[1] + dy))  # noqa: E731
+        spare = it["row"]["spare"]
+        col_out = "#888888" if spare else cs.C_OUT
+        for kn in g["knife"]:
+            if "poly" in kn:
+                pg.poly([Q(q) for q in kn["poly"]], lw=0.5, color=cs.C_KNIFE, ls=(0, (3, 1.6)), hatch="////")
+            else:
+                c = Q(kn["circle"])
+                pg.circle(c, kn["d"] / 2, lw=0.5, color=cs.C_KNIFE, ls=(0, (3, 1.6)))
+        pg.poly([Q(q) for q in g["outline"]], lw=cs.LW_OUTLINE, color=col_out, ls="-" if not spare else (0, (4, 2)))
+        for d in g["drill"]:
+            c = Q(d["c"])
+            pg.circle(c, d["d"] / 2, lw=0.4, color=cs.C_DRILL)
+            cs.draw_cross(pg, c, max(1.8, d["d"] / 2 + 1.2))
+        r = it["row"]
+        cx, cy = r["x"] + r["w"] / 2, r["y"] + r["h"] / 2
+        lab = r["label"]
+        fs = 6.5 if min(r["w"], r["h"]) >= 12 else 4.2
+        if not (bx0 + 3 <= cx <= bx1 - 3 and by0 + 3 <= cy <= by1 - 3):
+            continue   # 이름표는 가운데가 이 칸에 있을 때만 (이웃 칸에 찍힘)
+        pg.text(*P((cx, cy)), lab, fs=fs, ha="center", va="center", bold=not spare,
+                color="#888888" if spare else "k",
+                rotation=90 if r["h"] > r["w"] * 1.8 and r["w"] < 16 else 0)
+    # 칸 밖은 잘라 내기
+    for a in list(ax.patches) + list(ax.lines) + list(ax.texts):
+        a.set_clip_on(True)
+        a.set_clip_path(clip)
+    # 겹침 띠·맞춤 십자
+    if col == 1:
+        x = P((150, 0))[0]
+        pg.line([(x, PY0), (x, PY0 + by1 - by0)], lw=0.4, color="#d08000", ls=(0, (2, 2)))
+    if col == 0:
+        x = P((150, 0))[0]
+        pg.line([(x, PY0), (x, PY0 + by1 - by0)], lw=0.4, color="#d08000", ls=(0, (2, 2)))
+    if row == 1:
+        y = P((0, 225))[1]
+        pg.line([(PX0, y), (PX0 + bx1 - bx0, y)], lw=0.4, color="#d08000", ls=(0, (2, 2)))
+    if row == 0:
+        y = P((0, 225))[1]
+        pg.line([(PX0, y), (PX0 + bx1 - bx0, y)], lw=0.4, color="#d08000", ls=(0, (2, 2)))
+    for mx in (60.0, 150.0, 240.0):
+        for my in (110.0, 225.0, 340.0):
+            if (mx == 150.0 or my == 225.0) and bx0 <= mx <= bx1 and by0 <= my <= by1:
+                c = P((mx, my))
+                pg.circle(c, 2.5, lw=0.5, color="#d08000")
+                pg.line([(c[0] - 4, c[1]), (c[0] + 4, c[1])], lw=0.5, color="#d08000")
+                pg.line([(c[0], c[1] - 4), (c[0], c[1] + 4)], lw=0.5, color="#d08000")
+    # 제목 (잘라 내기 없음)
+    names = {(0, 1): "왼쪽 위", (1, 1): "오른쪽 위", (0, 0): "왼쪽 아래", (1, 0): "오른쪽 아래"}
+    pg.text(10, 286, f"판 {sname} — {names[(col, row)]} 칸  (300×450 판을 A4 4장으로 나눔)", fs=10.5, bold=True)
+    pg.text(200, 286, f"{n} / {total}", fs=9, ha="right", bold=True)
+    pg.text(10, 280.5, "주황 점선 = 이웃 칸과 겹치는 선 · 주황 십자 = 맞춤 표시 (두 장의 십자를 겹쳐 붙임) · 회색 굵은 선 = 판 가장자리"
+            " · 회색 점선 조각 = 여분", fs=5.8, color=cs.C_DIM)
+    pg.text(10, 276.5, "검정 실선 = 자르는 선 · 빨강 십자 = 드릴 · 파랑 빗금 = 칼로 따는 창 · 판 귀퉁이(왼쪽 아래 = 0,0)를 판 모서리에 맞춘다",
+            fs=5.8, color=cs.C_DIM)
+    cs.ruler(pg, 55, 12.5)
+    pg.text(cs.A4[0] / 2, 3.5, "인쇄: A4 · 실제 크기 100 % · 페이지 맞춤 끄기 — 기준선이 100 mm 가 아니면 다시 인쇄", fs=6,
+            ha="center", color=cs.C_DIM)
+
+
+def main_tiles():
+    cs.setup_fonts()
+    data = cs.load_pieces()
+    sheets = layout_items(data)
+    order = [(0, 1), (1, 1), (0, 0), (1, 0)]
+    total = 4 * len(sheets) + 1
+    meta = {"Title": "V5H 포맥스 재단 가이드 (판 맞춤 A4 타일)", "Author": "V5H", "Creator": "make_v5h_templates_a4.py",
+            "Producer": "matplotlib", "CreationDate": None}
+    n = 0
+    with PdfPages(str(OUT_TILE), metadata=meta) as pdf:
+        for sname in sorted(sheets):
+            for col, row in order:
+                n += 1
+                pg = cs.Page(*cs.A4)
+                draw_tile(pg, sname, col, row, sheets[sname], n, total)
+                pdf.savefig(pg.fig)
+                cs.plt.close(pg.fig)
+        pg = cs.Page(*cs.A4)
+        angle_page(pg, total, total)
+        pdf.savefig(pg.fig)
+        cs.plt.close(pg.fig)
+    cnt = sum(len(v) for v in sheets.values())
+    print(f"{OUT_TILE.relative_to(cs.ROOT)}: {total}쪽 (판 {len(sheets)}장 × 4칸, 배치 {cnt}개)")
+
+
 if __name__ == "__main__":
     main()
+    main_tiles()
