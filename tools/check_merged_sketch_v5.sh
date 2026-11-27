@@ -2,6 +2,7 @@
 # 합친 제출용 .ino 를 g++ 호스트 빌드로 검증한다 (arduino-cli 없이).
 #  b. Q 1 / S 1 / V 입력 → v5/tests/solve_seed1.test.yaml 의 wait-serial 이 같은 순서로 모두 출력되는지
 #  c. 원본 10개 파일(합치기 전)을 같은 스텁으로 빌드한 출력과 글자 단위로 같은지
+#  e. 장착 → 섞기 → 꺼내기 → 다시 장착 뒤 큐브 모델이 풀린 상태인지 (STATE 가 풀린 배열)
 #  d. -Wall 경고 수
 set -u
 cd "$(dirname "$0")/.."
@@ -41,6 +42,18 @@ if cmp -s "$TMP/merged.out" "$TMP/orig.out"; then
 else
   echo "FAIL c: outputs differ"; diff "$TMP/merged.out" "$TMP/orig.out" | head; exit 1
 fi
+
+# e. 재장착 리셋: 섞인 채 꺼낸 뒤 다 맞춘 큐브를 다시 넣으면 모델이 풀린 상태여야 한다
+SOLVED_FC="UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+for BIN in merged orig; do
+  printf 'L\nL\nS 1\nP\nL\nL\nL\nP\n' | "$TMP/$BIN" > "$TMP/reload.$BIN.out"
+  STATES=$(grep '^STATE ' "$TMP/reload.$BIN.out")
+  FIRST=$(echo "$STATES" | sed -n 1p); SECOND=$(echo "$STATES" | sed -n 2p)
+  if [ "$FIRST" = "STATE $SOLVED_FC" ] || [ "$SECOND" != "STATE $SOLVED_FC" ]; then
+    echo "FAIL e ($BIN): 섞은 뒤 STATE 는 풀리지 않아야 하고, 재장착 뒤엔 풀려야 한다"; echo "$STATES"; exit 1
+  fi
+done
+echo "PASS e: 재장착 후 모델 리셋 (섞인 상태 -> 재장착 -> 풀린 상태, merged/orig 모두)"
 
 # d. 경고 수
 echo "-Wall warnings: merged=$(grep -c 'warning:' "$TMP/merged.warn") original=$(grep -c 'warning:' "$TMP/orig.warn")"

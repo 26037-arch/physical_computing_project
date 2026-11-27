@@ -11,7 +11,7 @@ node tools/serve.js
 
 이미 포트를 사용 중이면 `node tools/serve.js 8875`로 실행하고 `http://localhost:8875/v5/sim/`을 연다. 이번 캡처는 직접 실행한 8875 서버에서 저장했다. 기존 8765 서버는 최신 정적 파일을 제공했지만 실행 중인 서버 코드에 캡처 엔드포인트가 없어 `not found`를 반환했다. 기존 프로세스는 종료하거나 변경하지 않았다.
 
-1. **LOAD · 투입 준비**: 후드가 LOAD 150°로 열린다. LCD는 `PLACE CUBE SOLVED` / `WHITE DOWN GRN FRONT`이다.
+1. **LOAD · 투입 준비**: 후드가 LOAD 150°로 열린다. LCD는 `PUT SOLVED CUBE` / `WHT DOWN GRN FRT`이다.
 2. **LOAD · 장착 완료**: 흰색 아래·초록색 앞의 해결된 큐브를 표시하고 후드를 OPEN 60°로 돌린다. LCD는 `CUBE LOADED` / `SCRAMBLE / SOLVE`이다.
 3. **SCRAMBLE**: 시드에 따른 20수를 기구 액션으로 재생한다. **SOLVE**는 현재 논리 큐브를 CFOP로 풀고 같은 실행기로 재생한다. **MOVES**는 입력 수열을 실행한다. 초기 예시는 `R U R' U' F D2 B L`이다.
 4. **FLIP**은 앞으로 한 번 넘기고, **SPIN · y**는 전체 큐브를 한 번 돌린다. 두 동작 모두 논리 큐브를 변경하지 않는다.

@@ -345,7 +345,7 @@
       if(a.type==='spin'){orientationFromAction(a);displayed.spins++;}
       if(a.type==='flip'){orientationFromAction(a);displayed.flips++;cubePose.position.set(0,0,H);visual.theta=0;visual.yf=H;}
       if(a.type==='msg'){
-        if(a.line==='READY TO LOAD')lcd('PLACE CUBE SOLVED','WHITE DOWN GRN FRONT');
+        if(a.line==='READY TO LOAD')lcd('PUT SOLVED CUBE','WHT DOWN GRN FRT');
         if(a.line==='EJECT')lcd('REMOVE CUBE');
       }
       if(a.type==='loaded'){
@@ -460,7 +460,7 @@
         for(const [s,theta] of [[0,0],[middleStroke,90],[P.lift_stroke_mm,180]]){
           setLifter(s);assert(Math.abs(visual.servoAngle-theta)<1e-4,'upper-axis crank angle '+theta);assert(visual.linkageError<1e-6,'crank dead-centre closure');
         }setLifter(0);
-        run(mech.load());assert($('lcd').textContent==='PLACE CUBE SOLVED\nWHITE DOWN GRN FRONT','READY LCD');run(mech.load());
+        run(mech.load());assert($('lcd').textContent==='PUT SOLVED CUBE\nWHT DOWN GRN FRT','READY LCD');run(mech.load());
         run(mech.planSeq(C.parseMoves("R U R' U' F D2 B L")));
         // Include every direction and all marker actions independently of scrambles.
         for(const k of [1,2,3])run(mech.manualSpin(k));run(mech.manualFlip());run(mech.eject());run(mech.load());

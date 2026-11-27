@@ -143,8 +143,8 @@ void doLoad() {
   bool wasLoaded = mech.isLoaded();
   if (!mech.load()) { fail(F("LOAD FAILED"), "check hood"); return; }
   if (wasLoaded) lcdShow(F("REMOVE CUBE"), "LOAD: next cube");
-  else if (mech.waitingForCube()) lcdShow(F("PLACE CUBE SOLVED"), "WHITE DOWN GRN FRONT");
-  else { lcdShow(F("CUBE LOADED"), "SCRAMBLE / SOLVE"); beep(880, 80); }
+  else if (mech.waitingForCube()) lcdShow(F("PUT SOLVED CUBE"), "WHT DOWN GRN FRT");
+  else { cube.reset(); lcdShow(F("CUBE LOADED"), "SCRAMBLE / SOLVE"); beep(880, 80); }  // 장착 = 다 맞춘 큐브 → 모델도 풀린 상태로
 }
 void doEject() {
   if (!mech.isLoaded()) { Serial.println(F("ERR not loaded")); return; }

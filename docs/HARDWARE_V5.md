@@ -147,7 +147,7 @@ p == U : FLIP → FLIP
 
 | 상태 | LOAD | 줄 | LCD |
 |---|---|---|---|
-| 비어 있음 | 후드 LOAD, 리프터 DOWN | `HOOD LOAD` `READY TO LOAD` | `PLACE CUBE SOLVED` / `WHITE DOWN GRN FRONT` |
+| 비어 있음 | 후드 LOAD, 리프터 DOWN | `HOOD LOAD` `READY TO LOAD` | `PUT SOLVED CUBE` / `WHT DOWN GRN FRT` |
 | 비어 있음·후드 LOAD (큐브 넣음) | 후드 OPEN → loaded, ori = z2 | `HOOD OPEN` `LOADED` | `CUBE LOADED` / `SCRAMBLE / SOLVE` |
 | 장착됨 | 후드 LOAD → 손으로 꺼냄 | `EJECT` `HOOD LOAD` `EJECTED` | `REMOVE CUBE` |
 
