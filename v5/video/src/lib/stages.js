@@ -43,6 +43,19 @@ export function emphasis(stickers, phase, donePhases) {
   return out;
 }
 
+// 단계 끝 멈춤 동안 글로우할 스티커: 그 단계에서 완성한 부분
+//   CROSS = 십자 엣지, F2L 슬롯 = 그 슬롯 쌍, F2L 마지막 슬롯(다음이 OLL) = 아래 두 층 전체(U 색 없는 조각, 가운데 칸 포함),
+//   OLL = 윗면, PLL = 큐브 전체
+export function glowMask(phase, nextPhase, stickers) {
+  const lastSlot = phase.startsWith('F2L') && nextPhase === 'OLL';
+  return Array.from({ length: 54 }, (_, i) => {
+    if (phase === 'PLL') return true;
+    if (phase === 'OLL') return FACELETS[i].face === 'U';
+    if (lastSlot) return !pieceAt(stickers, i).includes('U');
+    return isTarget(phase, stickers, i);
+  });
+}
+
 // 단계 목표가 맞춰졌는지 (검사용): 목표 스티커가 제 면에 있는가
 export function stageSolved(phase, stickers) {
   for (let i = 0; i < 54; i++) {

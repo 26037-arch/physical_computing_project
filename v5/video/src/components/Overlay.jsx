@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
 import { BG, DIM, FG, MONO, SANS } from '../theme.js';
 
 // 자막 burn-in: narration.md 대본 문구 그대로, 최대 2줄
@@ -27,10 +27,21 @@ export const SceneLabel = ({ index, name }) => (
   </div>
 );
 
-export const Frame = ({ children, scene, index, name }) => (
-  <AbsoluteFill style={{ background: BG, color: FG }}>
-    {children}
-    <SceneLabel index={index} name={name} />
-    <Subtitles lines={scene.lines} />
-  </AbsoluteFill>
-);
+// 장면 사이 트랜지션: 각 장면 파일 안에서 앞 6프레임은 배경색에서 떠오르고 끝 6프레임은 배경색으로 가라앉는다
+// (이어 붙이면 12프레임 디졸브처럼 보인다. 완성 파일끼리 재인코딩하지 않음)
+export const FADE_FRAMES = 6;
+export const Frame = ({ children, scene, index, name }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const o = interpolate(frame, [0, FADE_FRAMES, durationInFrames - FADE_FRAMES, durationInFrames - 1], [0, 1, 1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  const y = interpolate(frame, [0, FADE_FRAMES], [10, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+  return (
+    <AbsoluteFill style={{ background: BG, color: FG }}>
+      <AbsoluteFill style={{ opacity: o, transform: `translateY(${y}px)` }}>
+        {children}
+        <SceneLabel index={index} name={name} />
+        <Subtitles lines={scene.lines} />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};

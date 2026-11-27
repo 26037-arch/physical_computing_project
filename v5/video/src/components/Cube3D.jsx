@@ -26,7 +26,10 @@ const shade = (hex, level) => {
   return '#' + src.map((v, i) => Math.round(DARK[i] + (v - DARK[i]) * k).toString(16).padStart(2, '0')).join('');
 };
 
-const Cubie = ({ p, stickers, state, levels, opacity = 1 }) => (
+// 글로우: 밝기를 흰색 쪽으로 조금 + 스티커 둘레의 얇은 밝은 테두리 (블룸 없음)
+const lighten = (hex, g) => '#' + [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).map((v) => Math.round(v + (255 - v) * 0.3 * g).toString(16).padStart(2, '0')).join('');
+
+const Cubie = ({ p, stickers, state, levels, glow, opacity = 1 }) => (
   <group position={p}>
     <mesh>
       <boxGeometry args={[0.97, 0.97, 0.97]} />
@@ -34,18 +37,28 @@ const Cubie = ({ p, stickers, state, levels, opacity = 1 }) => (
     </mesh>
     {stickers.map((i) => {
       const n = FACELETS[i].n;
+      const g = glow ? glow[i] : 0;
+      const base = shade(COLORS[state[i]], levels ? levels[i] : 2);
       return (
-        <mesh key={i} position={[n[0] * 0.488, n[1] * 0.488, n[2] * 0.488]} rotation={STICKER_ROT[n.join(',')]}>
-          <planeGeometry args={[0.84, 0.84]} />
-          <meshLambertMaterial color={shade(COLORS[state[i]], levels ? levels[i] : 2)} transparent={opacity < 1} opacity={opacity} />
-        </mesh>
+        <group key={i}>
+          {g > 0.01 ? (
+            <mesh position={[n[0] * 0.4865, n[1] * 0.4865, n[2] * 0.4865]} rotation={STICKER_ROT[n.join(',')]}>
+              <planeGeometry args={[0.84 + 0.11 * g, 0.84 + 0.11 * g]} />
+              <meshBasicMaterial color="#fff4cf" transparent opacity={0.75 * g} />
+            </mesh>
+          ) : null}
+          <mesh position={[n[0] * 0.488, n[1] * 0.488, n[2] * 0.488]} rotation={STICKER_ROT[n.join(',')]}>
+            <planeGeometry args={[0.84, 0.84]} />
+            <meshLambertMaterial color={g > 0.01 ? lighten(base, g) : base} transparent={opacity < 1} opacity={opacity} />
+          </mesh>
+        </group>
       );
     })}
   </group>
 );
 
 // move: 'R2' 같은 수, t: 0..1 진행. layerAxis/layerAngle 로 임의 층 회전도 가능.
-export const Cube3D = ({ stickers, levels = null, move = null, t = 0, layer = null, rotation = [0, 0, 0], position = [0, 0, 0], opacity = 1, children }) => {
+export const Cube3D = ({ stickers, levels = null, glow = null, move = null, t = 0, layer = null, rotation = [0, 0, 0], position = [0, 0, 0], opacity = 1, children }) => {
   let axis = null;
   let angle = 0;
   if (move) {
@@ -62,9 +75,9 @@ export const Cube3D = ({ stickers, levels = null, move = null, t = 0, layer = nu
   const rot = axis ? [axis[0] * angle, axis[1] * angle, axis[2] * angle] : [0, 0, 0];
   return (
     <group rotation={rotation} position={position}>
-      {still.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} levels={levels} opacity={opacity} />)}
+      {still.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} levels={levels} glow={glow} opacity={opacity} />)}
       <group rotation={rot}>
-        {moving.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} levels={levels} opacity={opacity} />)}
+        {moving.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} levels={levels} glow={glow} opacity={opacity} />)}
       </group>
       {children}
     </group>

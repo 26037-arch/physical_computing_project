@@ -115,15 +115,15 @@ export const Ida = ({ scene }) => {
   const [, l5, l6] = scene.lines;
   const aEnd = l5.from;
   const bEnd = l6.from;
-  const X = 8;
+  const X = 12;
   const opA = interpolate(frame, [aEnd - X, aEnd], [1, 0], CLAMP);
   const opB = interpolate(frame, [aEnd - X, aEnd, bEnd - X, bEnd], [0, 1, 1, 0], CLAMP);
   const opC = interpolate(frame, [bEnd - X, bEnd], [0, 1], CLAMP);
   return (
     <Frame scene={scene} index={3} name="ida*">
-      {frame < aEnd ? <AbsoluteFill style={{ opacity: opA }}><BruteCount frame={frame} total={aEnd} /></AbsoluteFill> : null}
+      {frame < aEnd ? <AbsoluteFill style={{ opacity: opA, transform: `scale(${0.94 + 0.06 * opA})` }}><BruteCount frame={frame} total={aEnd} /></AbsoluteFill> : null}
       {frame >= aEnd - X && frame < bEnd ? (
-        <AbsoluteFill style={{ opacity: opB }}><TreePart frame={Math.max(0, frame - aEnd)} total={bEnd - aEnd} /></AbsoluteFill>
+        <AbsoluteFill style={{ opacity: opB, transform: `scale(${frame < aEnd ? 1.06 - 0.06 * opB : 1})` }}><TreePart frame={Math.max(0, frame - aEnd)} total={bEnd - aEnd} /></AbsoluteFill>
       ) : null}
       {frame >= bEnd - X ? <AbsoluteFill style={{ opacity: opC }}><Shrink frame={Math.max(0, frame - bEnd)} total={durationInFrames - bEnd} /></AbsoluteFill> : null}
     </Frame>

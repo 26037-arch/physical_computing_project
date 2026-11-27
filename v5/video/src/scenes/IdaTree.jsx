@@ -96,19 +96,24 @@ function rowPointer(S, frame) {
   return { iter: 2, p: interpolate(frame, S.i3, [1, n3], CLAMP) };
 }
 
+// 줌 배율 (클로즈업). 줌 정도에 따라 고리·먼 가지를 흐리게 해 초점 노드 주변만 또렷하게 한다.
+const ZOOM_S = 2.2;
+const NEAR = 70; // 월드 좌표 거리: 이 안은 또렷
+const FAR = 170; // 이 밖은 가장 흐림
+
 // 카메라: 월드 점 (cx, cy) 를 화면 중심에, 배율 s
 function camera(S, frame) {
   const wide = { cx: CX, cy: CY, s: 1 };
   const fp = LAYOUTS[1].pos.get(FOCUS.row.id);
-  const zoom = { cx: fp[0], cy: fp[1], s: 3.4 };
+  const zoom = { cx: fp[0], cy: fp[1], s: ZOOM_S };
   const L3 = LAYOUTS[2];
   const mid = L3.path.length ? L3.pos.get(L3.path[Math.floor(L3.path.length / 2)].id) : [CX, CY];
   const goal = { cx: (mid[0] + CX * 3) / 4, cy: (mid[1] + CY * 3) / 4, s: 1.12 };
   const mix = (A, B, t) => ({ cx: A.cx + (B.cx - A.cx) * t, cy: A.cy + (B.cy - A.cy) * t, s: A.s * Math.pow(B.s / A.s, t) });
   if (frame < S.zoomIn[0]) return mix(wide, { ...wide, s: 1.04 }, interpolate(frame, [0, S.zoomIn[0]], [0, 1], CLAMP));
   if (frame < S.zoomIn[1]) return mix({ ...wide, s: 1.04 }, zoom, EASE(interpolate(frame, S.zoomIn, [0, 1], CLAMP)));
-  if (frame < S.fan[1]) return mix(zoom, { ...zoom, s: 3.6 }, interpolate(frame, S.fan, [0, 1], CLAMP));
-  if (frame < S.zoomOut[1]) return mix({ ...zoom, s: 3.6 }, wide, EASE(interpolate(frame, S.zoomOut, [0, 1], CLAMP)));
+  if (frame < S.fan[1]) return mix(zoom, { ...zoom, s: ZOOM_S * 1.06 }, interpolate(frame, S.fan, [0, 1], CLAMP));
+  if (frame < S.zoomOut[1]) return mix({ ...zoom, s: ZOOM_S * 1.06 }, wide, EASE(interpolate(frame, S.zoomOut, [0, 1], CLAMP)));
   if (frame < S.goalFwd[0]) return wide;
   return mix(wide, goal, EASE(interpolate(frame, [S.goalFwd[0], S.goalFwd[0] + 24], [0, 1], CLAMP)));
 }
@@ -146,7 +151,17 @@ const TreeCanvas = ({ st }) => {
     const nextB = trans ? F.iterations[iter + 1].bound : L.bound;
     const ringT = trans ? EASE(interpolate(frame, trans, [0, 1], CLAMP)) : 0;
     const boundR = (L.bound + (nextB - L.bound) * ringT) * RSTEP;
+    // 줌 정도 z (0 = 넓게, 1 = 클로즈업) 와 초점에서 먼 정도에 따른 불투명도
+    const z = iter === 1 ? Math.max(0, Math.min(1, (cam.s - 1.04) / (ZOOM_S - 1.04))) : 0;
+    const fpos = LAYOUTS[1].pos.get(FOCUS.row.id);
+    const near = (w) => {
+      if (z <= 0) return 1;
+      const dd = Math.hypot(w[0] - fpos[0], w[1] - fpos[1]);
+      const far = Math.max(0, Math.min(1, (dd - NEAR) / (FAR - NEAR)));
+      return 1 - z * 0.88 * far * far * (3 - 2 * far);
+    };
     const c0 = toScreen(cam, [CX, CY]);
+    ctx.globalAlpha = 1 - 0.8 * z;
     for (let d = 1; d <= 7; d++) {
       ctx.beginPath();
       ctx.arc(c0[0], c0[1], d * RSTEP * cam.s, 0, Math.PI * 2);
@@ -159,6 +174,7 @@ const TreeCanvas = ({ st }) => {
     ctx.strokeStyle = '#5a5e66';
     ctx.lineWidth = 1.2;
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
     ctx.globalAlpha = fade;
     const n = Math.min(L.rows.length, Math.floor(p));
@@ -167,22 +183,32 @@ const TreeCanvas = ({ st }) => {
     const LIFE = Math.max(3, 9 * rate);
     // 확장 간선 (흰 선)
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(232,232,228,0.5)';
-    ctx.beginPath();
+    if (z <= 0) {
+      ctx.strokeStyle = 'rgba(232,232,228,0.5)';
+      ctx.beginPath();
+    }
     for (let i = 1; i < n; i++) {
       const r = L.rows[i];
       if (r.event === 'prune') continue;
-      const a = toScreen(cam, L.pos.get(r.parent));
-      const b = toScreen(cam, L.pos.get(r.id));
+      const wa = L.pos.get(r.parent);
+      const wb = L.pos.get(r.id);
+      const a = toScreen(cam, wa);
+      const b = toScreen(cam, wb);
+      if (z > 0) {
+        ctx.strokeStyle = `rgba(232,232,228,${(0.55 * near(wb)).toFixed(3)})`;
+        ctx.beginPath();
+      }
       ctx.moveTo(a[0], a[1]);
       ctx.lineTo(b[0], b[1]);
+      if (z > 0) ctx.stroke();
     }
-    ctx.stroke();
-    ctx.fillStyle = FG;
+    if (z <= 0) ctx.stroke();
     for (let i = 0; i < n; i++) {
       const r = L.rows[i];
       if (r.event === 'prune') continue;
-      const b = toScreen(cam, L.pos.get(r.id));
+      const w = L.pos.get(r.id);
+      const b = toScreen(cam, w);
+      ctx.fillStyle = z > 0 ? `rgba(232,232,228,${near(w).toFixed(3)})` : FG;
       ctx.fillRect(b[0] - 1.5, b[1] - 1.5, 3, 3);
     }
     // 잘린 자식: 빨강으로 깜빡이고 사라짐
@@ -191,7 +217,7 @@ const TreeCanvas = ({ st }) => {
       if (r.event !== 'prune') continue;
       const age = p - i;
       if (age > LIFE) continue;
-      const al = Math.max(0, 1 - age / LIFE);
+      const al = Math.max(0, 1 - age / LIFE) * near(L.pos.get(r.id));
       const a = toScreen(cam, L.pos.get(r.parent));
       const b = toScreen(cam, L.pos.get(r.id));
       ctx.strokeStyle = `rgba(216,66,58,${0.7 * al})`;

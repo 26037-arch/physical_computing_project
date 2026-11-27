@@ -5,7 +5,9 @@ import path from 'node:path';
 import { applyMove } from '../src/lib/cube.js';
 import { ACTUATORS, bruteForceCounts, deriveFacts } from '../src/lib/facts.js';
 import { CONFIG, buildTimeline, parseNarration } from './timing.mjs';
-import { TREE_BASE, TREE_SEG } from '../src/lib/plan.js';
+import { CFOP_PAUSE_END, TREE_BASE, TREE_SEG, cfopSchedule } from '../src/lib/plan.js';
+import { Quaternion } from 'three';
+import { facingScore, phaseViews, quatAt } from '../src/lib/cfopView.js';
 import { createRequire } from 'node:module';
 import { CORNER_NAMES, CROSS_EDGE_IDX, EDGE_NAMES, SLOT_NAMES, stageSolved } from '../src/lib/stages.js';
 import { REPO, ROOT } from './common.mjs';
@@ -72,6 +74,31 @@ const F = deriveFacts(data);
     ok(stageSolved(ph, st[i].stickers), `단계 ${ph} 끝에서 강조 조각이 맞춰지지 않음`);
   }
   eq(data.f2l.map((f) => f.slot), F.solveSteps.filter((s, i, a) => s.phase.startsWith('F2L') && (i === 0 || a[i - 1].phase !== s.phase)).map((s) => s.phase.slice(4)), 'F2L 슬롯 순서 = data f2l slot');
+}
+
+// 2c. CFOP 자세: 단계마다 목표 스티커가 카메라를 향하는 정도가 고정 자세(회전 없음)보다 나쁘지 않고 일정 이상
+//     + 단계 대표 프레임(단계 가운데 수)에서 실제 보간된 자세로 다시 계산
+//     + 재생 속도·멈춤
+{
+  const views = phaseViews(data.stickerSteps);
+  const ident = new Quaternion();
+  for (const v of views) {
+    const auto = facingScore(v.phase, v.states, v.q);
+    const fixed = facingScore(v.phase, v.states, ident);
+    ok(auto >= fixed - 0.02, `${v.phase} 자세 점수 ${auto.toFixed(3)} < 고정 자세 ${fixed.toFixed(3)}`);
+    ok(auto >= 0.33, `${v.phase} 자세 점수 ${auto.toFixed(3)} < 0.33`);
+    const mj = v.first + Math.floor(v.ks.length / 2);
+    const qm = quatAt(views, mj + 0.5, 0, 2.5);
+    const rep = facingScore(v.phase, [data.stickerSteps[v.ks[Math.floor(v.ks.length / 2)] - 1].stickers], qm);
+    ok(rep >= 0.2, `${v.phase} 대표 프레임 점수 ${rep.toFixed(3)} < 0.2`);
+  }
+  const tl0 = buildTimeline();
+  const cf = tl0.scenes.find((sc) => sc.id === 'cfop');
+  const sched = cfopSchedule(cf.durationInFrames, F.solveSteps.map((x) => x.phase));
+  ok(sched.spf >= 3, `CFOP 한 수 ${sched.spf.toFixed(2)} 프레임 < 3 (너무 빠름)`);
+  eq(sched.pauses.length, 7, 'CFOP 단계 끝 멈춤 수 (CROSS, F2L 4, OLL, PLL)');
+  ok(sched.pauses[sched.pauses.length - 1].len >= CFOP_PAUSE_END - 1e-6, 'PLL 끝 멈춤이 짧음');
+  ok(sched.pauses.every((x) => x.len >= 6), '멈춤이 6프레임보다 짧음');
 }
 
 // 3. IDA*
@@ -171,7 +198,7 @@ const F = deriveFacts(data);
   const subs = tl.scenes.flatMap((s) => s.lines.map((l) => [l.id, l.text]));
   eq(subs.map((x) => x[0]), ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'], '자막 줄 순서');
   for (const [id, text] of subs) eq(text, lines[id].text, `자막 ${id} = 대본`);
-  ok(tl.totalSec <= 60, `총 길이 ${tl.totalSec.toFixed(2)} s > 60 s`);
+  ok(tl.totalSec <= CONFIG.maxSec, `총 길이 ${tl.totalSec.toFixed(2)} s > ${CONFIG.maxSec} s`);
   // 무음 연출 구간(timeline.config.json holdAfterSec)은 대본에 있는 줄 뒤에만, 자막은 그 구간에 나오지 않는다
   for (const [id, sec] of Object.entries(CONFIG.holdAfterSec || {})) {
     ok(lines[id] != null, `holdAfterSec 의 줄 ${id} 가 대본에 없음`);

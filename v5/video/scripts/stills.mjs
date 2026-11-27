@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { renderStill, selectComposition } from '@remotion/renderer';
-import { cfopSolveFrames, treeSegments } from '../src/lib/plan.js';
+import { cfopSchedule, treeSegments } from '../src/lib/plan.js';
 import { BROWSER, CHROMIUM, ROOT, logCollector, makeBundle, readTimeline } from './common.mjs';
 
 const tl = readTimeline();
@@ -14,10 +14,6 @@ const end = (id) => by[id].durationInFrames - 1;
 const PICKS = [
   ['title', 'main', Math.round(by.title.durationInFrames * 0.6)],
   ['cfop', 'start', 5],
-  ['cfop', 'cross', null],
-  ['cfop', 'f2l', null],
-  ['cfop', 'oll', null],
-  ['cfop', 'pll', null],
   ['cfop', 'merge', null], // 아래에서 R'+R2 합치는 순간으로 계산
   ['ida', 'brute', L('ida', 1).from - 12],
   ['ida', 'shrink-mid', L('ida', 2).from + 30],
@@ -33,17 +29,25 @@ const PICKS = [
   const d = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'algo_seed1.json'), 'utf8'));
   const nscr = d.stickerSteps.filter((s) => s.phase === 'scramble').length;
   const nsol = d.stickerSteps.length - 1 - nscr;
-  const { solveStart, spf } = cfopSolveFrames(by.cfop.durationInFrames, nsol);
-  const firstPll = d.stickerSteps.findIndex((s) => s.phase === 'PLL') - 1 - nscr; // 0-based 풀이 수 번호
-  PICKS.find((p) => p[1] === 'merge')[2] = Math.round(solveStart + (firstPll + 0.5) * spf);
-  // 단계마다 그 단계 가운데 수에서 1장 (F2L 은 두 번째 슬롯)
   const solve = d.stickerSteps.slice(1 + nscr);
+  const sched = cfopSchedule(by.cfop.durationInFrames, solve.map((s) => s.phase));
+  const firstPll = solve.findIndex((s) => s.phase === 'PLL'); // 0-based 풀이 수 번호
+  PICKS.find((p) => p[1] === 'merge')[2] = Math.round(sched.starts[firstPll] + 0.5 * sched.spf);
+  // 단계마다 그 단계 가운데 수에서 1장, F2L 은 슬롯 4개 각각
   const mid = (pred) => { const ix = solve.map((s, i) => [s, i]).filter(([s]) => pred(s.phase)).map(([, i]) => i); return ix[Math.floor(ix.length / 2)]; };
-  const pick = (tag, pred) => { PICKS.find((p) => p[0] === 'cfop' && p[1] === tag)[2] = Math.round(solveStart + (mid(pred) + 0.4) * spf); };
+  const pick = (tag, pred) => { PICKS.push(['cfop', tag, Math.round(sched.starts[mid(pred)] + 0.4 * sched.spf)]); };
   pick('cross', (ph) => ph === 'CROSS');
-  pick('f2l', (ph) => ph === 'F2L BR');
+  for (const sl of ['FL', 'BR', 'BL', 'FR']) pick(`f2l-${sl.toLowerCase()}`, (ph) => ph === `F2L ${sl}`);
   pick('oll', (ph) => ph === 'OLL');
   pick('pll', (ph) => ph === 'PLL');
+  // 단계 끝 멈춤 글로우: CROSS 끝, F2L 마지막 슬롯 끝(아래 두 층), OLL 끝, PLL 끝
+  for (const p of sched.pauses) {
+    const last = p.after === solve.length - 1;
+    const tag = last ? 'glow-pll' : p.phase === 'CROSS' ? 'glow-cross' : p.phase === 'OLL' ? 'glow-oll' : solve[p.after + 1].phase === 'OLL' ? 'glow-f2l' : null;
+    if (tag) PICKS.push(['cfop', tag, Math.round(p.from + Math.min(p.len, 14) * 0.5)]);
+  }
+  // 트랜지션 중간: cfop → ida 경계(cfop 끝 3프레임 전, ida 3프레임째), ida 안 04 → 그래프 디졸브 가운데
+  PICKS.push(['cfop', 'trans-out', by.cfop.durationInFrames - 3], ['ida', 'trans-in', 2], ['ida', 'trans-04-graph', L('ida', 1).from - 6]);
   const b0 = L('ida', 1).from;
   const S = treeSegments(L('ida', 2).from - b0);
   const at = (seg, f) => Math.round(b0 + S[seg][0] + (S[seg][1] - S[seg][0]) * f);
