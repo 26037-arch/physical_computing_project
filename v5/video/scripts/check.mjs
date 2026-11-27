@@ -6,6 +6,8 @@ import { applyMove } from '../src/lib/cube.js';
 import { ACTUATORS, bruteForceCounts, deriveFacts } from '../src/lib/facts.js';
 import { CONFIG, buildTimeline, parseNarration } from './timing.mjs';
 import { TREE_BASE, TREE_SEG } from '../src/lib/plan.js';
+import { createRequire } from 'node:module';
+import { CORNER_NAMES, CROSS_EDGE_IDX, EDGE_NAMES, SLOT_NAMES, stageSolved } from '../src/lib/stages.js';
 import { REPO, ROOT } from './common.mjs';
 
 const fails = [];
@@ -48,6 +50,28 @@ const F = deriveFacts(data);
   eq(F.stageBar.map((s) => s.key), ['CROSS', 'F2L', 'OLL', 'PLL'], '단계 이름');
   const stageMoves = data.stages.flatMap((s) => s.moves);
   eq(stageMoves, F.solveMoves, 'stages 수열 = stickerSteps 풀이 수열');
+}
+
+// 2b. CFOP 단계별 강조 조각 정의 = 풀이기 정의, 각 단계 끝에서 그 조각이 실제로 맞춰짐
+{
+  const require = createRequire(import.meta.url);
+  const cubeLib = require(path.join(REPO, 'v5', 'sim', 'cube.js'));
+  eq(CORNER_NAMES, cubeLib.CORNER_NAMES, 'CORNER_NAMES = v5/sim/cube.js');
+  eq(EDGE_NAMES, cubeLib.EDGE_NAMES, 'EDGE_NAMES = v5/sim/cube.js');
+  const solverSrc = fs.readFileSync(path.join(REPO, 'v5', 'sim', 'solver.js'), 'utf8');
+  const sn = /SLOT_NAMES\s*=\s*\[([^\]]*)\]/.exec(solverSrc);
+  eq(sn ? sn[1].split(',').map((x) => x.trim().replace(/'/g, '')) : null, SLOT_NAMES, 'SLOT_NAMES = solver.js');
+  const ce = /const es = \[([\d,\s]+)\]\.map\(\(e\) => this\.edgeState\(c, e\)\)/.exec(solverSrc);
+  eq(ce ? ce[1].split(',').map((x) => Number(x)) : null, CROSS_EDGE_IDX, '크로스 엣지 = solver.js');
+  ok(/cornerState\(c, 4 \+ s\), es = this\.edgeState\(c, 8 \+ s\)/.test(solverSrc), 'solver.js F2L 슬롯 s = 코너 4+s · 엣지 8+s 가 아님');
+  const st = data.stickerSteps;
+  for (let i = 1; i < st.length; i++) {
+    const ph = st[i].phase;
+    if (ph === 'scramble') continue;
+    if (st[i + 1] && st[i + 1].phase === ph) continue;
+    ok(stageSolved(ph, st[i].stickers), `단계 ${ph} 끝에서 강조 조각이 맞춰지지 않음`);
+  }
+  eq(data.f2l.map((f) => f.slot), F.solveSteps.filter((s, i, a) => s.phase.startsWith('F2L') && (i === 0 || a[i - 1].phase !== s.phase)).map((s) => s.phase.slice(4)), 'F2L 슬롯 순서 = data f2l slot');
 }
 
 // 3. IDA*
