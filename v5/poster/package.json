@@ -1,0 +1,17 @@
+{
+  "name": "v5-poster",
+  "private": true,
+  "version": "1.0.0",
+  "description": "컴과2 피지컬컴퓨팅 제출 포스터 (B4 1쪽) — HTML/SVG → 헤드리스 Chrome PDF",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "node-html-parser": "7.0.1",
+    "pdf-lib": "1.17.1",
+    "qrcode": "1.5.4"
+  }
+}
