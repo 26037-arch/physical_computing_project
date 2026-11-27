@@ -13,7 +13,20 @@ const STICKER_ROT = {
   '0,0,-1': [0, Math.PI, 0],
 };
 
-const Cubie = ({ p, stickers, state, opacity = 1 }) => (
+// 강조 단계: 2 = 원래 색, 1 = 은은하게, 0 = 어둡게. sRGB 값에서 어두운 회색 쪽으로 섞는다 (0 은 거의 회색).
+const DARK = [0x1f, 0x20, 0x25];
+const KEEP = [0.13, 0.42, 1];
+const shade = (hex, level) => {
+  if (level == null || level >= 2) return hex;
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const g = (c[0] + c[1] + c[2]) / 3;
+  const k = KEEP[level];
+  // 0 단계는 색을 절반 탈색한 뒤 섞는다
+  const src = level === 0 ? c.map((v) => (v + g) / 2) : c;
+  return '#' + src.map((v, i) => Math.round(DARK[i] + (v - DARK[i]) * k).toString(16).padStart(2, '0')).join('');
+};
+
+const Cubie = ({ p, stickers, state, levels, opacity = 1 }) => (
   <group position={p}>
     <mesh>
       <boxGeometry args={[0.97, 0.97, 0.97]} />
@@ -24,7 +37,7 @@ const Cubie = ({ p, stickers, state, opacity = 1 }) => (
       return (
         <mesh key={i} position={[n[0] * 0.488, n[1] * 0.488, n[2] * 0.488]} rotation={STICKER_ROT[n.join(',')]}>
           <planeGeometry args={[0.84, 0.84]} />
-          <meshLambertMaterial color={COLORS[state[i]]} transparent={opacity < 1} opacity={opacity} />
+          <meshLambertMaterial color={shade(COLORS[state[i]], levels ? levels[i] : 2)} transparent={opacity < 1} opacity={opacity} />
         </mesh>
       );
     })}
@@ -32,7 +45,7 @@ const Cubie = ({ p, stickers, state, opacity = 1 }) => (
 );
 
 // move: 'R2' 같은 수, t: 0..1 진행. layerAxis/layerAngle 로 임의 층 회전도 가능.
-export const Cube3D = ({ stickers, move = null, t = 0, layer = null, rotation = [0, 0, 0], position = [0, 0, 0], opacity = 1, children }) => {
+export const Cube3D = ({ stickers, levels = null, move = null, t = 0, layer = null, rotation = [0, 0, 0], position = [0, 0, 0], opacity = 1, children }) => {
   let axis = null;
   let angle = 0;
   if (move) {
@@ -49,9 +62,9 @@ export const Cube3D = ({ stickers, move = null, t = 0, layer = null, rotation = 
   const rot = axis ? [axis[0] * angle, axis[1] * angle, axis[2] * angle] : [0, 0, 0];
   return (
     <group rotation={rotation} position={position}>
-      {still.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} opacity={opacity} />)}
+      {still.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} levels={levels} opacity={opacity} />)}
       <group rotation={rot}>
-        {moving.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} opacity={opacity} />)}
+        {moving.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} levels={levels} opacity={opacity} />)}
       </group>
       {children}
     </group>

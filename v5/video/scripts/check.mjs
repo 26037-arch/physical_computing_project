@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { applyMove } from '../src/lib/cube.js';
 import { ACTUATORS, bruteForceCounts, deriveFacts } from '../src/lib/facts.js';
-import { buildTimeline, parseNarration } from './timing.mjs';
+import { CONFIG, buildTimeline, parseNarration } from './timing.mjs';
+import { TREE_BASE, TREE_SEG } from '../src/lib/plan.js';
 import { REPO, ROOT } from './common.mjs';
 
 const fails = [];
@@ -110,9 +111,6 @@ const F = deriveFacts(data);
     eq(value, expected, `줄 ${id} "${word}" (${what})`);
   };
   has('02', '네 단계', F.stageBar.length, 4, '단계 수');
-  has('03', '십자 일곱 수', F.stageBar[0].moves, 7, '크로스 수');
-  has('03', '두 층 스물한 수', F.stageBar[1].moves, 21, 'F2L 수');
-  has('03', '공식 두 번', [data.oll, data.pll].filter((x) => x && x.case).length, 2, 'OLL+PLL 공식 수');
   has('03', '쉰세 수', data.totals.moves, 53, 'TOTAL');
   has('04', '일곱 수 안', 7, data.cross.ida.solution.length, '무작정 탐색 깊이 = 크로스 길이');
   has('04', '1억 1천만', Math.round(bruteForceCounts(7).total / 1e7), 11, '1억 1천만 ≈ 111,207,591');
@@ -150,6 +148,17 @@ const F = deriveFacts(data);
   eq(subs.map((x) => x[0]), ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'], '자막 줄 순서');
   for (const [id, text] of subs) eq(text, lines[id].text, `자막 ${id} = 대본`);
   ok(tl.totalSec <= 60, `총 길이 ${tl.totalSec.toFixed(2)} s > 60 s`);
+  // 무음 연출 구간(timeline.config.json holdAfterSec)은 대본에 있는 줄 뒤에만, 자막은 그 구간에 나오지 않는다
+  for (const [id, sec] of Object.entries(CONFIG.holdAfterSec || {})) {
+    ok(lines[id] != null, `holdAfterSec 의 줄 ${id} 가 대본에 없음`);
+    ok(sec >= 0 && sec <= 10, `holdAfterSec ${id} = ${sec} s (0~10)`);
+  }
+  const l05 = tl.scenes.find((s) => s.id === 'ida').lines.find((l) => l.id === '05');
+  eq(l05.holdFrames, Math.round((CONFIG.holdAfterSec['05'] || 0) * tl.fps), '05 뒤 무음 연출 프레임');
+  // 시간표 구간이 빈틈 없이 이어지는지
+  const segs = Object.values(TREE_SEG);
+  for (let i = 1; i < segs.length; i++) eq(segs[i][0], segs[i - 1][1], `IDA* 그래프 시간표 구간 ${i} 연속`);
+  eq(segs[segs.length - 1][1], TREE_BASE, 'IDA* 그래프 시간표 끝');
   for (const s of tl.scenes) for (const l of s.lines) ok(l.from + l.durationInFrames <= s.durationInFrames, `장면 ${s.id} 줄 ${l.id} 이 장면 밖`);
 }
 

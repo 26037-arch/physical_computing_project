@@ -10,12 +10,14 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const FPS = 30;
 export const WIDTH = 1920;
 export const HEIGHT = 1080;
-// 장면 앞 여유 + 줄 사이 여유 + 장면 끝 여유 (초)
-export const LEAD = 0.1;
-export const GAP = 0.15;
-export const TAIL = 0.15;
-export const MAX_SEC = 60;
-export const MAX_TEMPO = 1.08;
+// 여유·무음 연출 구간·상한은 timeline.config.json (narration.md 표에 없는 값)
+export const CONFIG = JSON.parse(fs.readFileSync(path.join(ROOT, 'timeline.config.json'), 'utf8'));
+export const LEAD = CONFIG.leadSec;
+export const GAP = CONFIG.gapSec;
+export const TAIL = CONFIG.tailSec;
+export const HOLD_AFTER = CONFIG.holdAfterSec || {};
+export const MAX_SEC = CONFIG.maxSec;
+export const MAX_TEMPO = CONFIG.maxTempo;
 // 앞 무음 제거 → 뒤집기 → 앞(=원래 뒤) 무음 제거 → 다시 뒤집기
 const SR = 'silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02';
 export const TRIM_FILTER = `${SR},areverse,${SR},areverse`;
@@ -103,8 +105,9 @@ export function buildTimeline() {
         const durSec = l.audio ? l.audioSec / tempo : l.targetSec;
         const from = Math.round(t * FPS);
         const dur = Math.round((durSec + GAP) * FPS);
-        lines.push({ id, text: l.text, from, durationInFrames: dur, audio: l.audio, audioTrimmed: l.audioTrimmed || null, durSec });
-        t = (from + dur) / FPS;
+        const holdFrames = Math.round((HOLD_AFTER[id] || 0) * FPS);
+        lines.push({ id, text: l.text, from, durationInFrames: dur, holdFrames, audio: l.audio, audioTrimmed: l.audioTrimmed || null, durSec });
+        t = (from + dur + holdFrames) / FPS;
       }
       const durationInFrames = Math.round((t + TAIL) * FPS);
       scenes.push({ id: s.id, clip: s.clip || null, startFrame: start, durationInFrames, lines });
