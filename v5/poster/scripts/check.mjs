@@ -41,7 +41,7 @@ for (const el of page.querySelectorAll('[data-fact]')) {
   if (F[k]) ok(txt(el).trim() === F[k].v, `숫자 불일치 ${k}: 포스터 "${txt(el).trim()}" ≠ 근거 "${F[k].v}" (${F[k].src})`);
 }
 // 부품·형식 이름 (숫자가 들어 있지만 수치가 아닌 고유 이름)
-const NAMES = /NEMA17|MG996R|SG90|A4988|UNO R4 WiFi|R4|F2L|CUBOTino|v5\/sim\/wiring\.html|v5\/|\b3D\b|y\^k|\b[URFDLBy]2\b|OLL|PLL/g;
+const NAMES = /V5H|NEMA17|MG996R|SG90|A4988|UNO R4 WiFi|R4|F2L|CUBOTino|v5\/sim\/wiring\.html|v5\/|\b3D\b|y\^k|\b[URFDLBy]2\b|OLL|PLL/g;
 const unmarked = [];
 function walk(node) {
   if (node.nodeType === 3) {

@@ -93,7 +93,7 @@ export function loadFacts() {
   put('crossSeq', crossStage.moves.join(' '), SRC.algo + ' stages[CROSS].moves');
   put('crossLen', crossStage.moves.length, SRC.algo + ' stages[CROSS]');
   put('scrambleSeq', algo.scramble.join(' '), SRC.algo + ' scramble');
-  stages.forEach((s, i) => { put(`stName${i}`, s.name, SRC.algo + ` stages[${i}].name`); put(`stMoves${i}`, s.moves, SRC.algo + ` stages[${i}].moves`); put(`stNodes${i}`, comma(s.nodes), SRC.algo + ` stages[${i}].nodes`); });
+  stages.forEach((s, i) => { put(`stShort${i}`, s.name.replace(/^F2L /, '').replace(/ .*$/, ''), SRC.algo + ` stages[${i}].name (줄임)`); put(`stName${i}`, s.name, SRC.algo + ` stages[${i}].name`); put(`stMoves${i}`, s.moves, SRC.algo + ` stages[${i}].moves`); put(`stNodes${i}`, comma(s.nodes), SRC.algo + ` stages[${i}].nodes`); });
   put('scrambleLen', scrambleLen, SRC.ino + ' SCRAMBLE_LEN');
   put('longS', (longMs / 1000).toFixed(1), SRC.ino + ' LONG_PRESS_MS');
   put('baud', baud, SRC.ino + ' Serial.begin');
@@ -133,6 +133,9 @@ export function loadFacts() {
   put('vmot', phrase('hw', 'VMOT 12 V').match(/\d+/)[0], SRC.hw + ' 4절 "VMOT 12 V"');
   put('servoV', phrase('hw', '서보 전원 5 V').match(/\d+/)[0], SRC.hw + ' 4절 "서보 전원 5 V"');
 
+  put('avg30s', phrase('hw', '30 시드 평균 194 s').match(/(\d+) s/)[1], SRC.hw + ' 5절 "30 시드 평균 194 s"');
+  put('scrMin', phrase('hw', '섞기 20수 약 1.2 분').match(/약 ([\d.]+) 분/)[1], SRC.hw + ' 5절 "섞기 20수 약 1.2 분"');
+  put('jogMax', grab('ino', /constrain\(strtol\(arg, nullptr, 10\), -(\d+)L, \d+L\)/), SRC.ino + ' J 제한');
   put('repeat10', phrase('hw', '4b 의 10회 반복 시험').match(/(\d+)회/)[1], SRC.hw + ' 3.5절 "10회 반복 시험"');
   put('oll57', phrase('report', '57공식').match(/\d+/)[0], SRC.report + ' 5.2절');
   put('pll21', phrase('report', '21공식').match(/\d+/)[0], SRC.report + ' 5.2절');
@@ -146,8 +149,21 @@ export function loadFacts() {
   put('merged', +F.stageSum.v - algo.totals.moves, SRC.solverCpp + ' simplifySeq(out) = Σstages − totals');
   if (+F.merged.v < 0) throw new Error('facts: 단계 합 < 총 수');
 
+  // LCD 화면 (main.ino 문구를 그대로 — 위치로 찾는다). %u/%lu 는 '#'
+  const two = (re, what) => { const m = ino.match(re); if (!m) throw new Error('facts: main.ino LCD 문구 못 찾음: ' + what); return [m[1], m[2]]; };
+  const fmtOf = (re, what) => { const m = ino.match(re); if (!m) throw new Error('facts: main.ino snprintf 못 찾음: ' + what); return m[1].replace(/%l?u/g, '#'); };
+  const lcd = {
+    idle: two(/lcd\.backlight\(\);\s*lcdShow\(F\("([^"]*)"\), "([^"]*)"\)/, 'setup'),
+    place: two(/waitingForCube\(\)\) lcdShow\(F\("([^"]*)"\), "([^"]*)"\)/, 'doLoad 대기'),
+    loaded: two(/cube\.reset\(\); lcdShow\(F\("([^"]*)"\), "([^"]*)"\)/, 'doLoad 장착'),
+    remove: two(/if \(wasLoaded\) lcdShow\(F\("([^"]*)"\), "([^"]*)"\)/, 'doLoad 배출'),
+    scrambled: [ino.match(/lcdShow\(F\("(SCRAMBLED[^"]*)"\), row1\)/)[1], fmtOf(/snprintf\(row1, sizeof\(row1\), "(seed[^"]*)"/, 'seed')],
+    solved: [ino.match(/solved \? F\("([^"]*)"\)/)[1], fmtOf(/snprintf\(row1, sizeof\(row1\), "(%umv[^"]*)"/, 'solved')],
+  };
+  if (!/cube\.reset\(\); lcdShow\(F\("CUBE LOADED"/.test(ino)) throw new Error('facts: 장착 때 cube.reset() 이 없다 — 포스터의 "장착 = 다 맞춘 상태로 다시 셈" 문구 재검토');
+
   return {
-    F, algo, ino, cmdCases, reorient, solverExcerpt,
+    lcd, F, algo, ino, cmdCases, reorient, solverExcerpt,
     stickersScrambled: algo.stickerSteps[iScr].stickers,
     stickersCross: algo.stickerSteps[iCross].stickers,
     trace: ida.trace, bounds: ida.bounds, rootH: ida.heuristic.rootH,

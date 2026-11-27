@@ -131,17 +131,18 @@ export function idaFig(D, fx, color) {
 
 // ---- 단계별 수 막대 (합 = 총 수) ----
 export function stageBar(D, fx, color) {
-  const W = 93, H = 9.5; let b = '', x = 0;
+  const W = 93, H = 13.5; let b = '', x = 0;
   const tot = +fx.stageSum.v;
   const shades = ['1', '0.78', '0.62', '0.5', '0.38', '0.6', '0.85'];
   D.stages.forEach((s, i) => {
     const w = s.moves / tot * W;
     b += `<rect x="${x.toFixed(2)}" y="0" width="${(w - 0.3).toFixed(2)}" height="5" fill="${color}" opacity="${shades[i % shades.length]}"/>`;
     b += `<text x="${(x + w / 2).toFixed(2)}" y="3.7" font-size="2.5" text-anchor="middle" fill="#fff" font-weight="700" data-fact="stMoves${i}">${s.moves}</text>`;
+    b += `<text x="${(x + w / 2).toFixed(2)}" y="8.2" font-size="2.5" text-anchor="middle" class="mono" fill="#333" data-fact="stShort${i}">${esc(fx['stShort' + i].v)}</text>`;
     x += w;
   });
-  b += `<text x="0" y="8.6" font-size="2.5" fill="#333">CROSS → F2L → OLL → PLL</text>`;
-  b += `<text x="${W}" y="8.6" font-size="2.5" text-anchor="end" font-weight="700"><tspan>단계 합 </tspan><tspan data-fact="stageSum">${tot}</tspan><tspan> − 경계 합치기 </tspan><tspan data-fact="merged">${fx.merged.v}</tspan><tspan> = </tspan><tspan data-fact="moves">${fx.moves.v}</tspan><tspan>수</tspan></text>`;
+  b += `<text x="0" y="12.6" font-size="2.6" fill="#333"><tspan>노드 </tspan>${D.stages.map((st, i) => `<tspan data-fact="stNodes${i}">${fx['stNodes' + i].v}</tspan>`).join('<tspan> · </tspan>')}</tspan></text>`;
+  b += `<text x="${W}" y="12.6" font-size="2.6" text-anchor="end" font-weight="700"><tspan>단계 합 </tspan><tspan data-fact="stageSum">${tot}</tspan><tspan> − 경계 합치기 </tspan><tspan data-fact="merged">${fx.merged.v}</tspan><tspan> = </tspan><tspan data-fact="moves">${fx.moves.v}</tspan><tspan>수</tspan></text>`;
   return svg(W, H, b, 'stagebar');
 }
 

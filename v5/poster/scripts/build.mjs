@@ -69,11 +69,11 @@ const serialRows = [
   ['P', 'P', '스티커 54칸 + 기구 상태 출력'],
   ['R', 'R', '내부 모델을 풀린 상태로 리셋'],
   ['Q', 'Q 0|1', '1 = 모터·서보 없이 절차만 출력'],
-  ['J', 'J ±n', '컵 영점 미세 회전'],
+  ['J', 'J ±n', '컵 영점 (+ = 위에서 시계, 1 스텝 0.45°)'],
   ['O', 'O · H · K', '조정: 오버슈트·여유 / 후드 / 리프터'],
 ];
 // 설명 속 숫자 표기 (20수, 54칸, 1 =)
-const serialDesc = (s) => s.replace('20수', `${f('scrambleLen')}수`).replace('54칸', `${ok('54', '정의: 3×3×6 스티커')}칸`).replace('1 = ', `${ok('1', 'Q 인자 값')} = `);
+const serialDesc = (s) => s.replace('1 스텝 0.45°', `${ok('1', '정의: 한 스텝')} 스텝 ${f('stepDeg')}°`).replace('20수', `${f('scrambleLen')}수`).replace('54칸', `${ok('54', '정의: 3×3×6 스티커')}칸`).replace('1 = ', `${ok('1', 'Q 인자 값')} = `);
 
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
@@ -85,7 +85,7 @@ const html = `<!doctype html>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:257mm;height:364mm;background:${PAPER}}
 body{font-family:'Noto Sans CJK KR','Noto Sans KR','Malgun Gothic',sans-serif;color:${INK};font-size:9pt;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact;word-break:keep-all}
-.page{width:257mm;height:364mm;padding:8mm 9mm 7mm;display:flex;flex-direction:column;gap:2.6mm;overflow:hidden}
+.page{width:257mm;height:364mm;padding:8mm 9mm 7mm;display:flex;flex-direction:column;gap:2.2mm;overflow:hidden}
 .mono,code,.num{font-family:'JBM','Noto Sans CJK KR',monospace}
 code{font-size:8.6pt}
 .mono,code,pre,.num,.lc,.lcdtxt,svg text.mono{font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0}
@@ -110,12 +110,12 @@ svg text.mono{font-family:'JBM',monospace}
 .stat .cap{font-size:8pt;color:${MUTED};line-height:1.3}
 /* 섹션 머리 */
 .sec-head{display:flex;align-items:baseline;gap:2.4mm;margin-bottom:1.8mm}
-.tag{display:inline-block;font-size:13pt;font-weight:800;padding:0.5mm 2.6mm 0.7mm;line-height:1.25}
+.tag{display:inline-block;white-space:nowrap;flex:none;font-size:13pt;font-weight:800;padding:0.5mm 2.6mm 0.7mm;line-height:1.25}
 .sec-sub{font-size:9pt;color:${MUTED}}
 h3{font-size:10pt;font-weight:800;margin:1.6mm 0 0.8mm}
 /* 2행 */
-.row2{display:grid;grid-template-columns:97mm 1fr;gap:6mm}
-.product{width:97mm;height:55mm;border:0.3mm solid ${INK};overflow:hidden;background:#eef2f4}
+.row2{display:grid;grid-template-columns:90mm 1fr;gap:5mm}
+.product{width:90mm;height:56mm;border:0.3mm solid ${INK};overflow:hidden;background:#eef2f4}
 .product img{width:100%;height:100%;object-fit:cover;display:block}
 .cap2{font-size:8pt;color:${MUTED};margin-top:0.8mm}
 .parts{margin-top:1.8mm}
@@ -145,7 +145,7 @@ h3{font-size:10pt;font-weight:800;margin:1.6mm 0 0.8mm}
 .fail{margin-top:1.8mm;border-top:0.35mm solid ${INK};padding-top:1.2mm}
 .fail table{width:100%;border-collapse:collapse;font-size:8.4pt;line-height:1.3}
 .fail td{padding:0.55mm 1mm;vertical-align:top;border-bottom:0.2mm solid #dde2e5}
-.fail td:first-child{width:36mm}
+.fail td:first-child{width:31mm}
 /* 3행 */
 .row3{display:grid;grid-template-columns:104mm 1fr;gap:6mm}
 .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4mm 2mm;margin-top:1mm}
@@ -171,10 +171,10 @@ ul.pts li:before{content:'';position:absolute;left:0;top:1.9mm;width:1.4mm;heigh
 .cf{display:grid;grid-template-columns:15mm 1fr;gap:0.6mm 2mm;font-size:9pt;line-height:1.33;margin-bottom:1.6mm}
 .cf b{color:${B}}
 .nets{display:flex;align-items:center;justify-content:space-around;gap:2mm;margin-top:0.2mm;font-size:8pt;color:${MUTED}}
-.net{width:23.4mm;height:21.55mm}
+.net{width:20.4mm;height:19.3mm}
 .idafig{width:140mm;height:50mm}
 pre.code{font-family:'JBM',monospace;font-size:8pt;background:#f1f3f5;border-left:0.8mm solid ${B};padding:1mm 2mm;margin-top:0.6mm;line-height:1.35;white-space:pre}
-.stagebar{width:93mm;height:9.5mm;margin-top:1.4mm}
+.stagebar{width:93mm;height:13.5mm;margin-top:1.4mm}
 /* 아래 */
 .foot{display:grid;grid-template-columns:1fr 82mm;gap:6mm;margin-top:auto;border-top:0.5mm solid ${INK};padding-top:2mm}
 .ser table{border-collapse:collapse;width:100%;font-size:8.3pt;line-height:1.28}
@@ -197,10 +197,10 @@ pre.code{font-family:'JBM',monospace;font-size:8pt;background:#f1f3f5;border-lef
   </div>
   <p class="lead">아두이노가 큐브를 <b>직접 섞고</b>, 보드 안에서 <b>CFOP</b> 로 풀이를 계산해, <b data-ok="구동기 3 = 스텝모터 1 + 서보 2 (HARDWARE_V5 0절)">스텝모터 1개와 서보 2개</b>로 맞춘다</p>
   <div class="stats">
-    <div class="stat"><div class="big">${f('moves')}<small>수</small></div><div class="cap">풀이 길이 (시드 ${f('seed')}, 크로스·F2L·OLL·PLL 합)</div></div>
+    <div class="stat"><div class="big">${f('moves')}<small>수</small></div><div class="cap">풀이 길이 (시드 ${f('seed')})</div></div>
     <div class="stat"><div class="big">${f('crossNodes')}</div><div class="cap">크로스 IDA* 탐색 노드 (시드 ${f('seed')})</div></div>
     <div class="stat"><div class="big">${f('actuators')}<small>개</small></div><div class="cap">구동기 — 스텝모터 ${ok('1', 'NEMA17 1개')} · 서보 ${ok('2', 'MG996R·SG90')}</div></div>
-    <div class="stat"><div class="big">${f('sensors')}<small>개</small></div><div class="cap">센서 — 직접 섞으며 기록해 상태를 안다</div></div>
+    <div class="stat"><div class="big">${f('sensors')}<small>개</small></div><div class="cap">센서 — 직접 섞으며 기록</div></div>
     <div class="stat"><div class="big">${f('fomaxT')}<small>mm</small></div><div class="cap">포맥스 수작업 ${f('fomaxKinds')}종 ${f('fomaxPieces')}장</div></div>
   </div>
 </header>
@@ -213,7 +213,7 @@ pre.code{font-family:'JBM',monospace;font-size:8pt;background:#f1f3f5;border-lef
     <div class="parts">
       ${tag('red', '핵심 기능 ① 기구', `아래 한 축으로 ${ok('6', '정의: 큐브 6면')}면을 모두 돌린다`)}
       <div class="part"><span class="pid">A</span><div><div class="h">컵 스텝모터<code>NEMA17 + A4988</code></div>후드가 닫히면 <b>아래 층만</b>, 열리면 <b>큐브 전체</b>를 돌린다. ${f('quarter')} 스텝 = ${ok('90°', '정의: 한 수')} (${f('micro')} 마이크로스텝)</div></div>
-      <div class="part"><span class="pid">B</span><div><div class="h">후드 서보<code>MG996R</code></div>닫아서 위 두 층을 잡는다. CLOSE ${f('hoodClose')}° · OPEN ${f('hoodOpen')}° · LOAD ${f('hoodLoad')}°</div></div>
+      <div class="part"><span class="pid">B</span><div><div class="h">후드 서보<code>MG996R</code></div>위 두 층을 잡는다. CLOSE ${f('hoodClose')}° · OPEN ${f('hoodOpen')}° · LOAD ${f('hoodLoad')}°</div></div>
       <div class="part"><span class="pid">C</span><div><div class="h">리프터 서보<code>SG90</code></div>큐브 뒤쪽 아래 모서리를 끌어올려 <b>앞으로 넘긴다</b>(FLIP, 약 ${f('flipS')} s). 컵이 ${f('tilt')}° 기울어 큐브가 스스로 자리 잡는다.</div></div>
     </div>
   </div>
@@ -223,24 +223,24 @@ pre.code{font-family:'JBM',monospace;font-size:8pt;background:#f1f3f5;border-lef
     <div class="prep"><b>준비</b><span>① ${f('vmot')} V 어댑터 → 모터 드라이버</span><span>② USB → UNO R4 WiFi</span><span>③ ${f('servoV')} V USB 어댑터 → 서보</span><span>④ <b>다 맞춘</b> ${f('cubeMm')} mm 큐브</span></div>
     <div class="steps">
       <div class="step"><span class="sn z">ON</span><span class="bt muted">전원</span>
-        <div class="st"><b>전원을 켠다.</b> 컵의 홈(노치)이 정확히 뒤를 향하는지 확인 — 어긋나면 시리얼 ${cmd('J', 'J ±n')}.</div>${lcd('CUBE ROBOT V5', 'hold=LOAD tap=GO')}</div>
+        <div class="st"><b>전원을 켠다.</b> 컵의 홈(노치)이 정확히 뒤를 향하는지 확인 — 어긋나면 시리얼 ${cmd('J', 'J ±n')}(아래 표).</div>${lcd(...D.lcd.idle)}</div>
       <div class="step"><span class="sn">${ok('1', '단계 번호')}</span><span class="bt l">${btnIcon('long', G)}길게</span>
-        <div class="st"><b>후드가 뒤로 젖혀진다.</b> 다 맞춘 큐브를 <b>흰색 아래 · 초록 앞</b>으로 컵에 위에서 내려놓는다.</div>${lcd('PLACE CUBE SOLVED', 'WHITE DOWN GRN FRONT')}</div>
+        <div class="st"><b>후드가 뒤로 젖혀진다.</b> <b>다 맞춘</b> 큐브를 <b>흰색 아래 · 초록 앞</b>으로 컵에 위에서 내려놓는다.</div>${lcd(...D.lcd.place)}</div>
       <div class="step"><span class="sn">${ok('2', '단계 번호')}</span><span class="bt l">${btnIcon('long', G)}길게</span>
-        <div class="st"><b>장착.</b> 후드가 돌아와 큐브를 덮고 삑 소리가 난다.</div>${lcd('CUBE LOADED', 'SCRAMBLE / SOLVE')}</div>
+        <div class="st"><b>장착.</b> 후드가 열린 자세(OPEN)로 돌아오고 삑. 보드는 이때 큐브를 <b>다 맞춘 상태로 다시 센다</b>.</div>${lcd(...D.lcd.loaded)}</div>
       <div class="step"><span class="sn">${ok('3', '단계 번호')}</span><span class="bt">${btnIcon('short', G)}짧게</span>
-        <div class="st"><b>섞기.</b> 로봇이 무작위 ${f('scrambleLen')}수를 직접 돌리며 수열을 기록한다 (${lcdTxt('SCRAMBLING')} 진행 수 표시).</div>${lcd('SCRAMBLED 20mv', 'seed #')}</div>
+        <div class="st"><b>섞기.</b> 무작위 ${f('scrambleLen')}수를 직접 돌리며 기록한다 (${lcdTxt('SCRAMBLING')}, 약 ${f('scrMin')}분).</div>${lcd(...D.lcd.scrambled)}</div>
       <div class="step"><span class="sn">${ok('4', '단계 번호')}</span><span class="bt">${btnIcon('short', G)}짧게</span>
-        <div class="st"><b>풀기.</b> ${lcdTxt('SOLVING...')} 계산 → ${lcdTxt('EXECUTING')} 실행 → 완료 음. 시드 ${f('seed')} 예상 약 ${f('minutes1')}분(실측 전).</div>${lcd('SOLVED!', '#mv #.#s')}</div>
+        <div class="st"><b>풀기.</b> ${lcdTxt('SOLVING...')} 계산 → ${lcdTxt('EXECUTING')} 실행 → 완료 음. 보통 약 ${f('avg30s')} s (${f('seeds30')} 시드 평균 계산값, 실측 전).</div>${lcd(...D.lcd.solved)}</div>
       <div class="step"><span class="sn z">끝</span><span class="bt l">${btnIcon('long', G)}길게</span>
-        <div class="st"><b>꺼내기.</b> 후드가 젖혀지면 꺼낸다. 다음 큐브는 넣고 길게 = ${ok('2', '단계 번호')}단계. 꺼내지 않고 짧게 = 다시 섞기.</div>${lcd('REMOVE CUBE', 'LOAD: next cube')}</div>
+        <div class="st"><b>다시·꺼내기.</b> ${lcdTxt(D.lcd.solved[0])} 에서 짧게 = 다시 섞기(${ok('3', '단계 번호')}). 길게 = 후드가 젖혀져 꺼낸다 → 다 맞춘 큐브를 넣고 길게 = 장착(${ok('2', '단계 번호')}).</div>${lcd(...D.lcd.remove)}</div>
     </div>
     <div class="fail">
       <table>
-        <tr><td>${lcdTxt('ABORTED')}</td><td>넣기 전에 짧게 눌렀다 → 길게 눌러 ${ok('1', '단계 번호')}·${ok('2', '단계 번호')}단계부터.</td></tr>
+        <tr><td>${lcdTxt('ABORTED')}</td><td>장착 전에 짧게 눌렀다(돌지 않음). 후드가 뒤로 젖혀져 있으면 다 맞춘 큐브를 넣고 길게, 아니면 길게 → 넣고 → 길게.</td></tr>
         <tr><td>${lcdTxt('ALREADY SOLVED')}</td><td>풀린 상태에서 풀기 명령(${cmd('V', 'V')}) → 짧게 눌러 섞기부터.</td></tr>
-        <tr><td>${lcdTxt('SOLVE FAILED')}</td><td>내부 상태가 잘못됐다 → 큐브를 손으로 맞추고 시리얼 ${cmd('R', 'R')}(모델 리셋).</td></tr>
-        <tr><td>층이 걸림 · 실물 ≠ 화면</td><td>센서가 없어 로봇은 모른다 → ${f('vmot')} V 전원을 끄고, 손으로 맞춘 뒤 ${cmd('R', 'R')} → 다시 장착.</td></tr>
+        <tr><td>${lcdTxt('SOLVE FAILED')}</td><td>내부 상태가 잘못됐다 → 길게(꺼내기) → 손으로 맞춤 → 넣고 길게(장착하면 다시 셈).</td></tr>
+        <tr><td>도는 중 멈추기 ·<br>층 걸림 · 실물 ≠ 화면</td><td>실행 중엔 버튼·시리얼이 먹지 않는다 → UNO <b>RESET</b> 버튼(또는 USB 뽑았다 꽂기)으로 정지·재시작 → 길게(후드 젖힘) → 큐브를 꺼내 손으로 맞춤 → 컵 홈 확인(${cmd('J', 'J')}) → 넣고 길게. <b>${f('vmot')} V 만 끄면 스텝모터만 서고 보드·서보(${f('servoV')} V)는 계속 움직인다.</b></td></tr>
       </table>
     </div>
   </div>
@@ -270,13 +270,13 @@ pre.code{font-family:'JBM',monospace;font-size:8pt;background:#f1f3f5;border-lef
   <div class="st3">
     ${tag('blue', '핵심 기능 ③ CFOP 풀이기', '보드 안에서 계산')}
     <div class="cf">
-      <b>Cross</b><span>바닥 십자 엣지 ${f('crossEdges')}개(<span class="mono" data-fact="crossEdgeNames">${esc(F.crossEdgeNames.v)}</span>)를 IDA* 로. 하한 h = 엣지 쌍 ${f('pairs')}개 거리표의 최댓값.</span>
+      <b>Cross</b><span>D 면(노랑) 십자 엣지 ${f('crossEdges')}개(<span class="mono" data-fact="crossEdgeNames">${esc(F.crossEdgeNames.v)}</span>)를 IDA* 로. 하한 h = 엣지 쌍 ${f('pairs')}개 거리표의 최댓값. 흰색을 아래로 넣으므로 <b>실물에선 노란 면이 위</b> — 십자는 위에서 보인다.</span>
       <b>F2L</b><span>코너·엣지 한 쌍씩 IDA*. 이미 맞춘 슬롯은 깨지 않는다.</span>
       <b>OLL·PLL</b><span>마지막 층의 방향·위치를 키로 공식 표 조회 (OLL ${f('oll57')} · PLL ${f('pll21')}).</span>
     </div>
-    <table class="hz"><tr><th>단계</th>${stageCols}</tr><tr><th>노드</th>${stageNodes}</tr></table>
+    
     ${stageBar(D, F, B)}
-    <div class="nets">${cubeNet(D.stickersScrambled, 1.95, '섞은 직후')}<span style="text-align:center">크로스 ${f('crossLen')}수 →<br>아래(D) 면 십자</span>${cubeNet(D.stickersCross, 1.95, '크로스 완성')}</div>
+    <div class="nets">${cubeNet(D.stickersScrambled, 1.7, '섞은 직후')}<span style="text-align:center">크로스 ${f('crossLen')}수 →<br>D(노랑) 면 십자</span>${cubeNet(D.stickersCross, 1.7, '크로스 완성')}</div>
   </div>
   <div>
     <div class="sec-head" style="margin-top:1.2mm"><span class="sec-sub"><b style="color:${B}">IDA* 실제 추적</b> · 시드 ${f('seed')} 크로스 <span class="mono" data-fact="crossSeq">${esc(F.crossSeq.v)}</span> · f = g(쓴 수) + h(남은 수 하한) &gt; 한도면 잘라낸다</span></div>
@@ -289,7 +289,7 @@ pre.code{font-family:'JBM',monospace;font-size:8pt;background:#f1f3f5;border-lef
 
 <footer class="foot">
   <div class="ser">
-    ${tag('yellow', '고급 — 시리얼 명령', `USB 시리얼 ${f('baud')} baud, 한 줄씩 입력 (대소문자 무관)`)}
+    ${tag('yellow', '고급 — 시리얼 명령', `시리얼 모니터 ${f('baud')} baud · 줄 끝 <b>Newline</b>(또는 CR) 필요`)}
     <div class="two">${[serialRows.slice(0, 5), serialRows.slice(5)].map((rows) => `<table>${rows.map(([l, s, d]) => `<tr><td>${cmd(l, s)}</td><td>${serialDesc(esc(d))}</td></tr>`).join('')}</table>`).join('')}</div>
   </div>
   <div class="ref">
