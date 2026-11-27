@@ -92,7 +92,7 @@ for (const line of lines) {
 const cut = (s) => s.slice(0, 16);
 const fmtShow = (s) => cut(s.replace(/%l?u/g, '#'));
 const lcdBoxes = page.querySelectorAll('[data-lcd]');
-ok(lcdBoxes.length >= 6, `LCD 상자가 ${lcdBoxes.length}개 — 사용 단계마다 하나씩 있어야 한다`);
+ok(lcdBoxes.length >= 4, `LCD 상자가 ${lcdBoxes.length}개 — 사용 4단계마다 하나씩 있어야 한다`);
 for (const box of lcdBoxes) {
   const rows = box.querySelectorAll('.lrow');
   const want = rows.map((r, i) => decode(r.getAttribute('data-lcd' + i)));

@@ -156,3 +156,37 @@ export function btnIcon(kind, color) {
   return svg(9, 9, `<circle cx="4.5" cy="4.5" r="2.7" fill="#fff" stroke="#1b1f24" stroke-width="0.45"/><circle cx="4.5" cy="4.5" r="1.4" fill="${color}"/>` +
     `<path d="M4.5 0.6 A${r} ${r} 0 1 1 ${ex.toFixed(2)} ${ey.toFixed(2)}" fill="none" stroke="${color}" stroke-width="0.7" stroke-linecap="round"/>`, 'btn');
 }
+
+// ---- 카드용 IDA*: 한도 5→6→7 막대 + 찾은 크로스 경로 (h) ----
+export function idaCompact(D, fx, color) {
+  const W = 72, H = 46;
+  let b = '';
+  const maxV = Math.max(...D.bounds.map((x) => x.visited));
+  const bx = 13, bw = 34;
+  D.bounds.forEach((bd, i) => {
+    const y = 1 + i * 7.4, w = Math.max(0.8, bd.visited / maxV * bw);
+    b += `<text x="0" y="${y + 4}" font-size="3.3" font-weight="700"><tspan data-ok="라벨">한도 </tspan><tspan data-fact="bound${i}">${bd.bound}</tspan></text>`;
+    b += `<rect x="${bx}" y="${y + 0.6}" width="${w.toFixed(2)}" height="4.4" fill="${color}" opacity="${bd.goalFound ? 0.9 : 0.3}"/>`;
+    b += `<text x="${(bx + w + 1.4).toFixed(2)}" y="${y + 4}" font-size="3.1"><tspan data-fact="visited${i}" font-weight="700">${fx['visited' + i].v}</tspan><tspan fill="${bd.goalFound ? color : '#4a535b'}" font-weight="${bd.goalFound ? 700 : 400}">${bd.goalFound ? ' 찾음' : ' 없음'}</tspan></text>`;
+  });
+  b += `<text x="${W}" y="4.8" font-size="2.8" text-anchor="end" fill="#4a535b">탐색 노드</text>`;
+  const last = D.bounds[D.bounds.length - 1].bound;
+  const b7 = D.trace.filter((t) => t.bound === last);
+  const byId = new Map(b7.map((t) => [t.id, t]));
+  let g = b7.find((t) => t.event === 'goal'); const path = [];
+  while (g) { path.unshift(g); g = byId.get(g.parent); }
+  const py = 28.5;
+  b += `<text x="0" y="${py}" font-size="3.1" font-weight="700">찾은 크로스 — 원 = 남은 수의 하한 h</text>`;
+  const step = (W - 6) / (path.length - 1 || 1);
+  path.forEach((n, i) => {
+    const x = 3 + i * step, y = py + 9;
+    if (i) {
+      b += `<line x1="${(x - step + 2.6).toFixed(2)}" y1="${y}" x2="${(x - 2.6).toFixed(2)}" y2="${y}" stroke="${color}" stroke-width="0.4"/>`;
+      b += `<text x="${(x - step / 2).toFixed(2)}" y="${y - 3}" font-size="3.2" text-anchor="middle" class="mono" font-weight="700" data-ok="회전 기호(${n.move})">${esc(n.move)}</text>`;
+    }
+    const goal = n.event === 'goal';
+    b += `<circle cx="${x.toFixed(2)}" cy="${y}" r="2.5" fill="${goal ? color : '#fff'}" stroke="${color}" stroke-width="0.4"/>`;
+    b += `<text x="${x.toFixed(2)}" y="${y + 1.1}" font-size="3" text-anchor="middle" class="mono" data-trace="${n.id}" data-trace-bound="${last}" data-trace-kind="h" fill="${goal ? '#fff' : '#1b1f24'}">${n.h}</text>`;
+  });
+  return svg(W, H, b, 'idafig2');
+}
