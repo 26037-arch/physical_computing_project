@@ -1,0 +1,74 @@
+// 3D 큐브: 스티커 54자 상태 + (선택) 진행 중인 한 수의 층 회전.
+// 층 회전 방향은 lib/cube.js 기하와 같다 (check.mjs 가 stickerSteps 전체로 검증).
+import { useThree } from '@react-three/fiber';
+import { useEffect, useMemo } from 'react';
+import { CUBIES, FACELETS, COLORS, parseMove, inLayer } from '../lib/cube.js';
+
+const STICKER_ROT = {
+  '1,0,0': [0, Math.PI / 2, 0],
+  '-1,0,0': [0, -Math.PI / 2, 0],
+  '0,1,0': [-Math.PI / 2, 0, 0],
+  '0,-1,0': [Math.PI / 2, 0, 0],
+  '0,0,1': [0, 0, 0],
+  '0,0,-1': [0, Math.PI, 0],
+};
+
+const Cubie = ({ p, stickers, state, opacity = 1 }) => (
+  <group position={p}>
+    <mesh>
+      <boxGeometry args={[0.97, 0.97, 0.97]} />
+      <meshLambertMaterial color="#121317" transparent={opacity < 1} opacity={opacity} />
+    </mesh>
+    {stickers.map((i) => {
+      const n = FACELETS[i].n;
+      return (
+        <mesh key={i} position={[n[0] * 0.488, n[1] * 0.488, n[2] * 0.488]} rotation={STICKER_ROT[n.join(',')]}>
+          <planeGeometry args={[0.84, 0.84]} />
+          <meshLambertMaterial color={COLORS[state[i]]} transparent={opacity < 1} opacity={opacity} />
+        </mesh>
+      );
+    })}
+  </group>
+);
+
+// move: 'R2' 같은 수, t: 0..1 진행. layerAxis/layerAngle 로 임의 층 회전도 가능.
+export const Cube3D = ({ stickers, move = null, t = 0, layer = null, rotation = [0, 0, 0], position = [0, 0, 0], opacity = 1, children }) => {
+  let axis = null;
+  let angle = 0;
+  if (move) {
+    const pm = parseMove(move);
+    axis = pm.axis;
+    angle = pm.angle * t;
+  } else if (layer) {
+    axis = layer.axis;
+    angle = layer.angle;
+  }
+  const moving = [];
+  const still = [];
+  for (const c of CUBIES) (axis && inLayer(c.p, axis) ? moving : still).push(c);
+  const rot = axis ? [axis[0] * angle, axis[1] * angle, axis[2] * angle] : [0, 0, 0];
+  return (
+    <group rotation={rotation} position={position}>
+      {still.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} opacity={opacity} />)}
+      <group rotation={rot}>
+        {moving.map((c) => <Cubie key={c.p.join()} {...c} state={stickers} opacity={opacity} />)}
+      </group>
+      {children}
+    </group>
+  );
+};
+
+export const LookAt = ({ target = [0, 0, 0] }) => {
+  const camera = useThree((s) => s.camera);
+  useMemo(() => camera.lookAt(...target), [camera, target]);
+  useEffect(() => { camera.lookAt(...target); camera.updateProjectionMatrix(); }, [camera, target]);
+  return null;
+};
+
+export const Lights = () => (
+  <>
+    <ambientLight intensity={1.7} />
+    <directionalLight position={[4, 8, 6]} intensity={1.6} />
+    <directionalLight position={[-6, -2, 3]} intensity={0.5} />
+  </>
+);

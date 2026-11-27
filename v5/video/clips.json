@@ -1,0 +1,6 @@
+{
+  "_help": "실물 클립 구간. file 은 public/ 기준. startSec~endSec 구간을 장면 길이에 맞춰 재생(배속 0.5~2.0). endSec null = 끝까지. cropX = [왼쪽, 오른쪽] 원본 가로 비율(0~1) 중 남길 범위, 없으면 전체. rotate = 0/90/180/270 (시계 방향, 휴대폰 메타데이터가 틀렸을 때만). 파일이 없으면 3D 대체 화면(simulation).",
+  "cup":    { "file": "clips/cup.mp4",    "startSec": 0, "endSec": null },
+  "hood":   { "file": "clips/hood.mp4",   "startSec": 0, "endSec": null },
+  "lifter": { "file": "clips/lifter.mp4", "startSec": 0, "endSec": null }
+}

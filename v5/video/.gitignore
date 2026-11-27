@@ -1,0 +1,8 @@
+node_modules/
+out/
+*.tmp.mp4
+src/generated/
+public/tts/*
+!public/tts/.gitkeep
+public/clips/*
+!public/clips/.gitkeep

@@ -1,0 +1,26 @@
+{
+  "name": "v5h-submission-video",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "V5H 제출 시연 영상 (1분, Remotion). 실물 클립·TTS 는 public/clips, public/tts 에 넣고 npm run render",
+  "scripts": {
+    "timing": "node scripts/timing.mjs",
+    "check": "node scripts/check.mjs",
+    "studio": "node scripts/timing.mjs && remotion studio src/index.jsx",
+    "stills": "node scripts/timing.mjs && node scripts/stills.mjs",
+    "render": "node scripts/timing.mjs && node scripts/render.mjs"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "5.2.8",
+    "@react-three/fiber": "9.8.2",
+    "@remotion/bundler": "4.0.547",
+    "@remotion/cli": "4.0.547",
+    "@remotion/renderer": "4.0.547",
+    "@remotion/three": "4.0.547",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.547",
+    "three": "0.172.0"
+  }
+}
