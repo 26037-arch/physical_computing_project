@@ -187,7 +187,7 @@ h2.sec i{display:block;width:4.2mm;height:4.2mm;border-radius:0.8mm;flex:none}
       ${step(1, 'long', '큐브 넣기', '<b>다 맞춘</b> 큐브를 흰색 아래 · 초록 앞으로', D.lcd.place)}
       ${step(2, 'long', '장착', '보드가 다 맞춘 상태로 다시 센다', D.lcd.loaded)}
       ${step(3, 'short', '섞기', `로봇이 무작위 ${f('scrambleLen')}수를 직접 돌리며 기록`, D.lcd.scrambled)}
-      ${step(4, 'short', '풀기', `보드가 계산하고 실행<br>— 보통 약&nbsp;${f('avg30s')}&nbsp;s(계산값)`, D.lcd.solved)}
+      ${step(4, 'short', '풀기', `계산 후 실행<br>보통 약&nbsp;${f('avg30s')}&nbsp;s(계산값)`, D.lcd.solved)}
     </div>
     <div class="again">${lcdTxt(D.lcd.solved[0])} 에서 <b>짧게</b> = 다시 섞기 · <b>길게</b> = 꺼내기 ${lcdTxt(D.lcd.remove[0])}</div>
   </div>
