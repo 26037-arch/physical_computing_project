@@ -11,7 +11,7 @@ export const Outro = ({ scene }) => {
   const frame = useCurrentFrame();
   const items = [
     { big: String(F.totalMoves), small: 'moves' },
-    { big: fmt(F.crossNodes), small: 'nodes' },
+    { big: fmt(F.crossNodes), small: 'cross nodes' },
     { big: `${ACTUATORS.steppers} + ${ACTUATORS.servos}`, small: `${ACTUATORS.steppers} stepper + ${ACTUATORS.servos} servos` },
   ];
   return (

@@ -23,7 +23,7 @@ export const Subtitles = ({ lines }) => {
 
 export const SceneLabel = ({ index, name }) => (
   <div style={{ position: 'absolute', left: 64, top: 44, fontFamily: MONO, fontSize: 22, color: DIM, letterSpacing: 1 }}>
-    v5h <span style={{ color: '#55585f' }}>/</span> {String(index).padStart(2, '0')} {name}
+    V5H <span style={{ color: '#55585f' }}>/</span> {String(index).padStart(2, '0')} {name}
   </div>
 );
 

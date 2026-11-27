@@ -7,7 +7,9 @@ import { Frame } from '../components/Overlay.jsx';
 import timeline from '../generated/timeline.json';
 import { DIM, FG, MONO, SANS } from '../theme.js';
 
-const SOLVED = 'UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB';
+// 실물 장착 자세: 흰색(U 색) 아래 · 초록(F 색) 앞 = 풀린 큐브를 z2 로 돌린 것.
+// 화면 좌표의 위 면엔 노랑(D 색), 오른쪽엔 주황(L 색), 왼쪽엔 빨강(R 색), 아래엔 흰색.
+const SOLVED = 'DDDDDDDDDLLLLLLLLLFFFFFFFFFUUUUUUUUURRRRRRRRRBBBBBBBBB';
 const CLAMP = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' };
 const ease = Easing.inOut(Easing.cubic);
 
@@ -115,7 +117,7 @@ const SimClip = ({ name, frame }) => {
         {cube}
       </ThreeCanvas>
       <div style={{ position: 'absolute', left: 20, bottom: 14, fontFamily: MONO, fontSize: 22, color: DIM }}>{caption}</div>
-      <div style={{ position: 'absolute', right: 20, bottom: 14, fontFamily: MONO, fontSize: 20, color: '#5c5f66' }}>simulation</div>
+      <div style={{ position: 'absolute', right: 20, bottom: 14, fontFamily: MONO, fontSize: 20, color: '#5c5f66', textAlign: 'right' }}>simulation · white down · green front</div>
     </div>
   );
 };

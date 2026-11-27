@@ -117,7 +117,17 @@ const F = deriveFacts(data);
   has('04', '일곱 수 안', 7, data.cross.ida.solution.length, '무작정 탐색 깊이 = 크로스 길이');
   has('04', '1억 1천만', Math.round(bruteForceCounts(7).total / 1e7), 11, '1억 1천만 ≈ 111,207,591');
   has('06', '오천칠백구십칠', data.cross.ida.nodes, 5797, '크로스 노드');
-  has('07', '모터는 단 하나', ACTUATORS.steppers, 1, '스테퍼 수');
+  has('07', '스텝모터 하나', ACTUATORS.steppers, 1, '층을 돌리는 스테퍼 수');
+  has('08', '서보 후드', 'MG996R', 'MG996R', '후드 = 서보');
+  has('09', '서보 리프터', 'SG90', 'SG90', '리프터 = 서보');
+  eq(['08', '09'].filter((id) => L(id).includes('서보')).length, ACTUATORS.servos, '대본의 서보 줄 수 = 서보 수');
+  // 10: "장착 뒤 짧게 두 번" = 장착(LOADED) 상태에서 짧게 = START, 풀린 상태면 섞기 → 다음 짧게 = 풀기
+  {
+    ok(L('10').includes('장착 뒤 짧게 두 번'), '줄 10 에 "장착 뒤 짧게 두 번" 없음');
+    const ino = fs.readFileSync(path.join(REPO, 'v5', 'firmware', 'main', 'main.ino'), 'utf8');
+    ok(/짧게\s*=\s*START/.test(ino), 'main.ino: 짧게 = START 설명 없음');
+    ok(/case BTN_START:\s*if \(cube\.isSolved\(\)\) doScramble\(.*?\); else doSolve\(\);/.test(ino), 'main.ino: START = 풀린 상태면 섞기, 아니면 풀기 가 아님');
+  }
   ok(narrationMd.includes('189 + 4,341 + 1,267'), 'narration.md 숫자 근거의 반복별 노드');
   eq(data.cross.ida.bounds.map((b) => b.visited), [189, 4341, 1267], '반복별 노드');
 }
