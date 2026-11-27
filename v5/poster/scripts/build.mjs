@@ -55,14 +55,14 @@ const qrSvg = await QRCode.toString('https://' + REPO_URL, { type: 'svg', margin
 
 const POSNAME = { U: '위', R: '오른쪽', F: '앞', D: '아래', L: '왼쪽', B: '뒤' };
 const reorderCards = ['D', 'F', 'U', 'R', 'B', 'L'].map((p) => `
-  <div class="rcard">${reorientNet(p, R)}<div><b>${POSNAME[p]}</b><br><span class="mono rops" data-fact="re${p}">${esc(F['re' + p].v)}</span></div></div>`).join('');
+  <div class="rcard">${reorientNet(p, R)}<b>${POSNAME[p]}</b><span class="mono rops" data-fact="re${p}">${esc(F['re' + p].v)}</span></div>`).join('');
 
 const head = (face, num, title) => `<h2 class="sec"><i style="background:${C[face].tag};${C[face].border ? `box-shadow:inset 0 0 0 0.3mm ${C[face].border};` : ''}"></i>${num ? `<span class="secn" style="color:${C[face].accent}">${num}</span>` : ''}${title}</h2>`;
 
 const step = (n, kind, title, text, scr) => `
   <div class="step"><span class="sn">${ok(String(n), '단계 번호')}</span>
-    <span class="bt${kind === 'long' ? ' l' : ''}">${btnIcon(kind, G)}<b>${kind === 'long' ? '길게' : '짧게'}</b></span>
-    <div class="st"><b>${title}</b><br>${text}</div>${lcd(...scr)}</div>`;
+    <span class="bt">${btnIcon(kind, G)}<b>${kind === 'long' ? '길게' : '짧게'}</b></span>
+    <div class="st"><b class="stt">${title}</b><span>${text}</span></div>${lcd(...scr)}</div>`;
 
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8">
@@ -74,7 +74,7 @@ const html = `<!doctype html>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:257mm;height:364mm;background:${PAPER}}
 body{font-family:'Noto Sans CJK KR','Noto Sans KR','Malgun Gothic',sans-serif;color:${INK};font-size:10.5pt;line-height:1.42;-webkit-print-color-adjust:exact;print-color-adjust:exact;word-break:keep-all}
-.page{width:257mm;height:364mm;padding:10mm 11mm 8mm;display:flex;flex-direction:column;gap:8mm;overflow:hidden}
+.page{width:257mm;height:364mm;padding:12mm 12mm 8mm;display:flex;flex-direction:column;gap:8mm;overflow:hidden}
 .mono,code{font-family:'JBM','Noto Sans CJK KR',monospace;font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0}
 b{font-weight:700}
 svg text{font-family:'Noto Sans CJK KR','Noto Sans KR',sans-serif}
@@ -94,51 +94,53 @@ svg text.mono{font-family:'JBM',monospace}
 .stat .big small{font-family:'Noto Sans CJK KR',sans-serif;font-size:11pt;margin-left:0.6mm}
 .stat .cap{font-size:9pt;color:${MUTED};margin-top:1mm}
 /* 섹션 제목 */
-h2.sec{display:flex;align-items:center;gap:2.4mm;font-size:17pt;font-weight:800;line-height:1.2;margin-bottom:3mm}
+h2.sec{display:flex;align-items:center;gap:2mm;font-size:17pt;font-weight:800;line-height:1.2;margin-bottom:4mm;height:8mm}
 h2.sec i{display:block;width:4.2mm;height:4.2mm;border-radius:0.8mm;flex:none}
 .secn{font-family:'JBM',monospace;font-size:15pt}
 /* 주인공 행 */
-.main{display:grid;grid-template-columns:110mm 1fr;gap:8mm}
-.product{width:110mm;height:86mm;border-radius:2mm;overflow:hidden;background:#eef2f4}
+.main{display:grid;grid-template-columns:108mm 1fr;gap:8mm}
+.product{width:108mm;height:68mm;border-radius:2mm;overflow:hidden;background:#eef2f4}
 .product img{width:100%;height:100%;object-fit:cover;display:block}
-.cap2{font-size:9pt;color:${MUTED};margin-top:1.2mm}
-.prep{margin-top:4mm;font-size:10.5pt;line-height:1.5}
-.prep b{color:${G}}
-.fix{margin-top:4mm;border-left:1.2mm solid ${INK};padding:1mm 0 1mm 3mm;font-size:10pt;line-height:1.5}
-.fix .warn{font-weight:700;color:${C.red.accent}}
-.steps{display:flex;flex-direction:column;gap:4.6mm}
-.step{display:grid;grid-template-columns:8mm 12mm 1fr;grid-template-rows:auto auto;gap:1.2mm 2.4mm;align-items:center}
-.step .lcd{grid-column:3;grid-row:2;justify-self:start}
-.sn{font-family:'JBM',monospace;font-weight:800;font-size:24pt;color:${G};line-height:1;grid-row:1 / span 2}
-.bt{display:flex;flex-direction:column;align-items:center;font-size:9.5pt;line-height:1.1;text-align:center;grid-row:1 / span 2}
+.cap2{font-size:9pt;color:${MUTED};margin-top:1.6mm}
+.kv{display:grid;grid-template-columns:20mm 1fr;gap:1.6mm 0;font-size:10.5pt;line-height:1.45;align-items:baseline}
+.main > div > .kv{margin-top:4mm}
+.kv .k{font-weight:700}
+.warnic{vertical-align:-0.4mm}
+.fix{margin-top:4mm;border-top:0.3mm solid #cfd5d9;padding-top:4mm}
+.fix .fh{display:block;font-size:10.5pt;margin-bottom:1.6mm}
+.fix .kv{font-size:10pt}
+.steps{display:flex;flex-direction:column;margin-top:4mm;border-top:0.3mm solid #cfd5d9}
+.step{display:grid;grid-template-columns:8mm 12mm 1fr auto;gap:0 3mm;align-items:center;padding:4mm 0;border-bottom:0.3mm solid #cfd5d9}
+.step .lcd{justify-self:end}
+.sn{font-family:'JBM',monospace;font-weight:800;font-size:24pt;color:${G};line-height:1}
+.bt{display:flex;flex-direction:column;align-items:center;gap:0.8mm;font-size:9.5pt;line-height:1.1;text-align:center}
 .bt svg{width:10mm;height:10mm}
-.bt.l b{color:${G}}
-.st{font-size:11pt;line-height:1.38}
-.st > b:first-child{font-size:13pt}
+.st{display:flex;flex-direction:column;gap:0.8mm;font-size:11pt;line-height:1.38}
+.st .stt{font-size:13pt}
 .lcd{background:${LCD.frame};padding:1.2mm 1.4mm;border-radius:1mm;display:inline-block}
-.lrow{display:grid;grid-template-columns:repeat(16,3.5mm);background:${LCD.bg}}
+.lrow{display:grid;grid-template-columns:repeat(16,3.1mm);background:${LCD.bg}}
 .lrow+.lrow{border-top:0.15mm solid #c9d69c}
-.lc{font-family:'JBM',monospace;font-size:11pt;font-weight:700;color:${LCD.ink};text-align:center;line-height:5mm;white-space:pre;border-right:0.1mm solid #cbd8a0}
+.lc{font-family:'JBM',monospace;font-size:10pt;font-weight:700;color:${LCD.ink};text-align:center;line-height:4.8mm;white-space:pre;border-right:0.1mm solid #cbd8a0}
 .lc.v{color:#7c8a5a;font-size:8pt}
-.lcdtxt{font-family:'JBM',monospace;font-size:9.5pt;background:${LCD.bg};color:${LCD.ink};padding:0 0.8mm;font-weight:700;border-radius:0.4mm}
-.again{margin-top:3.4mm;font-size:10.5pt;line-height:1.5;border-top:0.3mm solid #cfd5d9;padding-top:2.4mm}
-.hint{font-size:10pt;margin-top:1mm;line-height:1.45}
+.lcdtxt{white-space:nowrap;font-family:'JBM',monospace;font-size:9.5pt;background:${LCD.bg};color:${LCD.ink};padding:0 0.8mm;font-weight:700;border-radius:0.4mm}
+.again{margin-top:4mm;padding-left:26mm;font-size:10.5pt;line-height:1.5}
+.hint{font-size:10.5pt;line-height:1.45}
 /* 카드 3장 */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7mm}
 .card{display:flex;flex-direction:column}
-.card .txt{font-size:11pt;line-height:1.45;margin-top:3mm}
+.card .txt{font-size:11pt;line-height:1.45;margin-top:4mm}
 .card .fig{display:flex;justify-content:center;align-items:center;flex:1;min-height:0}
-.parts{font-size:10pt;line-height:1.5;margin-bottom:2mm}
+.parts{display:grid;grid-template-columns:5mm 1fr;gap:1mm 0;font-size:10.5pt;line-height:1.4;margin-bottom:4mm}
 .parts b{color:${R}}
-.rgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:2mm 2mm}
-.rcard{display:flex;gap:1.8mm;align-items:center;font-size:10pt;line-height:1.25}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,auto);gap:3mm 2mm}
+.rcard{display:flex;flex-direction:column;align-items:center;gap:0.6mm;font-size:10pt;line-height:1.25;text-align:center}
 .rnet{width:12mm;height:9mm;flex:none}
-.rops{font-size:9pt;color:${R};font-weight:700}
+.rops{font-size:8.5pt;color:${R};font-weight:700;white-space:nowrap}
 .cupfig{width:76mm;height:45.4mm}
 .idafig2{width:76mm;height:48.6mm}
 /* 아래 */
-.foot{display:grid;grid-template-columns:30mm 1fr;gap:6mm;align-items:center;margin-top:auto;border-top:0.4mm solid ${INK};padding-top:4mm}
-.foot svg{width:30mm;height:30mm}
+.foot{display:grid;grid-template-columns:28mm 1fr;gap:6mm;align-items:center;margin-top:auto;border-top:0.4mm solid ${INK};padding-top:4mm}
+.foot svg{width:28mm;height:28mm}
 .url{font-family:'JBM',monospace;font-size:11pt;font-weight:700}
 .foot .more{font-size:11pt;margin-top:1mm}
 .foot .refs{font-size:8.5pt;color:${MUTED};margin-top:2mm;line-height:1.4}
@@ -165,23 +167,27 @@ h2.sec i{display:block;width:4.2mm;height:4.2mm;border-radius:0.8mm;flex:none}
     ${head('white', '', '최종 산출물')}
     <div class="product"><img src="../img/product.png" alt="최종 산출물"></div>
     <div class="cap2">${esc(productCaption)}</div>
-    <div class="prep"><b>준비</b> ${f('vmot')} V 어댑터(모터) · USB(보드) · ${f('servoV')} V 어댑터(서보) · <b>다 맞춘</b> 큐브<br>
-      전원을 켜면 ${lcdTxt(D.lcd.idle[0])} — 컵의 홈이 정확히 뒤를 향하는지 본다.</div>
+    <div class="kv">
+      <b class="k">준비</b><span>${f('vmot')} V 어댑터(모터) · USB(보드) · ${f('servoV')} V 어댑터(서보) · <b style="white-space:nowrap">다 맞춘 큐브</b></span>
+      <b class="k">전원</b><span>${lcdTxt(D.lcd.idle[0])} — 컵의 홈이 정확히 뒤를 향하는지 본다.</span>
+    </div>
     <div class="fix">
-      <b>안 될 때</b><br>
-      ${lcdTxt('ABORTED')} 장착 전이다 → 길게 눌러 큐브부터 넣는다.<br>
-      도는 중 멈추기·걸림: 버튼이 안 먹는다 → UNO <b>RESET</b> → 길게 → 손으로 맞춰 넣고 길게.<br>
-      <span class="warn">${f('vmot')} V 만 끄면 서보(${f('servoV')} V)는 계속 움직인다.</span>
+      <b class="fh">안 될 때</b>
+      <div class="kv">
+        <span class="k">${lcdTxt('ABORTED')}</span><span>장착 전이다 → 길게 눌러 큐브부터 넣는다.</span>
+        <span class="k">멈추기·걸림</span><span>버튼이 안 먹는다 → UNO <b>RESET</b> → 길게 → 손으로 맞춰 넣고 길게.</span>
+        <span class="k"><svg class="warnic" viewBox="0 0 10 9" width="3.6mm" height="3.2mm"><path d="M5 0.6 L9.5 8.4 H0.5 Z" fill="none" stroke="${INK}" stroke-width="0.9" stroke-linejoin="round"/><path d="M5 3.4 V5.8" stroke="${INK}" stroke-width="0.9"/><circle cx="5" cy="7.1" r="0.5" fill="${INK}"/></svg> 전원</span><span><b>${f('vmot')} V 만 끄면 서보(${f('servoV')} V)는 계속 움직인다.</b></span>
+      </div>
     </div>
   </div>
   <div>
     ${head('green', '', '사용 방법')}
     <div class="hint">버튼 하나 — <b>짧게</b> = 섞기·풀기 · <b>길게(${f('longS')} s)</b> = 넣기·꺼내기</div>
-    <div class="steps" style="margin-top:3.4mm">
+    <div class="steps">
       ${step(1, 'long', '큐브 넣기', '<b>다 맞춘</b> 큐브를 흰색 아래 · 초록 앞으로', D.lcd.place)}
       ${step(2, 'long', '장착', '보드가 다 맞춘 상태로 다시 센다', D.lcd.loaded)}
       ${step(3, 'short', '섞기', `로봇이 무작위 ${f('scrambleLen')}수를 직접 돌리며 기록`, D.lcd.scrambled)}
-      ${step(4, 'short', '풀기', `보드가 계산하고 실행 — 보통 약 ${f('avg30s')} s(계산값)`, D.lcd.solved)}
+      ${step(4, 'short', '풀기', `보드가 계산하고 실행<br>— 보통 약&nbsp;${f('avg30s')}&nbsp;s(계산값)`, D.lcd.solved)}
     </div>
     <div class="again">${lcdTxt(D.lcd.solved[0])} 에서 <b>짧게</b> = 다시 섞기 · <b>길게</b> = 꺼내기 ${lcdTxt(D.lcd.remove[0])}</div>
   </div>
@@ -190,7 +196,7 @@ h2.sec i{display:block;width:4.2mm;height:4.2mm;border-radius:0.8mm;flex:none}
 <section class="cards">
   <div class="card">
     ${head('red', '①', '기구')}
-    <div class="parts"><b>A</b> 컵 스텝모터 — 아래 층 · 큐브 전체 회전<br><b>B</b> 후드 서보 — 위 두 층 붙잡기<br><b>C</b> 리프터 서보 — 앞으로 넘기기</div>
+    <div class="parts"><b>A</b><span>컵 스텝모터 — 아래 층 · 큐브 전체 회전</span><b>B</b><span>후드 서보 — 위 두 층 붙잡기</span><b>C</b><span>리프터 서보 — 앞으로 넘기기</span></div>
     <div class="rgrid">${reorderCards}</div>
     <div class="txt">층은 아래에서만 돈다 → 돌릴 면을 먼저 아래로 (<b>y</b> 스핀 · <b>FLIP</b> 뒤집기).</div>
   </div>
@@ -239,7 +245,7 @@ addEventListener('load', async () => {
     else pt = parseFloat(getComputedStyle(el).fontSize) * 0.75;
     if (pt < minPt) { minPt = pt; minWhere = n.nodeValue.trim().slice(0, 20); }
     if (pt < 6.95) bad.push('7 pt 미만 ' + pt.toFixed(2) + 'pt "' + n.nodeValue.trim().slice(0, 20) + '"');
-    if (el.closest('.lead,.st,.prep,.fix,.again,.hint,.card .txt,.parts,.more') && !el.closest('code,.lcd') && pt < 9.95) bad.push('본문 10 pt 미만 ' + pt.toFixed(2) + 'pt "' + n.nodeValue.trim().slice(0, 20) + '"');
+    if (el.closest('.lead,.st,.kv,.fix,.again,.hint,.card .txt,.parts,.more') && !el.closest('code,.lcd') && pt < 9.95) bad.push('본문 10 pt 미만 ' + pt.toFixed(2) + 'pt "' + n.nodeValue.trim().slice(0, 20) + '"');
   }
   document.body.dataset.minPt = minPt.toFixed(2) + ' ' + minWhere;
   const mono = [...document.fonts].some((f) => f.family.replace(/["']/g, '') === 'JBM' && f.status === 'loaded');

@@ -69,7 +69,7 @@ export function cupMoveFig(fx, color) {
   // 행정 표시
   const lab = (x, y, n, body) => text(x, y, n, { size: 2.9, weight: 700, fill: color }) + `<text x="${x + 3.4}" y="${y}" font-size="2.6">${body}</text>`;
   b += lab(xs[0] + 4.5, Y(q + over) - 1.4, '①', `<tspan>+</tspan><tspan data-fact="quarter">${q}</tspan><tspan>+</tspan><tspan data-fact="over">${over}</tspan>`);
-  b += lab(xs[2] + 0.5, Y(q) + 3.4, '②', `<tspan>−</tspan><tspan data-fact="back">${over + play}</tspan>`);
+  b += lab(xs[1] - 1, Y(q) + 5.2, '②', `<tspan>−</tspan><tspan data-fact="back">${over + play}</tspan>`);
   b += lab(xs[3] + 3.6, Y(q - play) + 1.0, '③', `<tspan>+</tspan><tspan data-fact="play">${play}</tspan>`);
   b += text(x0, yBot + 5.8, '0 에서 출발 (아래 생략) · 가로는 순서', { size: 2.5, fill: '#555', ok: '정의: 시작 위치 0' });
   return svg(W, H, b, 'cupfig');
