@@ -41,9 +41,9 @@ class Mechanism {
   uint8_t ori[6];
   uint16_t flips = 0, spins = 0, hoods = 0;
   // 조정값 (시리얼 H/K/O 명령으로 바꾸고 맞으면 아래 기본값을 고친다)
-  uint8_t hoodDeg[3] = {15, 75, 135};   // CLOSE / OPEN / LOAD (후드 각 0/60/120 + 15)
-  uint8_t hoodFlipDeg = 105;            // 뒤집는 동안 후드 (90 + 15: 팔이 리프터 크로스바 뒤로 비킨다)
-  uint8_t liftUpDeg = 180;              // 리프터 최상 (크랭크 사점)
+  uint8_t hoodDeg[3] = {140, 70, 50};   // CLOSE / OPEN / LOAD — 실물 측정(2026-11-28): 140 누름, 70 기준, 50 최대로 젖힘 (설계 15/75/135 와 방향 반대)
+  uint8_t hoodFlipDeg = 50;             // 뒤집는 동안 후드 — 실물 최대 젖힘(50)을 쓴다 (설계 105 = 후드 각 90°)
+  uint8_t liftUpDeg = 140;              // 리프터 최상 — 실물 측정: 140 에서 뒤집힘 (설계 180 = 크랭크 사점)
   uint8_t overshootSteps = 3 * MICROSTEP;          // 층 회전 오버슈트 = 컵 여유 + 후드 여유 (12 스텝 = 5.4° ≈ 2.05° + 3.1°)
   uint8_t playSteps = (5 * MICROSTEP + 2) / 4;     // 컵 한쪽 여유 (5 스텝 = 2.25° ≈ 2.05°). 0 이면 중심 맞춤 생략
 
@@ -64,7 +64,7 @@ class Mechanism {
 
 // 핀 배치 (diagram.json, docs/HARDWARE_V5.md 4절) — UNO R3/R4 공통 헤더
 static const uint8_t HOOD_SERVO_PIN = 8, LIFT_SERVO_PIN = 9;
-static const uint8_t LIFT_DOWN_DEG = 0;
+static const uint8_t LIFT_DOWN_DEG = 75;   // 실물 측정: 75 가 안정(최하) 자세 (설계 0)
 // 후드는 HOOD_MS 동안 20 ms 간격으로 나눠 옮기고(서보 최고 속도로 큐브·타워를 치지 않게) HOOD_SETTLE_MS 를 기다린다.
 // FLIP_SETTLE_MS: 큐브가 65° 를 넘어 떨어져 튐이 멎을 시간(넘어가는 시간 상수 0.074 s × ln(25°/1°) ≈ 0.24 s + 여유).
 static const uint16_t HOOD_MS = 300, HOOD_SETTLE_MS = 60, LIFT_UP_MS = 700, LIFT_DOWN_MS = 400, FLIP_SETTLE_MS = 350;   // 뒤집기 합계 약 1.9 s
